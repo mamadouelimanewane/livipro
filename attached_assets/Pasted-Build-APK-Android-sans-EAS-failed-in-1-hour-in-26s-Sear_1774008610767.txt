@@ -1,0 +1,41 @@
+Build APK Android (sans EAS)
+failed in 1 hour in 26s
+Search logs
+4s
+1s
+0s
+3s
+1s
+10s
+2s
+Run npx expo prebuild --platform android --clean --no-install
+- Clearing android
+✔ Cleared android code
+- Creating native directory (./android)
+✔ Created native directory
+- Updating package.json
+✔ Updated package.json
+- Running prebuild
+✖ Prebuild failed
+Error: [android.dangerous]: withAndroidDangerousBaseMod: ENOENT: no such file or directory, open './assets/images/adaptive-icon.png'
+Error: [android.dangerous]: withAndroidDangerousBaseMod: ENOENT: no such file or directory, open './assets/images/adaptive-icon.png'
+    at Object.openSync (node:fs:560:18)
+    at Object.readFileSync (node:fs:444:35)
+    at calculateHash (/home/runner/work/livipro/livipro/node_modules/.pnpm/@expo+image-utils@0.8.12/node_modules/@expo/image-utils/build/Cache.js:19:76)
+    at createCacheKey (/home/runner/work/livipro/livipro/node_modules/.pnpm/@expo+image-utils@0.8.12/node_modules/@expo/image-utils/build/Cache.js:24:18)
+    at Object.createCacheKeyWithDirectoryAsync (/home/runner/work/livipro/livipro/node_modules/.pnpm/@expo+image-utils@0.8.12/node_modules/@expo/image-utils/build/Cache.js:32:33)
+    at generateImageAsync (/home/runner/work/livipro/livipro/node_modules/.pnpm/@expo+image-utils@0.8.12/node_modules/@expo/image-utils/build/Image.js:227:34)
+    at async generateIconAsync (/home/runner/work/livipro/livipro/node_modules/.pnpm/@expo+prebuild-config@54.0.8_expo@54.0.33/node_modules/@expo/prebuild-config/build/plugins/icons/withAndroidIcons.js:360:11)
+    at async /home/runner/work/livipro/livipro/node_modules/.pnpm/@expo+prebuild-config@54.0.8_expo@54.0.33/node_modules/@expo/prebuild-config/build/plugins/icons/withAndroidIcons.js:278:21
+    at async Promise.all (index 0)
+    at async generateMultiLayerImageAsync (/home/runner/work/livipro/livipro/node_modules/.pnpm/@expo+prebuild-config@54.0.8_expo@54.0.33/node_modules/@expo/prebuild-config/build/plugins/icons/withAndroidIcons.js:274:3)
+Error: Process completed with exit code 1.
+0s
+0s
+0s
+0s
+0s
+0s
+0s
+0s
+1s
