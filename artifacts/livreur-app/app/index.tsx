@@ -28,6 +28,7 @@ interface Grossiste {
 interface Chauffeur {
   id: number;
   nom: string;
+  prenom: string;
   telephone: string;
   statut: string;
 }
@@ -64,10 +65,11 @@ export default function LoginScreen() {
   };
 
   const selectChauffeur = async (c: Chauffeur) => {
+    const fullName = `${c.prenom} ${c.nom}`;
     await AsyncStorage.setItem("grossisteId", String(selectedGrossisteId));
     await AsyncStorage.setItem("chauffeurId", String(c.id));
-    await AsyncStorage.setItem("chauffeurNom", c.nom);
-    router.replace("/manifest");
+    await AsyncStorage.setItem("chauffeurNom", fullName);
+    router.replace("/manifest" as never);
   };
 
   const activeGrossiste = grossistes.find((g) => g.id === selectedGrossisteId);
@@ -172,7 +174,8 @@ export default function LoginScreen() {
             ) : (
               <ScrollView showsVerticalScrollIndicator={false}>
                 {chauffeurs.map((c) => {
-                  const initials = c.nom
+                  const fullName = `${c.prenom} ${c.nom}`;
+                  const initials = fullName
                     .split(" ")
                     .map((w: string) => w[0])
                     .slice(0, 2)
@@ -190,7 +193,7 @@ export default function LoginScreen() {
                         <Text style={styles.avatarText}>{initials}</Text>
                       </View>
                       <View style={styles.itemInfo}>
-                        <Text style={styles.itemName}>{c.nom}</Text>
+                        <Text style={styles.itemName}>{fullName}</Text>
                         <Text style={styles.itemSub}>{c.telephone}</Text>
                       </View>
                       <View

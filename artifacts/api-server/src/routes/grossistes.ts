@@ -441,6 +441,9 @@ router.get("/livraisons", async (req, res) => {
         tourneeId: livraisonsTable.tourneeId,
         boutiqueId: livraisonsTable.boutiqueId,
         boutiqueNom: boutiquesTable.nom,
+        boutiqueAdresse: boutiquesTable.adresse,
+        boutiqueProprietaire: boutiquesTable.proprietaire,
+        boutiqueTelephone: boutiquesTable.telephone,
         statut: livraisonsTable.statut,
         montantTotal: livraisonsTable.montantTotal,
         methodePaiement: livraisonsTable.methodePaiement,
@@ -450,12 +453,22 @@ router.get("/livraisons", async (req, res) => {
       .leftJoin(tourneesTable, eq(livraisonsTable.tourneeId, tourneesTable.id))
       .leftJoin(boutiquesTable, eq(livraisonsTable.boutiqueId, boutiquesTable.id))
       .where(eq(tourneesTable.grossisteId, grossisteId))
-      .orderBy(sql`${livraisonsTable.createdAt} DESC`);
+      .orderBy(sql`${livraisonsTable.createdAt} ASC`);
     res.json(
-      livraisons.map((l) => ({
-        ...l,
-        montantTotal: Number(l.montantTotal),
-        boutiqueNom: l.boutiqueNom ?? "",
+      livraisons.map((l, i) => ({
+        id: l.id,
+        tourneeId: l.tourneeId,
+        boutiqueId: l.boutiqueId,
+        boutique: {
+          id: l.boutiqueId,
+          nom: l.boutiqueNom ?? "",
+          adresse: l.boutiqueAdresse ?? "",
+          proprietaire: l.boutiqueProprietaire ?? "",
+          telephone: l.boutiqueTelephone ?? "",
+        },
+        statut: l.statut,
+        montant: Number(l.montantTotal),
+        methodePaiement: l.methodePaiement,
         createdAt: l.createdAt.toISOString(),
       }))
     );
