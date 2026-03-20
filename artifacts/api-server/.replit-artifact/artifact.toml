@@ -13,9 +13,10 @@ paths = ["/api"]
 run = "pnpm --filter @workspace/api-server run dev"
 
 [services.production]
+build = [ "pnpm", "install", "--frozen-lockfile" ]
 
 [services.production.run]
-args = ["node", "artifacts/api-server/dist/index.cjs"]
+args = ["pnpm", "--filter", "@workspace/api-server", "run", "start"]
 
 [services.production.run.env]
 PORT = "8080"
