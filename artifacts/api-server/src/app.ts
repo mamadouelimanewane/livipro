@@ -38,12 +38,12 @@ if (process.env.NODE_ENV === "production") {
   const adminPublic = path.join(rootDir, "artifacts/admin-backoffice/dist/public");
 
   app.use("/grossiste", express.static(grossistePublic));
-  app.get("/grossiste/*", (_req: Request, res: Response) => {
+  app.use("/grossiste", (_req: Request, res: Response) => {
     res.sendFile(path.join(grossistePublic, "index.html"));
   });
 
   app.use(express.static(adminPublic));
-  app.get("*", (_req: Request, res: Response) => {
+  app.use((_req: Request, res: Response) => {
     res.sendFile(path.join(adminPublic, "index.html"));
   });
 }
