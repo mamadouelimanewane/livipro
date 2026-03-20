@@ -1,0 +1,27 @@
+kind = "mobile"
+previewPath = "/livreur-app/"
+title = "LiviPro - App Livreur"
+version = "1.0.0"
+id = "artifacts/livreur-app"
+router = "expo-domain"
+
+[[integratedSkills]]
+name = "expo"
+version = "1.0.0"
+
+[[services]]
+ensurePreviewReachable = "/status"
+name = "expo"
+paths = [ "/livreur-app/" ]
+localPort = 21015
+
+[services.development]
+run = "pnpm --filter @workspace/livreur-app run dev"
+
+[services.production]
+build = [ "pnpm", "--filter", "@workspace/livreur-app", "run", "build" ]
+run = [ "pnpm", "--filter", "@workspace/livreur-app", "run", "serve" ]
+
+[services.env]
+PORT = "21015"
+BASE_PATH = "/livreur-app/"
