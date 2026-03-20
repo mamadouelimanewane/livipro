@@ -32,7 +32,7 @@ jobs:
           PORT: "3000"
           BASE_PATH: /
           NODE_ENV: production
-          VITE_API_BASE_URL: https://workspace.mamadouelimaned.replit.app
+          VITE_API_BASE_URL: https://livi-pro-admin.replit.app
 
       - name: Capacitor sync
         working-directory: artifacts/boutiquier-app
