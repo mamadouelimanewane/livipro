@@ -1,0 +1,31 @@
+kind = "web"
+previewPath = "/grossiste-mobile/"
+title = "LiviPro - App Grossiste Mobile"
+version = "1.0.0"
+id = "artifacts/grossiste-mobile"
+router = "path"
+
+[[integratedSkills]]
+name = "react-vite"
+version = "1.0.0"
+
+[[services]]
+name = "web"
+paths = [ "/grossiste-mobile/" ]
+localPort = 22536
+
+[services.development]
+run = "pnpm --filter @workspace/grossiste-mobile run dev"
+
+[services.production]
+build = [ "pnpm", "--filter", "@workspace/grossiste-mobile", "run", "build" ]
+publicDir = "artifacts/grossiste-mobile/dist/public"
+serve = "static"
+
+[[services.production.rewrites]]
+from = "/*"
+to = "/index.html"
+
+[services.env]
+PORT = "22536"
+BASE_PATH = "/grossiste-mobile/"

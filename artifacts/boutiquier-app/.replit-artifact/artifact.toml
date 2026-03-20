@@ -1,0 +1,31 @@
+kind = "web"
+previewPath = "/boutiquier/"
+title = "LiviPro - App Boutiquier"
+version = "1.0.0"
+id = "artifacts/boutiquier-app"
+router = "path"
+
+[[integratedSkills]]
+name = "react-vite"
+version = "1.0.0"
+
+[[services]]
+name = "web"
+paths = [ "/boutiquier/" ]
+localPort = 22971
+
+[services.development]
+run = "pnpm --filter @workspace/boutiquier-app run dev"
+
+[services.production]
+build = [ "pnpm", "--filter", "@workspace/boutiquier-app", "run", "build" ]
+publicDir = "artifacts/boutiquier-app/dist/public"
+serve = "static"
+
+[[services.production.rewrites]]
+from = "/*"
+to = "/index.html"
+
+[services.env]
+PORT = "22971"
+BASE_PATH = "/boutiquier/"
