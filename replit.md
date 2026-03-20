@@ -1,8 +1,7 @@
-# Workspace
+# LiviPro B2B - Plateforme Logistique & Distribution
 
-## Overview
-
-pnpm workspace monorepo using TypeScript. Each package manages its own dependencies.
+## Vision
+LiviPro est un **Système d'Exécution Logistique (LES) Mobile** B2B qui transforme la chaîne d'approvisionnement des grossistes et distributeurs (FMCG, BTP, Agroalimentaire).
 
 ## Stack
 
@@ -14,83 +13,85 @@ pnpm workspace monorepo using TypeScript. Each package manages its own dependenc
 - **Database**: PostgreSQL + Drizzle ORM
 - **Validation**: Zod (`zod/v4`), `drizzle-zod`
 - **API codegen**: Orval (from OpenAPI spec)
-- **Build**: esbuild (CJS bundle)
+- **Frontend**: React 19 + Vite + TailwindCSS + shadcn/ui
+
+## Applications
+
+| Application | URL | Description |
+|---|---|---|
+| **Backoffice Administrateur** | `/` | Super-admin: gestion de tous les grossistes, KPIs globaux, supervision |
+| **Backoffice Grossiste** | `/grossiste/` | Espace personnel par grossiste: chauffeurs, boutiques, tournées |
+| **API Server** | `/api` | Express API REST |
 
 ## Structure
 
 ```text
-artifacts-monorepo/
-├── artifacts/              # Deployable applications
-│   └── api-server/         # Express API server
-├── lib/                    # Shared libraries
-│   ├── api-spec/           # OpenAPI spec + Orval codegen config
-│   ├── api-client-react/   # Generated React Query hooks
-│   ├── api-zod/            # Generated Zod schemas from OpenAPI
-│   └── db/                 # Drizzle ORM schema + DB connection
-├── scripts/                # Utility scripts (single workspace package)
-│   └── src/                # Individual .ts scripts, run via `pnpm --filter @workspace/scripts run <script>`
-├── pnpm-workspace.yaml     # pnpm workspace (artifacts/*, lib/*, lib/integrations/*, scripts)
-├── tsconfig.base.json      # Shared TS options (composite, bundler resolution, es2022)
-├── tsconfig.json           # Root TS project references
-└── package.json            # Root package with hoisted devDeps
+artifacts/
+├── admin-backoffice/     # Backoffice Super Admin (React + Vite)
+├── grossiste-backoffice/ # Backoffice Grossiste (React + Vite)
+└── api-server/           # Express API Server
+lib/
+├── api-spec/             # OpenAPI spec + Orval codegen
+├── api-client-react/     # Generated React Query hooks
+├── api-zod/              # Generated Zod schemas
+└── db/                   # Drizzle ORM schema + DB connection
 ```
 
-## TypeScript & Composite Projects
+## Database Schema
 
-Every package extends `tsconfig.base.json` which sets `composite: true`. The root `tsconfig.json` lists all packages as project references. This means:
+- **grossistes** — Les grossistes/distributeurs (actif/inactif/suspendu)
+- **chauffeurs** — Chauffeurs par grossiste (disponible/en_tournee/inactif)
+- **boutiques** — Boutiques clientes par grossiste (avec limite de crédit)
+- **produits** — Catalogue produits par grossiste
+- **tournees** — Tournées de livraison par grossiste (planifiée/en_cours/terminée/annulée)
+- **livraisons** — Livraisons par tournée et boutique (statut + paiement)
 
-- **Always typecheck from the root** — run `pnpm run typecheck` (which runs `tsc --build --emitDeclarationOnly`). This builds the full dependency graph so that cross-package imports resolve correctly. Running `tsc` inside a single package will fail if its dependencies haven't been built yet.
-- **`emitDeclarationOnly`** — we only emit `.d.ts` files during typecheck; actual JS bundling is handled by esbuild/tsx/vite...etc, not `tsc`.
-- **Project references** — when package A depends on package B, A's `tsconfig.json` must list B in its `references` array. `tsc --build` uses this to determine build order and skip up-to-date packages.
+## API Endpoints
 
-## Root Scripts
+### Admin (Super Admin)
+- `GET /api/admin/stats` — KPIs globaux
+- `GET/POST /api/admin/grossistes` — CRUD grossistes
+- `GET/PUT/DELETE /api/admin/grossistes/:id` — CRUD grossiste individuel
+- `GET /api/admin/tournees` — Toutes les tournées
+- `GET /api/admin/livraisons` — Toutes les livraisons
 
-- `pnpm run build` — runs `typecheck` first, then recursively runs `build` in all packages that define it
-- `pnpm run typecheck` — runs `tsc --build --emitDeclarationOnly` using project references
+### Grossiste (par grossisteId)
+- `GET /api/grossistes/:id/stats` — KPIs du grossiste
+- `GET/POST /api/grossistes/:id/chauffeurs` — CRUD chauffeurs
+- `GET/POST /api/grossistes/:id/boutiques` — CRUD boutiques
+- `GET/POST /api/grossistes/:id/produits` — CRUD produits
+- `GET/POST /api/grossistes/:id/tournees` — CRUD tournées
+- `GET/PUT /api/grossistes/:id/tournees/:tid` — Détails et MAJ statut
+- `GET /api/grossistes/:id/livraisons` — Livraisons du grossiste
 
-## Packages
+## Développement
 
-### `artifacts/api-server` (`@workspace/api-server`)
+```bash
+# Lancer tous les services
+pnpm --filter @workspace/api-server run dev
+pnpm --filter @workspace/admin-backoffice run dev
+pnpm --filter @workspace/grossiste-backoffice run dev
 
-Express 5 API server. Routes live in `src/routes/` and use `@workspace/api-zod` for request and response validation and `@workspace/db` for persistence.
+# Codegen (après modification openapi.yaml)
+pnpm --filter @workspace/api-spec run codegen
 
-- Entry: `src/index.ts` — reads `PORT`, starts Express
-- App setup: `src/app.ts` — mounts CORS, JSON/urlencoded parsing, routes at `/api`
-- Routes: `src/routes/index.ts` mounts sub-routers; `src/routes/health.ts` exposes `GET /health` (full path: `/api/health`)
-- Depends on: `@workspace/db`, `@workspace/api-zod`
-- `pnpm --filter @workspace/api-server run dev` — run the dev server
-- `pnpm --filter @workspace/api-server run build` — production esbuild bundle (`dist/index.cjs`)
-- Build bundles an allowlist of deps (express, cors, pg, drizzle-orm, zod, etc.) and externalizes the rest
+# Migration DB
+pnpm --filter @workspace/db run push
+```
 
-### `lib/db` (`@workspace/db`)
+## Données de démo
 
-Database layer using Drizzle ORM with PostgreSQL. Exports a Drizzle client instance and schema models.
+4 grossistes pré-chargés :
+1. **Diallo Distribution SA** — Dakar (actif)
+2. **Fofana Frères SARL** — Abidjan (actif)
+3. **Konaté & Fils** — Bamako (actif)
+4. **TransLog Conakry** — Conakry (inactif)
 
-- `src/index.ts` — creates a `Pool` + Drizzle instance, exports schema
-- `src/schema/index.ts` — barrel re-export of all models
-- `src/schema/<modelname>.ts` — table definitions with `drizzle-zod` insert schemas (no models definitions exist right now)
-- `drizzle.config.ts` — Drizzle Kit config (requires `DATABASE_URL`, automatically provided by Replit)
-- Exports: `.` (pool, db, schema), `./schema` (schema only)
+## Note sur l'APK Android
 
-Production migrations are handled by Replit when publishing. In development, we just use `pnpm --filter @workspace/db run push`, and we fallback to `pnpm --filter @workspace/db run push-force`.
-
-### `lib/api-spec` (`@workspace/api-spec`)
-
-Owns the OpenAPI 3.1 spec (`openapi.yaml`) and the Orval config (`orval.config.ts`). Running codegen produces output into two sibling packages:
-
-1. `lib/api-client-react/src/generated/` — React Query hooks + fetch client
-2. `lib/api-zod/src/generated/` — Zod schemas
-
-Run codegen: `pnpm --filter @workspace/api-spec run codegen`
-
-### `lib/api-zod` (`@workspace/api-zod`)
-
-Generated Zod schemas from the OpenAPI spec (e.g. `HealthCheckResponse`). Used by `api-server` for response validation.
-
-### `lib/api-client-react` (`@workspace/api-client-react`)
-
-Generated React Query hooks and fetch client from the OpenAPI spec (e.g. `useHealthCheck`, `healthCheck`).
-
-### `scripts` (`@workspace/scripts`)
-
-Utility scripts package. Each script is a `.ts` file in `src/` with a corresponding npm script in `package.json`. Run scripts via `pnpm --filter @workspace/scripts run <script>`. Scripts can import any workspace package (e.g., `@workspace/db`) by adding it as a dependency in `scripts/package.json`.
+L'application mobile (LiviPro Distri + LiviDash Boutiquier) était initialement construite avec React + Vite + Capacitor (voir le dépôt GitHub https://github.com/mamadouelimanewane/livipro). Pour générer l'APK, il faut :
+1. Cloner le repo GitHub localement
+2. Installer les dépendances (`npm install`)
+3. Builder (`npm run build`)
+4. Synchroniser Capacitor (`npx cap sync android`)
+5. Compiler avec Android Studio ou `./gradlew assembleDebug`

@@ -1,0 +1,31 @@
+kind = "web"
+previewPath = "/"
+title = "LiviPro - Backoffice Administrateur"
+version = "1.0.0"
+id = "artifacts/admin-backoffice"
+router = "path"
+
+[[integratedSkills]]
+name = "react-vite"
+version = "1.0.0"
+
+[[services]]
+name = "web"
+paths = [ "/" ]
+localPort = 25674
+
+[services.development]
+run = "pnpm --filter @workspace/admin-backoffice run dev"
+
+[services.production]
+build = [ "pnpm", "--filter", "@workspace/admin-backoffice", "run", "build" ]
+publicDir = "artifacts/admin-backoffice/dist/public"
+serve = "static"
+
+[[services.production.rewrites]]
+from = "/*"
+to = "/index.html"
+
+[services.env]
+PORT = "25674"
+BASE_PATH = "/"

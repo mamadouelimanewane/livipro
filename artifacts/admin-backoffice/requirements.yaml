@@ -1,0 +1,12 @@
+packages:
+  "lucide-react": "Beautiful, consistent iconography"
+  "framer-motion": "Smooth animations for page transitions and modals"
+  "recharts": "Data visualization for the dashboard"
+  "date-fns": "Date formatting for tables"
+  "clsx": "Conditional class name joining"
+  "tailwind-merge": "Merge tailwind classes safely"
+
+notes:
+  - Importing API hooks directly from @workspace/api-client-react as instructed
+  - Using FCFA formatting for all monetary values
+  - Assuming lucide-react is available or will be installed

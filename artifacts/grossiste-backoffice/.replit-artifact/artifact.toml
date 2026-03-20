@@ -1,0 +1,31 @@
+kind = "web"
+previewPath = "/grossiste/"
+title = "LiviPro - Backoffice Grossiste"
+version = "1.0.0"
+id = "artifacts/grossiste-backoffice"
+router = "path"
+
+[[integratedSkills]]
+name = "react-vite"
+version = "1.0.0"
+
+[[services]]
+name = "web"
+paths = [ "/grossiste/" ]
+localPort = 25659
+
+[services.development]
+run = "pnpm --filter @workspace/grossiste-backoffice run dev"
+
+[services.production]
+build = [ "pnpm", "--filter", "@workspace/grossiste-backoffice", "run", "build" ]
+publicDir = "artifacts/grossiste-backoffice/dist/public"
+serve = "static"
+
+[[services.production.rewrites]]
+from = "/*"
+to = "/index.html"
+
+[services.env]
+PORT = "25659"
+BASE_PATH = "/grossiste/"
