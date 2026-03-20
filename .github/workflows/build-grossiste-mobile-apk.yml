@@ -30,7 +30,7 @@ jobs:
         run: pnpm --filter @workspace/grossiste-mobile build
         env:
           PORT: "3000"
-          BASE_PATH: /grossiste-mobile/
+          BASE_PATH: /
           NODE_ENV: production
 
       - name: Capacitor sync
