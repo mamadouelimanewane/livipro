@@ -28,8 +28,18 @@ jobs:
         with:
           version: 9
 
+      - name: Debug - vérifier structure
+        run: |
+          echo "=== Node ===" && node --version
+          echo "=== pnpm ===" && pnpm --version
+          echo "=== Répertoires artifacts ===" && ls artifacts/ || echo "VIDE"
+          echo "=== boutiquier-app ===" && ls artifacts/boutiquier-app/ || echo "ABSENT"
+
       - name: Install deps
-        run: pnpm install --no-frozen-lockfile
+        run: |
+          echo "Démarrage pnpm install..."
+          pnpm install --no-frozen-lockfile
+          echo "pnpm install OK"
 
       - name: Build web app
         working-directory: artifacts/boutiquier-app
@@ -38,7 +48,11 @@ jobs:
           BASE_PATH: /boutiquier/
           NODE_ENV: production
           VITE_API_BASE_URL: ${{ secrets.PROD_API_URL || 'https://workspace.mamadouelimaned.replit.app' }}
-        run: pnpm run build
+        run: |
+          echo "Démarrage vite build..."
+          pnpm run build
+          echo "Build OK - contenu dist:"
+          ls dist/public/ || echo "Pas de dist/public"
 
       - name: Init Capacitor + Sync Android
         working-directory: artifacts/boutiquier-app
