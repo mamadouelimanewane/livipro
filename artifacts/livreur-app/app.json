@@ -24,7 +24,10 @@
         "backgroundColor": "#0f172a"
       },
       "package": "com.livipro.distri",
-      "permissions": ["android.permission.ACCESS_FINE_LOCATION"]
+      "permissions": [
+        "android.permission.ACCESS_FINE_LOCATION",
+        "android.permission.ACCESS_COARSE_LOCATION"
+      ]
     },
     "web": {
       "favicon": "./assets/images/icon.png"
@@ -43,6 +46,11 @@
     "experiments": {
       "typedRoutes": true,
       "reactCompiler": true
+    },
+    "extra": {
+      "eas": {
+        "projectId": "1df4ec11-9da9-44b4-926f-152659d087d5"
+      }
     }
   }
 }

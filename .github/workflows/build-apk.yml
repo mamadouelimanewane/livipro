@@ -48,12 +48,13 @@ jobs:
           restore-keys: ${{ runner.os }}-pnpm-
 
       - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+        run: pnpm install --no-frozen-lockfile
 
       - name: Install EAS CLI
         run: npm install -g eas-cli
 
       - name: Build APK (LiviPro Distri)
+        id: eas-build
         working-directory: artifacts/livreur-app
         env:
           EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
@@ -61,32 +62,38 @@ jobs:
           eas build \
             --platform android \
             --profile ${{ github.event.inputs.profile || 'preview' }} \
-            --non-interactive \
-            --output ./livipro-distri.apk
+            --non-interactive
         continue-on-error: false
 
-      - name: Upload APK as artifact
+      - name: Get APK download URL
+        id: get-apk-url
+        working-directory: artifacts/livreur-app
+        env:
+          EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
+        run: |
+          APK_URL=$(eas build:list --platform android --limit 1 --json --non-interactive | node -e "const d=JSON.parse(require('fs').readFileSync('/dev/stdin','utf8')); console.log(d[0]?.artifacts?.buildUrl || '')")
+          echo "apk_url=$APK_URL" >> $GITHUB_OUTPUT
+          echo "APK URL: $APK_URL"
+
+      - name: Download APK
+        if: steps.get-apk-url.outputs.apk_url != ''
+        run: |
+          curl -L "${{ steps.get-apk-url.outputs.apk_url }}" -o livipro-distri.apk
+          echo "APK downloaded: $(du -h livipro-distri.apk | cut -f1)"
+
+      - name: Upload APK as GitHub artifact
+        if: steps.get-apk-url.outputs.apk_url != ''
         uses: actions/upload-artifact@v4
         with:
           name: LiviPro-Distri-APK
-          path: artifacts/livreur-app/livipro-distri.apk
+          path: livipro-distri.apk
           retention-days: 30
 
-      - name: Create GitHub Release (production only)
-        if: github.event.inputs.profile == 'production'
-        uses: softprops/action-gh-release@v2
-        with:
-          tag_name: v${{ github.run_number }}
-          name: LiviPro Distri v${{ github.run_number }}
-          files: artifacts/livreur-app/livipro-distri.apk
-          body: |
-            ## LiviPro Distri - App Livreur
-
-            APK Android générée automatiquement depuis la branche main.
-
-            ### Installation
-            1. Télécharger le fichier `livipro-distri.apk`
-            2. Activer "Sources inconnues" dans les paramètres Android
-            3. Installer l'APK
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Summary
+        run: |
+          echo "## Build APK LiviPro Distri" >> $GITHUB_STEP_SUMMARY
+          echo "✅ Build terminé avec succès" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Télécharger l'APK:** ${{ steps.get-apk-url.outputs.apk_url }}" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "Ou via l'onglet **Artifacts** de ce workflow." >> $GITHUB_STEP_SUMMARY
