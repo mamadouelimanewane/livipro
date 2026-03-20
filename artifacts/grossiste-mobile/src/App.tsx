@@ -1,7 +1,7 @@
 import { useState, useEffect, createContext, useContext } from "react";
 import { QueryClient, QueryClientProvider, useQuery } from "@tanstack/react-query";
 
-const API = "/api";
+const API = (import.meta.env.VITE_API_BASE_URL || "") + "/api";
 const fmt = (v: number) => new Intl.NumberFormat("fr-FR").format(v) + " FCFA";
 const fmtK = (v: number) => (v >= 1000000 ? (v / 1000000).toFixed(1) + "M" : v >= 1000 ? (v / 1000).toFixed(0) + "K" : String(v));
 

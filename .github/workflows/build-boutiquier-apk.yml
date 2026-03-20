@@ -1,0 +1,84 @@
+name: Build APK LiviPro Boutiquier
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "artifacts/boutiquier-app/**"
+      - ".github/workflows/build-boutiquier-apk.yml"
+  workflow_dispatch:
+
+jobs:
+  build-apk:
+    name: Build Android APK (Boutiquier)
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Java 17
+        uses: actions/setup-java@v4
+        with:
+          java-version: "17"
+          distribution: "temurin"
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10
+
+      - name: Get pnpm store directory
+        id: pnpm-cache
+        run: echo "STORE_PATH=$(pnpm store path --silent)" >> $GITHUB_OUTPUT
+
+      - name: Cache pnpm store
+        uses: actions/cache@v4
+        with:
+          path: ${{ steps.pnpm-cache.outputs.STORE_PATH }}
+          key: ${{ runner.os }}-pnpm-${{ hashFiles('**/pnpm-lock.yaml') }}
+          restore-keys: ${{ runner.os }}-pnpm-
+
+      - name: Install dependencies
+        run: pnpm install --no-frozen-lockfile
+
+      - name: Build web app
+        working-directory: artifacts/boutiquier-app
+        env:
+          BASE_PATH: /boutiquier/
+          VITE_API_BASE_URL: ${{ secrets.PROD_API_URL }}
+        run: pnpm run build
+
+      - name: Initialize Capacitor Android project
+        working-directory: artifacts/boutiquier-app
+        run: |
+          npx cap add android
+          npx cap sync android
+
+      - name: Make Gradle wrapper executable
+        working-directory: artifacts/boutiquier-app/android
+        run: chmod +x gradlew
+
+      - name: Build debug APK
+        working-directory: artifacts/boutiquier-app/android
+        run: ./gradlew assembleDebug --no-daemon
+
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: LiviPro-Boutiquier-APK
+          path: artifacts/boutiquier-app/android/app/build/outputs/apk/debug/app-debug.apk
+          retention-days: 30
+
+      - name: Build summary
+        run: |
+          echo "## ✅ APK LiviPro Boutiquier généré" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "Télécharger l'APK dans l'onglet **Artifacts** ci-dessus." >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Installation :** Activer *Sources inconnues* sur l'Android, puis installer l'APK." >> $GITHUB_STEP_SUMMARY
