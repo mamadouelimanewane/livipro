@@ -2,6 +2,7 @@ import path from "path";
 import { fileURLToPath } from "url";
 import { build as esbuild } from "esbuild";
 import { rm, readFile } from "fs/promises";
+import type { Plugin } from "esbuild";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -39,6 +40,23 @@ const allowlist = [
   "zod-validation-error",
 ];
 
+// Plugin to stub out pg-native so the pure-JS pg driver is always used.
+// Without this, pg bundles its native wrapper which calls require('pg-native')
+// and re-throws the "Cannot find module" error instead of falling back.
+const pgNativeStub: Plugin = {
+  name: "pg-native-stub",
+  setup(build) {
+    build.onResolve({ filter: /^pg-native$/ }, () => ({
+      path: "pg-native",
+      namespace: "pg-native-stub",
+    }));
+    build.onLoad({ filter: /.*/, namespace: "pg-native-stub" }, () => ({
+      contents: "module.exports = null;",
+      loader: "js",
+    }));
+  },
+};
+
 async function buildAll() {
   const distDir = path.resolve(__dirname, "dist");
   await rm(distDir, { recursive: true, force: true });
@@ -67,6 +85,7 @@ async function buildAll() {
     },
     minify: true,
     external: externals,
+    plugins: [pgNativeStub],
     logLevel: "info",
   });
 }
