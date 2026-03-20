@@ -296,6 +296,10 @@ router.delete("/produits/:produitId", async (req, res) => {
 router.get("/tournees", async (req, res) => {
   try {
     const grossisteId = parseInt(req.params.grossisteId);
+    const chauffeurIdFilter = req.query.chauffeurId ? parseInt(req.query.chauffeurId as string) : null;
+    const whereClause = chauffeurIdFilter
+      ? sql`${tourneesTable.grossisteId} = ${grossisteId} AND ${tourneesTable.chauffeurId} = ${chauffeurIdFilter}`
+      : eq(tourneesTable.grossisteId, grossisteId);
     const tournees = await db
       .select({
         id: tourneesTable.id,
@@ -306,15 +310,78 @@ router.get("/tournees", async (req, res) => {
         statut: tourneesTable.statut,
         nombreArrets: sql<number>`COUNT(DISTINCT ${livraisonsTable.id})`,
         totalLivraisons: sql<number>`COALESCE(SUM(CAST(${livraisonsTable.montantTotal} AS NUMERIC)), 0)`,
+        livraisonsReussies: sql<number>`COUNT(CASE WHEN ${livraisonsTable.statut} = 'livree' THEN 1 END)`,
         createdAt: tourneesTable.createdAt,
       })
       .from(tourneesTable)
       .leftJoin(chauffeursTable, eq(tourneesTable.chauffeurId, chauffeursTable.id))
       .leftJoin(livraisonsTable, eq(livraisonsTable.tourneeId, tourneesTable.id))
-      .where(eq(tourneesTable.grossisteId, grossisteId))
+      .where(whereClause)
       .groupBy(tourneesTable.id, chauffeursTable.prenom, chauffeursTable.nom)
       .orderBy(sql`${tourneesTable.createdAt} DESC`);
-    res.json(tournees.map((t) => ({ ...t, createdAt: t.createdAt.toISOString() })));
+    res.json(tournees.map((t) => ({
+      ...t,
+      totalLivraisons: Number(t.totalLivraisons),
+      nombreArrets: Number(t.nombreArrets),
+      livraisonsReussies: Number(t.livraisonsReussies),
+      createdAt: t.createdAt.toISOString(),
+    })));
+  } catch (err) {
+    req.log.error(err);
+    res.status(500).json({ error: "Erreur serveur" });
+  }
+});
+
+router.get("/chauffeurs/:chauffeurId/stats", async (req, res) => {
+  try {
+    const grossisteId = parseInt(req.params.grossisteId);
+    const chauffeurId = parseInt(req.params.chauffeurId);
+    const tournees = await db
+      .select({
+        id: tourneesTable.id,
+        statut: tourneesTable.statut,
+        date: tourneesTable.date,
+        nombreArrets: sql<number>`COUNT(DISTINCT ${livraisonsTable.id})`,
+        totalCA: sql<number>`COALESCE(SUM(CASE WHEN ${livraisonsTable.statut} = 'livree' THEN CAST(${livraisonsTable.montantTotal} AS NUMERIC) ELSE 0 END), 0)`,
+        livraisonsReussies: sql<number>`COUNT(CASE WHEN ${livraisonsTable.statut} = 'livree' THEN 1 END)`,
+        livraisonsEchec: sql<number>`COUNT(CASE WHEN ${livraisonsTable.statut} = 'echec' OR ${livraisonsTable.statut} = 'litige' THEN 1 END)`,
+      })
+      .from(tourneesTable)
+      .leftJoin(livraisonsTable, eq(livraisonsTable.tourneeId, tourneesTable.id))
+      .where(sql`${tourneesTable.grossisteId} = ${grossisteId} AND ${tourneesTable.chauffeurId} = ${chauffeurId}`)
+      .groupBy(tourneesTable.id)
+      .orderBy(sql`${tourneesTable.createdAt} DESC`);
+    const totalTournees = tournees.length;
+    const totalCA = tournees.reduce((s, t) => s + Number(t.totalCA), 0);
+    const totalReussies = tournees.reduce((s, t) => s + Number(t.livraisonsReussies), 0);
+    const totalArrets = tournees.reduce((s, t) => s + Number(t.nombreArrets), 0);
+    const tauxReussite = totalArrets > 0 ? Math.round((totalReussies / totalArrets) * 100) : 0;
+    const meilleurCA = tournees.reduce((max, t) => Math.max(max, Number(t.totalCA)), 0);
+    const mois = new Date().toLocaleString("fr-FR", { month: "long", year: "numeric" });
+    const tourneesCeMois = tournees.filter((t) => {
+      const d = new Date(t.date);
+      const now = new Date();
+      return d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear();
+    });
+    const caMois = tourneesCeMois.reduce((s, t) => s + Number(t.totalCA), 0);
+    res.json({
+      totalTournees,
+      totalCA,
+      totalReussies,
+      totalArrets,
+      tauxReussite,
+      meilleurCA,
+      caMois,
+      moisLabel: mois,
+      dernieresTournees: tournees.slice(0, 10).map((t) => ({
+        id: t.id,
+        date: t.date,
+        statut: t.statut,
+        nombreArrets: Number(t.nombreArrets),
+        ca: Number(t.totalCA),
+        reussies: Number(t.livraisonsReussies),
+      })),
+    });
   } catch (err) {
     req.log.error(err);
     res.status(500).json({ error: "Erreur serveur" });

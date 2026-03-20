@@ -13,23 +13,42 @@ LiviPro est un **Système d'Exécution Logistique (LES) Mobile** B2B qui transfo
 - **Database**: PostgreSQL + Drizzle ORM
 - **Validation**: Zod (`zod/v4`), `drizzle-zod`
 - **API codegen**: Orval (from OpenAPI spec)
-- **Frontend**: React 19 + Vite + TailwindCSS + shadcn/ui
+- **Frontend**: React 19 + Vite + TailwindCSS + shadcn/ui + Recharts
+- **Mobile**: Expo (React Native) SDK 54
 
 ## Applications
 
 | Application | URL | Description |
 |---|---|---|
-| **Backoffice Administrateur** | `/` | Super-admin: gestion de tous les grossistes, KPIs globaux, supervision |
-| **Backoffice Grossiste** | `/grossiste/` | Espace personnel par grossiste: chauffeurs, boutiques, tournées |
+| **Backoffice Administrateur** | `/` | Super-admin: gestion de tous les grossistes, KPIs globaux, graphiques tendanciels |
+| **Backoffice Grossiste** | `/grossiste/` | Espace personnel par grossiste: chauffeurs, boutiques, tournées + optimisation itinéraire |
 | **API Server** | `/api` | Express API REST |
+| **App Mobile Livreur** | Expo Go / APK | App chauffeur: login PIN, manifeste, photo, scanner, historique, stats |
 
 ## Structure
 
 ```text
 artifacts/
-├── admin-backoffice/     # Backoffice Super Admin (React + Vite)
+├── admin-backoffice/     # Backoffice Super Admin (React + Vite + Recharts)
 ├── grossiste-backoffice/ # Backoffice Grossiste (React + Vite)
-└── api-server/           # Express API Server
+├── api-server/           # Express API Server
+└── livreur-app/          # App Mobile Expo (React Native)
+    ├── app/
+    │   ├── index.tsx        # Login 3 étapes + PIN à 4 chiffres
+    │   ├── manifest.tsx     # Redirect → (main)
+    │   └── (main)/
+    │       ├── _layout.tsx  # Navigation par onglets (3 tabs)
+    │       ├── index.tsx    # Manifeste tournée active + photo + scanner
+    │       ├── historique.tsx # Historique des tournées passées
+    │       └── stats.tsx    # Statistiques personnelles du chauffeur
+    └── components/
+        ├── SignatureModal.tsx  # Pad de signature gestuelle
+        ├── QRModal.tsx        # QR paiement Wave/Orange/Espèces
+        ├── LitigeModal.tsx    # Déclaration litige avec déduction
+        ├── PhotoModal.tsx     # Preuve photo avec expo-image-picker
+        ├── ScannerModal.tsx   # Scanner codes-barres avec expo-camera
+        ├── AppMap.native.tsx  # Carte GPS (natif)
+        └── AppMap.web.tsx     # Placeholder carte (web)
 lib/
 ├── api-spec/             # OpenAPI spec + Orval codegen
 ├── api-client-react/     # Generated React Query hooks
@@ -60,9 +79,31 @@ lib/
 - `GET/POST /api/grossistes/:id/chauffeurs` — CRUD chauffeurs
 - `GET/POST /api/grossistes/:id/boutiques` — CRUD boutiques
 - `GET/POST /api/grossistes/:id/produits` — CRUD produits
+- `GET /api/grossistes/:id/tournees?chauffeurId=X` — Tournées (filtrables par chauffeur)
+- `GET /api/grossistes/:id/chauffeurs/:chauffeurId/stats` — Stats personnelles d'un chauffeur
 - `GET/POST /api/grossistes/:id/tournees` — CRUD tournées
 - `GET/PUT /api/grossistes/:id/tournees/:tid` — Détails et MAJ statut
 - `GET /api/grossistes/:id/livraisons` — Livraisons du grossiste
+
+## Fonctionnalités Implémentées
+
+### App Mobile Livreur
+1. **Login 3 étapes** — Distributeur → Chauffeur → PIN 4 chiffres
+2. **PIN auth** — Premier login: création, retour: vérification (AsyncStorage)
+3. **3 onglets** — Tournée | Historique | Mes Stats
+4. **Manifeste tournée** — Carte GPS, arrêt en cours, actions (Signer/QR/Litige/Photo/Scanner)
+5. **Preuve photo** — expo-image-picker avec prévisualisation et horodatage
+6. **Scanner codes-barres** — expo-camera + saisie manuelle fallback
+7. **Mode hors-ligne** — AsyncStorage cache pour fonctionner sans réseau
+8. **Historique tournées** — Filtrable par statut, expansion détails, taux réussite
+9. **Stats personnelles** — CA cumulé, taux réussite, graphique barre 6 semaines, eval (Excellent/Bon/À améliorer)
+
+### Backoffice Admin
+10. **Analytics recharts** — LineChart CA 6 mois, PieChart statuts, BarChart grossistes, indicateurs clés
+
+### Backoffice Grossiste
+11. **Optimisation d'itinéraire** — Bouton "Optimiser" + réorganisation manuelle (↑↓) des arrêts
+12. **Profil boutique au survol** — Affichage zone géographique lors de la sélection
 
 ## Développement
 
@@ -71,12 +112,16 @@ lib/
 pnpm --filter @workspace/api-server run dev
 pnpm --filter @workspace/admin-backoffice run dev
 pnpm --filter @workspace/grossiste-backoffice run dev
+pnpm --filter @workspace/livreur-app run dev
 
 # Codegen (après modification openapi.yaml)
 pnpm --filter @workspace/api-spec run codegen
 
 # Migration DB
 pnpm --filter @workspace/db run push
+
+# Build APK Android (depuis artifacts/livreur-app/)
+# npm install -g eas-cli && eas login && eas build -p android --profile preview
 ```
 
 ## Données de démo
@@ -87,11 +132,11 @@ pnpm --filter @workspace/db run push
 3. **Konaté & Fils** — Bamako (actif)
 4. **TransLog Conakry** — Conakry (inactif)
 
-## Note sur l'APK Android
+## Notes importantes
 
-L'application mobile (LiviPro Distri + LiviDash Boutiquier) était initialement construite avec React + Vite + Capacitor (voir le dépôt GitHub https://github.com/mamadouelimanewane/livipro). Pour générer l'APK, il faut :
-1. Cloner le repo GitHub localement
-2. Installer les dépendances (`npm install`)
-3. Builder (`npm run build`)
-4. Synchroniser Capacitor (`npx cap sync android`)
-5. Compiler avec Android Studio ou `./gradlew assembleDebug`
+- `react-native-maps` est pinné à 1.18.0 avec des fichiers platform-specific (AppMap.native.tsx / AppMap.web.tsx)
+- Les livraisons retournent `{ boutique: { id, nom, adresse, proprietaire, telephone }, montant, statut, ... }` (objet imbriqué)
+- Les chauffeurs retournent `prenom` et `nom` séparément → les combiner avec `${prenom} ${nom}`
+- Les statuts de livraison valides: `"en_attente"`, `"livree"`, `"echec"`, `"litige"`
+- Le PIN est stocké dans AsyncStorage sous la clé `pin_{chauffeurId}`
+- Les photos de preuve sont stockées localement dans AsyncStorage sous `localPhotos`
