@@ -85,6 +85,25 @@ lib/
 - `GET/PUT /api/grossistes/:id/tournees/:tid` — Détails et MAJ statut
 - `GET /api/grossistes/:id/livraisons` — Livraisons du grossiste
 
+## Nouvelles Tables DB (Innovation)
+
+- **ratings** — Notations mutuelles chauffeur ↔ boutique (type, score 1-5, commentaire)
+- **whatsapp_orders** — Commandes reçues via WhatsApp Business (boutique, produits JSON, statut, montant estimé)
+
+## Nouveaux Endpoints API (Innovations)
+
+Tous sous `/api/grossistes/:id/innovations/` :
+- `GET /credit-scores` — Score crédit 0-100 pour chaque boutique (calculé depuis livraisons)
+- `GET /cashflow-prevision` — Flux de trésorerie 6 semaines + prévision semaine+1
+- `GET /demand-forecast` — Prévision commande prochaine par boutique (régression linéaire)
+- `GET /fraud-alerts` — Alertes anomalies chauffeurs (litige élevé, montants suspects)
+- `GET /fidelite` — Programme fidélité boutiques (Bronze/Argent/Or/Platine)
+- `GET/POST /ratings` — Notations mutuelles chauffeur ↔ boutique
+- `GET/POST /whatsapp-orders` — Commandes WhatsApp
+- `PUT /whatsapp-orders/:id/statut` — Mise à jour statut commande
+
+Admin : `GET /api/admin/benchmark` — Benchmark inter-grossistes + score ESG
+
 ## Fonctionnalités Implémentées
 
 ### App Mobile Livreur

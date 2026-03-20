@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link, useLocation } from "wouter";
-import { LayoutDashboard, Users, Store, Package, Truck, MapPin, Menu, X, Building2 } from "lucide-react";
+import { LayoutDashboard, Users, Store, Package, Truck, MapPin, Menu, X, Building2, CreditCard, Brain, Star } from "lucide-react";
 import { useGrossiste } from "@/context/GrossisteContext";
 import { useGrossistes } from "@/hooks/use-grossistes";
 import { cn } from "@/lib/utils";
@@ -12,6 +12,12 @@ const navItems = [
   { href: "/produits", label: "Produits", icon: Package },
   { href: "/tournees", label: "Tournées", icon: Truck },
   { href: "/livraisons", label: "Livraisons", icon: MapPin },
+];
+
+const innovationItems = [
+  { href: "/credit-finance", label: "Finance & Crédit", icon: CreditCard },
+  { href: "/intelligence", label: "Intelligence IA", icon: Brain },
+  { href: "/notation", label: "Notation Mutuelle", icon: Star },
 ];
 
 export function Layout({ children }: { children: React.ReactNode }) {
@@ -49,22 +55,33 @@ export function Layout({ children }: { children: React.ReactNode }) {
         </div>
       </div>
 
-      <nav className="flex-1 px-4 space-y-1.5 overflow-y-auto">
+      <nav className="flex-1 px-4 space-y-1 overflow-y-auto">
+        <div className="text-xs font-bold text-slate-500 uppercase tracking-wider px-2 pb-1">Opérations</div>
         {navItems.map((item) => {
           const isActive = location === item.href || (item.href !== "/" && location.startsWith(item.href));
           const Icon = item.icon;
-          
           return (
             <Link key={item.href} href={item.href}>
-              <div 
-                onClick={() => setMobileMenuOpen(false)}
-                className={cn(
-                  "flex items-center gap-3 px-4 py-3 rounded-xl font-semibold transition-all duration-200 cursor-pointer",
-                  isActive 
-                    ? "bg-primary text-white shadow-lg shadow-primary/20" 
-                    : "text-slate-400 hover:text-white hover:bg-slate-800/50"
-                )}
-              >
+              <div onClick={() => setMobileMenuOpen(false)}
+                className={cn("flex items-center gap-3 px-4 py-3 rounded-xl font-semibold transition-all duration-200 cursor-pointer",
+                  isActive ? "bg-primary text-white shadow-lg shadow-primary/20" : "text-slate-400 hover:text-white hover:bg-slate-800/50")}>
+                <Icon className={cn("w-5 h-5", isActive ? "text-white" : "text-slate-500")} />
+                {item.label}
+              </div>
+            </Link>
+          );
+        })}
+        <div className="text-xs font-bold text-slate-500 uppercase tracking-wider px-2 pt-3 pb-1 flex items-center gap-1.5">
+          <span className="w-2 h-2 rounded-full bg-primary animate-pulse inline-block" /> Innovation
+        </div>
+        {innovationItems.map((item) => {
+          const isActive = location === item.href;
+          const Icon = item.icon;
+          return (
+            <Link key={item.href} href={item.href}>
+              <div onClick={() => setMobileMenuOpen(false)}
+                className={cn("flex items-center gap-3 px-4 py-3 rounded-xl font-semibold transition-all duration-200 cursor-pointer",
+                  isActive ? "bg-primary text-white shadow-lg shadow-primary/20" : "text-slate-400 hover:text-white hover:bg-slate-800/50")}>
                 <Icon className={cn("w-5 h-5", isActive ? "text-white" : "text-slate-500")} />
                 {item.label}
               </div>

@@ -23,6 +23,8 @@ import { QRModal } from "@/components/QRModal";
 import { LitigeModal } from "@/components/LitigeModal";
 import { PhotoModal } from "@/components/PhotoModal";
 import { ScannerModal } from "@/components/ScannerModal";
+import { VoiceAssistant } from "@/components/VoiceAssistant";
+import { RatingModal } from "@/components/RatingModal";
 import Colors from "@/constants/colors";
 
 const BASE_URL = `https://${process.env.EXPO_PUBLIC_DOMAIN}/api`;
@@ -39,7 +41,7 @@ interface Livraison {
   statut: string; montant: number; methodePaiement: string;
 }
 
-type ModalType = null | "signature" | "qr" | "litige" | "photo" | "scanner";
+type ModalType = null | "signature" | "qr" | "litige" | "photo" | "scanner" | "voice" | "rating";
 
 const DAKAR_COORDS: [number, number][] = [
   [14.6937, -17.4441],[14.6928, -17.4627],[14.6850, -17.4582],
@@ -213,6 +215,29 @@ export default function ManifestScreen() {
   const handleScan = (code: string) => {
     setModal(null);
     Alert.alert("Code scanné", `Référence: ${code}\nProduit vérifié ✓`);
+  };
+
+  const handleVoiceCommand = (action: string, data: Record<string, any>) => {
+    if (!activeStop) return;
+    if (action === "LIVREE") {
+      if (Platform.OS !== "web") Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+      setStatut(activeStop.id, "livree");
+      setModal(null);
+      setTimeout(() => setModal("rating"), 800);
+    } else if (action === "ECHEC") {
+      setStatut(activeStop.id, "echec");
+      setModal(null);
+    } else if (action === "LITIGE") {
+      setModal("litige");
+    } else if (action === "NEXT") {
+      const idx = livraisons.findIndex(l => l.id === activeStop.id);
+      const next = livraisons[idx + 1];
+      if (next) setActiveId(next.id);
+    } else if (action === "PHOTO") {
+      setModal("photo");
+    } else if (action === "SCAN") {
+      setModal("scanner");
+    }
   };
 
   const openNav = (adresse: string, nom: string) => {
@@ -389,6 +414,18 @@ export default function ManifestScreen() {
                       <Text style={[styles.actionLabel2, { color: Colors.navyMid }]}>Scanner</Text>
                     </TouchableOpacity>
                   </View>
+                  <View style={styles.actionGrid2}>
+                    <TouchableOpacity style={[styles.actionBtn2, { borderColor: "#a855f7" }]}
+                      onPress={() => setModal("voice")}>
+                      <Feather name="mic" size={15} color="#a855f7" />
+                      <Text style={[styles.actionLabel2, { color: "#a855f7" }]}>Assistant vocal</Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity style={[styles.actionBtn2, { borderColor: "#f59e0b" }]}
+                      onPress={() => setModal("rating")}>
+                      <Feather name="star" size={15} color="#f59e0b" />
+                      <Text style={[styles.actionLabel2, { color: "#f59e0b" }]}>Noter la boutique</Text>
+                    </TouchableOpacity>
+                  </View>
                 </>
               )}
             </View>
@@ -449,6 +486,18 @@ export default function ManifestScreen() {
       <LitigeModal visible={modal === "litige"} boutiqueName={activeStop?.boutique.nom ?? ""} montant={montant} onConfirm={handleLitige} onClose={() => setModal(null)} />
       <PhotoModal visible={modal === "photo"} boutiqueName={activeStop?.boutique.nom ?? ""} onCapture={handlePhoto} onClose={() => setModal(null)} existingUri={activePhotoUri} />
       <ScannerModal visible={modal === "scanner"} onScan={handleScan} onClose={() => setModal(null)} />
+      <VoiceAssistant visible={modal === "voice"} onClose={() => setModal(null)} onCommand={handleVoiceCommand} />
+      {grossisteId && chauffeurId && activeStop && (
+        <RatingModal
+          visible={modal === "rating"}
+          onClose={() => setModal(null)}
+          grossisteId={grossisteId}
+          chauffeurId={chauffeurId}
+          boutiqueId={activeStop.boutique.id}
+          boutiqueNom={activeStop.boutique.nom}
+          tourneeId={activeTournee.id}
+        />
+      )}
     </View>
   );
 }

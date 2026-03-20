@@ -11,6 +11,9 @@ import Produits from "@/pages/Produits";
 import Tournees from "@/pages/Tournees";
 import TourneeDetails from "@/pages/TourneeDetails";
 import Livraisons from "@/pages/Livraisons";
+import CreditFinance from "@/pages/CreditFinance";
+import Intelligence from "@/pages/Intelligence";
+import Notation from "@/pages/Notation";
 
 const queryClient = new QueryClient();
 
@@ -28,6 +31,9 @@ function App() {
               <Route path="/tournees" component={Tournees} />
               <Route path="/tournees/:id" component={TourneeDetails} />
               <Route path="/livraisons" component={Livraisons} />
+              <Route path="/credit-finance" component={CreditFinance} />
+              <Route path="/intelligence" component={Intelligence} />
+              <Route path="/notation" component={Notation} />
               <Route>
                 <div className="flex flex-col items-center justify-center py-24 text-center">
                   <h2 className="text-4xl font-display font-bold text-slate-800 mb-2">404</h2>

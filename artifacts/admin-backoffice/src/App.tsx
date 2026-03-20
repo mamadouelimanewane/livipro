@@ -8,6 +8,7 @@ import Dashboard from "./pages/Dashboard";
 import Grossistes from "./pages/Grossistes";
 import Tournees from "./pages/Tournees";
 import Livraisons from "./pages/Livraisons";
+import Benchmark from "./pages/Benchmark";
 import NotFound from "./pages/not-found";
 
 const queryClient = new QueryClient({
@@ -26,6 +27,7 @@ function Router() {
       <Route path="/grossistes" component={Grossistes} />
       <Route path="/tournees" component={Tournees} />
       <Route path="/livraisons" component={Livraisons} />
+      <Route path="/benchmark" component={Benchmark} />
       <Route component={NotFound} />
     </Switch>
   );

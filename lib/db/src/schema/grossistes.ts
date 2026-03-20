@@ -97,3 +97,37 @@ export type Tournee = typeof tourneesTable.$inferSelect;
 export const insertLivraisonSchema = createInsertSchema(livraisonsTable).omit({ id: true, createdAt: true });
 export type InsertLivraison = z.infer<typeof insertLivraisonSchema>;
 export type Livraison = typeof livraisonsTable.$inferSelect;
+
+export const ratingTypeEnum = pgEnum("rating_type", ["chauffeur_by_boutique", "boutique_by_chauffeur"]);
+
+export const ratingsTable = pgTable("ratings", {
+  id: serial("id").primaryKey(),
+  grossisteId: integer("grossiste_id").notNull().references(() => grossistesTable.id, { onDelete: "cascade" }),
+  chauffeurId: integer("chauffeur_id").references(() => chauffeursTable.id),
+  boutiqueId: integer("boutique_id").references(() => boutiquesTable.id),
+  tourneeId: integer("tournee_id").references(() => tourneesTable.id),
+  type: ratingTypeEnum("type").notNull(),
+  score: integer("score").notNull(),
+  commentaire: text("commentaire"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+export const whatsappOrdersTable = pgTable("whatsapp_orders", {
+  id: serial("id").primaryKey(),
+  grossisteId: integer("grossiste_id").notNull().references(() => grossistesTable.id, { onDelete: "cascade" }),
+  numerotelephone: text("numero_telephone").notNull(),
+  nomBoutique: text("nom_boutique").notNull(),
+  message: text("message").notNull(),
+  produitsJson: text("produits_json").notNull().default("[]"),
+  statut: text("statut").notNull().default("recu"),
+  montantEstime: numeric("montant_estime", { precision: 12, scale: 2 }).notNull().default("0"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+export const insertRatingSchema = createInsertSchema(ratingsTable).omit({ id: true, createdAt: true });
+export type InsertRating = z.infer<typeof insertRatingSchema>;
+export type Rating = typeof ratingsTable.$inferSelect;
+
+export const insertWhatsappOrderSchema = createInsertSchema(whatsappOrdersTable).omit({ id: true, createdAt: true });
+export type InsertWhatsappOrder = z.infer<typeof insertWhatsappOrderSchema>;
+export type WhatsappOrder = typeof whatsappOrdersTable.$inferSelect;
