@@ -24,6 +24,8 @@ LiviPro est un **Système d'Exécution Logistique (LES) Mobile** B2B qui transfo
 | **Backoffice Grossiste** | `/grossiste/` | Espace personnel par grossiste: chauffeurs, boutiques, tournées + optimisation itinéraire |
 | **API Server** | `/api` | Express API REST |
 | **App Mobile Livreur** | Expo Go / APK | App chauffeur: login PIN, manifeste, photo, scanner, historique, stats |
+| **App Boutiquier PWA** | `/boutiquier/` | App mobile PWA pour boutiquiers: login, dashboard, livraisons, fidélité, profil |
+| **App Grossiste Mobile PWA** | `/grossiste-mobile/` | App mobile PWA pour grossistes: dashboard KPIs, tournées live, boutiques scores, alertes fraude |
 
 ## Structure
 
