@@ -77,6 +77,15 @@ export default function MainTabLayout() {
           ),
         }}
       />
+      <Tabs.Screen
+        name="rapport"
+        options={{
+          title: "Rapport",
+          tabBarIcon: ({ color, size }) => (
+            <Feather name="file-text" size={22} color={color} />
+          ),
+        }}
+      />
     </Tabs>
   );
 }

@@ -118,3 +118,20 @@ export const documentsTable = pgTable("documents", {
 export const insertDocumentSchema = createInsertSchema(documentsTable).omit({ id: true, createdAt: true });
 export type InsertDocument = z.infer<typeof insertDocumentSchema>;
 export type Document = typeof documentsTable.$inferSelect;
+
+// ─── PARAMÈTRES SYSTÈME (Admin) ───────────────────────────────────────────────
+
+export const parametresSystemeTable = pgTable("parametres_systeme", {
+  id: serial("id").primaryKey(),
+  cle: text("cle").notNull().unique(),
+  valeur: text("valeur").notNull(),
+  type: text("type").notNull().default("text"),
+  categorie: text("categorie").notNull().default("general"),
+  label: text("label").notNull(),
+  description: text("description"),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
+export const insertParametreSystemeSchema = createInsertSchema(parametresSystemeTable).omit({ id: true, updatedAt: true });
+export type InsertParametreSysteme = z.infer<typeof insertParametreSystemeSchema>;
+export type ParametreSysteme = typeof parametresSystemeTable.$inferSelect;

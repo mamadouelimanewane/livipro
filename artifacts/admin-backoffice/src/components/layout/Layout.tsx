@@ -13,6 +13,7 @@ import {
   X,
   Bell,
   Search,
+  Settings,
 } from "lucide-react";
 
 const navItems = [
@@ -20,6 +21,7 @@ const navItems = [
   { name: "Grossistes", href: "/grossistes", icon: Building2 },
   { name: "Tournées Globales", href: "/tournees", icon: Map },
   { name: "Livraisons", href: "/livraisons", icon: PackageCheck },
+  { name: "Paramètres Système", href: "/parametres", icon: Settings },
 ];
 
 const innovationItems = [
