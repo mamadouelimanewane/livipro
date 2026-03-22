@@ -6,6 +6,7 @@ import { Toaster } from "@/components/ui/toaster";
 
 import Dashboard from "@/pages/Dashboard";
 import Chauffeurs from "@/pages/Chauffeurs";
+import ChauffeurDetails from "@/pages/ChauffeurDetails";
 import Boutiques from "@/pages/Boutiques";
 import Produits from "@/pages/Produits";
 import Tournees from "@/pages/Tournees";
@@ -14,6 +15,7 @@ import Livraisons from "@/pages/Livraisons";
 import CreditFinance from "@/pages/CreditFinance";
 import Intelligence from "@/pages/Intelligence";
 import Notation from "@/pages/Notation";
+import Rapports from "@/pages/Rapports";
 
 const queryClient = new QueryClient();
 
@@ -26,6 +28,7 @@ function App() {
             <Switch>
               <Route path="/" component={Dashboard} />
               <Route path="/chauffeurs" component={Chauffeurs} />
+              <Route path="/chauffeurs/:id" component={ChauffeurDetails} />
               <Route path="/boutiques" component={Boutiques} />
               <Route path="/produits" component={Produits} />
               <Route path="/tournees" component={Tournees} />
@@ -34,6 +37,7 @@ function App() {
               <Route path="/credit-finance" component={CreditFinance} />
               <Route path="/intelligence" component={Intelligence} />
               <Route path="/notation" component={Notation} />
+              <Route path="/rapports" component={Rapports} />
               <Route>
                 <div className="flex flex-col items-center justify-center py-24 text-center">
                   <h2 className="text-4xl font-display font-bold text-slate-800 mb-2">404</h2>

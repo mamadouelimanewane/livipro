@@ -21,3 +21,21 @@ export function formatDate(dateStr: string | undefined | null) {
     return dateStr;
   }
 }
+
+export function formatDateTime(dateStr: string | undefined | null) {
+  if (!dateStr) return "-";
+  try {
+    return format(new Date(dateStr), "dd MMM yyyy HH:mm", { locale: fr });
+  } catch {
+    return dateStr;
+  }
+}
+
+export function formatShortDate(dateStr: string | undefined | null) {
+  if (!dateStr) return "-";
+  try {
+    return format(new Date(dateStr), "dd/MM", { locale: fr });
+  } catch {
+    return dateStr;
+  }
+}

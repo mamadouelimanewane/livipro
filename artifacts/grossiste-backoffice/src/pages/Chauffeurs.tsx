@@ -1,9 +1,10 @@
 import { useState } from "react";
+import { Link } from "wouter";
 import { useChauffeurs, useChauffeurMutations } from "@/hooks/use-chauffeurs";
 import { PageHeader } from "@/components/PageHeader";
 import { StatusBadge } from "@/components/StatusBadge";
 import { Modal } from "@/components/Modal";
-import { Plus, Edit2, Trash2, Users, Phone, CreditCard } from "lucide-react";
+import { Plus, Edit2, Trash2, Users, Phone, CreditCard, BarChart3 } from "lucide-react";
 import { toast } from "sonner";
 import type { Chauffeur } from "@workspace/api-client-react";
 
@@ -80,13 +81,20 @@ export default function Chauffeurs() {
                       <td className="px-6 py-4 text-muted-foreground">{c.telephone}</td>
                       <td className="px-6 py-4 text-muted-foreground">{c.permis}</td>
                       <td className="px-6 py-4"><StatusBadge status={c.statut} /></td>
-                      <td className="px-6 py-4 flex items-center justify-end gap-2">
-                        <button onClick={() => setEditingItem(c)} className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors">
-                          <Edit2 className="w-4 h-4" />
-                        </button>
-                        <button onClick={() => setDeleteId(c.id)} className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors">
-                          <Trash2 className="w-4 h-4" />
-                        </button>
+                      <td className="px-6 py-4">
+                        <div className="flex items-center justify-end gap-1">
+                          <Link href={`/chauffeurs/${c.id}`}>
+                            <button className="p-2 text-primary hover:bg-primary/10 rounded-lg transition-colors" title="Voir le profil">
+                              <BarChart3 className="w-4 h-4" />
+                            </button>
+                          </Link>
+                          <button onClick={() => setEditingItem(c)} className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors">
+                            <Edit2 className="w-4 h-4" />
+                          </button>
+                          <button onClick={() => setDeleteId(c.id)} className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors">
+                            <Trash2 className="w-4 h-4" />
+                          </button>
+                        </div>
                       </td>
                     </tr>
                   ))}
@@ -111,13 +119,20 @@ export default function Chauffeurs() {
                     <CreditCard className="w-3.5 h-3.5 text-slate-400" /> Permis: {c.permis}
                   </div>
                 </div>
-                <div className="flex items-center justify-end gap-2 border-t border-slate-100 pt-3">
-                  <button onClick={() => setEditingItem(c)} className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors">
-                    <Edit2 className="w-4 h-4" />
-                  </button>
-                  <button onClick={() => setDeleteId(c.id)} className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors">
-                    <Trash2 className="w-4 h-4" />
-                  </button>
+                <div className="flex items-center justify-between border-t border-slate-100 pt-3">
+                  <Link href={`/chauffeurs/${c.id}`}>
+                    <button className="flex items-center gap-1.5 text-xs font-bold text-primary bg-primary/10 px-3 py-1.5 rounded-lg hover:bg-primary/20 transition-colors">
+                      <BarChart3 className="w-3.5 h-3.5" /> Voir le profil
+                    </button>
+                  </Link>
+                  <div className="flex items-center gap-2">
+                    <button onClick={() => setEditingItem(c)} className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors">
+                      <Edit2 className="w-4 h-4" />
+                    </button>
+                    <button onClick={() => setDeleteId(c.id)} className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors">
+                      <Trash2 className="w-4 h-4" />
+                    </button>
+                  </div>
                 </div>
               </div>
             ))}
