@@ -9,7 +9,7 @@ export function cn(...inputs: ClassValue[]) {
 
 export function formatFCFA(amount: number | null | undefined): string {
   if (amount == null) return "0 FCFA";
-  return new Intl.NumberFormat("fr-FR").format(amount) + " FCFA";
+  return new Intl.NumberFormat("fr-FR", { maximumFractionDigits: 0 }).format(amount) + " FCFA";
 }
 
 export function formatDate(dateString: string | null | undefined): string {

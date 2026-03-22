@@ -10,7 +10,7 @@ export function cn(...inputs: ClassValue[]) {
 export function formatFCFA(amount: number | string | undefined | null) {
   if (amount == null) return "0 FCFA";
   const num = typeof amount === "string" ? parseFloat(amount) : amount;
-  return new Intl.NumberFormat("fr-FR").format(num) + " FCFA";
+  return new Intl.NumberFormat("fr-FR", { maximumFractionDigits: 0 }).format(num) + " FCFA";
 }
 
 export function formatDate(dateStr: string | undefined | null) {
