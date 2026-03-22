@@ -349,6 +349,7 @@ function Commander() {
   const { cart, add, remove, update, clear } = useCart();
   const qc = useQueryClient();
   const [view, setView] = useState<"catalogue" | "panier" | "confirmation">("catalogue");
+  const [subTab, setSubTab] = useState<"catalogue" | "mes-commandes">("catalogue");
   const [notes, setNotes] = useState("");
   const [search, setSearch] = useState("");
   const [success, setSuccess] = useState(false);
@@ -442,9 +443,24 @@ function Commander() {
     </div>
   );
 
+  if (subTab === "mes-commandes") return (
+    <div style={{ padding: "0 0 16px" }}>
+      <div style={{ display: "flex", gap: 6, padding: "0 16px 14px", borderBottom: "1px solid #1e293b" }}>
+        <button onClick={() => setSubTab("catalogue")} style={{ flex: 1, padding: "10px", borderRadius: 12, border: "none", background: "#1e293b", color: "#94a3b8", fontWeight: 600, cursor: "pointer", fontSize: 14 }}>🛒 Catalogue</button>
+        <button style={{ flex: 1, padding: "10px", borderRadius: 12, border: "none", background: "#f97316", color: "#fff", fontWeight: 700, cursor: "pointer", fontSize: 14 }}>📋 Mes commandes</button>
+      </div>
+      <MesCommandes />
+    </div>
+  );
+
   return (
     <div style={{ padding: "0 0 16px" }}>
       <div style={{ padding: "0 16px", marginBottom: 12 }}>
+        {/* Sub-tab switcher */}
+        <div style={{ display: "flex", gap: 6, marginBottom: 16 }}>
+          <button style={{ flex: 1, padding: "10px", borderRadius: 12, border: "none", background: "#f97316", color: "#fff", fontWeight: 700, cursor: "pointer", fontSize: 14 }}>🛒 Catalogue</button>
+          <button onClick={() => setSubTab("mes-commandes")} style={{ flex: 1, padding: "10px", borderRadius: 12, border: "none", background: "#1e293b", color: "#94a3b8", fontWeight: 600, cursor: "pointer", fontSize: 14 }}>📋 Mes commandes</button>
+        </div>
         <div style={{ ...S.row, marginBottom: 14 }}>
           <h2 style={{ color: "#fff", fontSize: 20, fontWeight: 700, margin: 0 }}>🛒 Catalogue</h2>
           {cart.length > 0 && (
@@ -501,6 +517,193 @@ function Commander() {
               );
             })}
           </div>}
+    </div>
+  );
+}
+
+// ─── MES COMMANDES (BONS DE COMMANDE) ────────────────────────────────────────
+
+function MesCommandes() {
+  const { auth } = useAuth();
+  const [selected, setSelected] = useState<any>(null);
+
+  const { data: commandes, isLoading, refetch } = useQuery({
+    queryKey: ["mes-commandes", auth.boutiqueId],
+    queryFn: () => fetch(`${API}/grossistes/${auth.grossisteId}/boutiques/${auth.boutiqueId}/commandes`).then(r => r.json()),
+    enabled: !!auth.boutiqueId,
+    refetchInterval: 30000,
+  });
+
+  const exportBC = (c: any) => {
+    const lines = [
+      `BON DE COMMANDE — ${`BC-${String(c.id).padStart(5, "0")}`}`,
+      `Date : ${new Date(c.createdAt).toLocaleDateString("fr-FR")}`,
+      `Boutique : ${auth.boutiqueNom}`,
+      `Distributeur : ${auth.grossisteNom}`,
+      ``,
+      `ARTICLES`,
+      ...(c.items || []).map((it: any) => `  ${it.produit?.nom || "Produit"} — ${it.quantite} × ${fmt(Number(it.prixUnitaire))} = ${fmt(it.quantite * Number(it.prixUnitaire))}`),
+      ``,
+      `TOTAL : ${fmt(Number(c.montantTotal))}`,
+      `Statut : ${statusMap[c.statut]?.label || c.statut}`,
+      c.notes ? `Notes : ${c.notes}` : "",
+    ].filter(Boolean).join("\n");
+
+    const blob = new Blob([lines], { type: "text/plain" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `BC-${String(c.id).padStart(5, "0")}.txt`;
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
+  const list = commandes || [];
+
+  if (selected) {
+    const bc = selected;
+    const statCfg = statusMap[bc.statut] || { color: "#64748b", label: bc.statut, icon: "•" };
+    const subtotal = (bc.items || []).reduce((s: number, it: any) => s + it.quantite * Number(it.prixUnitaire), 0);
+
+    return (
+      <div style={{ padding: "0 16px 16px" }}>
+        {/* Header */}
+        <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 20 }}>
+          <button onClick={() => setSelected(null)} style={{ background: "#1e293b", border: "none", borderRadius: 10, padding: "8px 14px", color: "#94a3b8", cursor: "pointer", fontSize: 14, fontWeight: 600 }}>← Retour</button>
+          <h2 style={{ color: "#fff", fontSize: 18, fontWeight: 700, margin: 0 }}>Bon de Commande</h2>
+        </div>
+
+        {/* BC Header card */}
+        <div style={{ background: "linear-gradient(135deg, #1e293b, #0f172a)", borderRadius: 20, padding: 20, marginBottom: 14, border: "1px solid #334155" }}>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 16 }}>
+            <div>
+              <div style={{ background: "#f9731620", borderRadius: 10, padding: "6px 12px", display: "inline-block", marginBottom: 8 }}>
+                <span style={{ color: "#f97316", fontWeight: 800, fontFamily: "monospace", fontSize: 15, letterSpacing: 1 }}>BC-{String(bc.id).padStart(5, "0")}</span>
+              </div>
+              <div style={{ color: "#fff", fontWeight: 700, fontSize: 16 }}>{auth.boutiqueNom}</div>
+              <div style={{ color: "#64748b", fontSize: 13 }}>via {auth.grossisteNom}</div>
+            </div>
+            <div style={{ textAlign: "right" }}>
+              <span style={S.badge(statCfg.color)}>{statCfg.icon} {statCfg.label}</span>
+              <div style={{ color: "#64748b", fontSize: 12, marginTop: 6 }}>{new Date(bc.createdAt).toLocaleDateString("fr-FR", { day: "2-digit", month: "long", year: "numeric" })}</div>
+            </div>
+          </div>
+          <div style={{ borderTop: "1px solid #334155", paddingTop: 14 }}>
+            <div style={{ ...S.row }}>
+              <span style={{ color: "#64748b", fontSize: 13 }}>Montant total</span>
+              <span style={{ color: "#f97316", fontSize: 24, fontWeight: 800 }}>{fmt(Number(bc.montantTotal))}</span>
+            </div>
+          </div>
+        </div>
+
+        {/* Articles */}
+        <div style={{ ...S.card }}>
+          <div style={{ color: "#94a3b8", fontSize: 11, fontWeight: 700, textTransform: "uppercase", letterSpacing: 1, marginBottom: 14 }}>Détail des Articles</div>
+          {(bc.items || []).length === 0 ? (
+            <p style={{ color: "#64748b", fontSize: 14, textAlign: "center", padding: "16px 0" }}>Aucun article</p>
+          ) : (bc.items || []).map((it: any, i: number, arr: any[]) => (
+            <div key={it.id} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "12px 0", borderBottom: i < arr.length - 1 ? "1px solid #0f172a" : "none" }}>
+              <div style={{ flex: 1, marginRight: 8 }}>
+                <div style={{ color: "#e2e8f0", fontWeight: 600, fontSize: 14 }}>{it.produit?.nom || `Produit #${it.produitId}`}</div>
+                <div style={{ color: "#64748b", fontSize: 12 }}>
+                  {it.quantite} {it.produit?.unite || "unité(s)"} × {fmt(Number(it.prixUnitaire))}
+                </div>
+              </div>
+              <div style={{ color: "#f97316", fontWeight: 700, fontSize: 15 }}>{fmt(it.quantite * Number(it.prixUnitaire))}</div>
+            </div>
+          ))}
+          <div style={{ borderTop: "2px solid #334155", marginTop: 4, paddingTop: 14 }}>
+            <div style={{ ...S.row }}>
+              <span style={{ color: "#94a3b8", fontWeight: 600 }}>Sous-total</span>
+              <span style={{ color: "#e2e8f0", fontWeight: 700 }}>{fmt(subtotal)}</span>
+            </div>
+          </div>
+        </div>
+
+        {/* Notes */}
+        {bc.notes && (
+          <div style={{ ...S.card, background: "#f9731610", border: "1px solid #f9731630" }}>
+            <p style={{ color: "#94a3b8", fontSize: 12, fontWeight: 700, textTransform: "uppercase", marginBottom: 6 }}>Notes</p>
+            <p style={{ color: "#e2e8f0", fontSize: 14, margin: 0 }}>{bc.notes}</p>
+          </div>
+        )}
+
+        {/* Workflow */}
+        <div style={{ ...S.card }}>
+          <p style={{ color: "#94a3b8", fontSize: 11, fontWeight: 700, textTransform: "uppercase", letterSpacing: 1, marginBottom: 14 }}>Suivi de la commande</p>
+          {["en_attente", "confirmee", "en_preparation", "livree"].map((s, i) => {
+            const cfg = statusMap[s] || { color: "#64748b", label: s, icon: "•" };
+            const isActive = bc.statut === s;
+            const isDone = ["en_attente", "confirmee", "en_preparation", "livree"].indexOf(bc.statut) > i;
+            const isAnnulee = bc.statut === "annulee";
+            return (
+              <div key={s} style={{ display: "flex", gap: 12, alignItems: "flex-start", paddingBottom: i < 3 ? 12 : 0 }}>
+                <div style={{ display: "flex", flexDirection: "column", alignItems: "center" }}>
+                  <div style={{ width: 32, height: 32, borderRadius: 16, background: isAnnulee ? "#ef444420" : (isActive || isDone) ? cfg.color + "25" : "#0f172a", border: `2px solid ${isAnnulee ? "#ef4444" : (isActive || isDone) ? cfg.color : "#334155"}`, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 14 }}>
+                    {isAnnulee ? "✕" : isDone ? "✓" : isActive ? cfg.icon : "○"}
+                  </div>
+                  {i < 3 && <div style={{ width: 2, height: 20, background: isDone ? "#22c55e40" : "#1e293b", marginTop: 2 }} />}
+                </div>
+                <div style={{ paddingTop: 4 }}>
+                  <div style={{ color: (isActive || isDone) && !isAnnulee ? "#e2e8f0" : "#475569", fontWeight: isActive ? 700 : 400, fontSize: 14 }}>
+                    {cfg.label}
+                  </div>
+                  {isActive && <div style={{ color: "#64748b", fontSize: 11 }}>Statut actuel</div>}
+                </div>
+              </div>
+            );
+          })}
+        </div>
+
+        {/* Actions */}
+        <button onClick={() => exportBC(bc)} style={{ ...S.btnOutline, width: "100%", textAlign: "center", display: "flex", alignItems: "center", justifyContent: "center", gap: 8, marginBottom: 12 }}>
+          📄 Télécharger le bon de commande
+        </button>
+        <button onClick={() => setSelected(null)} style={S.btn()}>← Retour à mes commandes</button>
+      </div>
+    );
+  }
+
+  return (
+    <div style={{ padding: "0 16px 16px" }}>
+      <div style={{ ...S.row, marginBottom: 16 }}>
+        <h2 style={{ color: "#fff", fontSize: 20, fontWeight: 700, margin: 0 }}>📋 Mes Commandes</h2>
+        <button onClick={() => refetch()} style={{ background: "none", border: "1px solid #334155", borderRadius: 10, padding: "6px 12px", color: "#94a3b8", cursor: "pointer", fontSize: 12 }}>↻ Actualiser</button>
+      </div>
+
+      {isLoading ? (
+        <div style={{ textAlign: "center", padding: 48, color: "#64748b" }}>Chargement...</div>
+      ) : list.length === 0 ? (
+        <div style={{ textAlign: "center", padding: 48 }}>
+          <div style={{ fontSize: 48, marginBottom: 12 }}>📋</div>
+          <div style={{ color: "#94a3b8", fontSize: 16, fontWeight: 600 }}>Aucune commande passée</div>
+          <div style={{ color: "#64748b", fontSize: 13, marginTop: 4 }}>Vos bons de commande apparaîtront ici.</div>
+        </div>
+      ) : list.map((c: any) => {
+        const statCfg = statusMap[c.statut] || { color: "#64748b", label: c.statut, icon: "•" };
+        return (
+          <button key={c.id} onClick={() => setSelected(c)}
+            style={{ ...S.card, width: "100%", textAlign: "left", cursor: "pointer", border: "1px solid #334155", background: "#1e293b" }}>
+            <div style={{ ...S.row, marginBottom: 10 }}>
+              <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                <span style={{ background: "#f9731615", color: "#f97316", borderRadius: 8, padding: "4px 8px", fontFamily: "monospace", fontSize: 13, fontWeight: 700, letterSpacing: 0.5 }}>
+                  BC-{String(c.id).padStart(5, "0")}
+                </span>
+              </div>
+              <span style={S.badge(statCfg.color)}>{statCfg.icon} {statCfg.label}</span>
+            </div>
+            <div style={{ ...S.row }}>
+              <div>
+                <div style={{ color: "#e2e8f0", fontSize: 15, fontWeight: 700 }}>{fmt(Number(c.montantTotal))}</div>
+                <div style={{ color: "#64748b", fontSize: 12, marginTop: 3 }}>
+                  {(c.items || []).length} article(s) · {new Date(c.createdAt).toLocaleDateString("fr-FR")}
+                </div>
+              </div>
+              <span style={{ color: "#64748b", fontSize: 20 }}>›</span>
+            </div>
+          </button>
+        );
+      })}
     </div>
   );
 }

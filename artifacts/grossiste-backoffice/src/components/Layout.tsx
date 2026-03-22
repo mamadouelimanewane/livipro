@@ -3,7 +3,7 @@ import { Link, useLocation } from "wouter";
 import {
   LayoutDashboard, Users, Store, Package, Truck, MapPin,
   Menu, X, Building2, CreditCard, Brain, Star, BarChart3,
-  Navigation, ShoppingCart
+  Navigation, ShoppingCart, GitMerge
 } from "lucide-react";
 import { useGrossiste } from "@/context/GrossisteContext";
 import { useGrossistes } from "@/hooks/use-grossistes";
@@ -17,6 +17,7 @@ const navItems = [
   { href: "/tournees", label: "Tournées", icon: Truck },
   { href: "/livraisons", label: "Livraisons", icon: MapPin },
   { href: "/commandes", label: "Commandes", icon: ShoppingCart },
+  { href: "/rapprochement", label: "Rapprochement", icon: GitMerge },
   { href: "/carte", label: "Carte Live", icon: Navigation },
   { href: "/rapports", label: "Rapports", icon: BarChart3 },
 ];

@@ -199,6 +199,152 @@ router.post("/livraisons/:livraisonId/preuves", async (req, res) => {
   }
 });
 
+// ─── BON DE COMMANDE DÉTAIL ────────────────────────────────────────────────
+
+router.get("/commandes/:commandeId", async (req, res) => {
+  try {
+    const [commande] = await db.select().from(commandesTable)
+      .where(eq(commandesTable.id, parseInt(req.params.commandeId))).limit(1);
+    if (!commande) return res.status(404).json({ error: "Commande introuvable" });
+
+    const [boutique] = await db.select().from(boutiquesTable).where(eq(boutiquesTable.id, commande.boutiqueId)).limit(1);
+    const items = await db.select().from(commandeItemsTable).where(eq(commandeItemsTable.commandeId, commande.id));
+    const itemsEnriched = await Promise.all(items.map(async (it) => {
+      const [prod] = await db.select().from(produitsTable).where(eq(produitsTable.id, it.produitId)).limit(1);
+      return { ...it, produit: prod ?? null };
+    }));
+
+    res.json({
+      ...commande,
+      numeroBc: `BC-${String(commande.id).padStart(5, "0")}`,
+      boutique: boutique ?? null,
+      items: itemsEnriched,
+    });
+  } catch (e) {
+    res.status(500).json({ error: String(e) });
+  }
+});
+
+// ─── BONS DE LIVRAISON ─────────────────────────────────────────────────────
+
+router.get("/bons-livraison", async (req, res) => {
+  try {
+    const grossisteId = parseInt(req.params.grossisteId);
+    const livraisons = await db.select().from(livraisonsTable)
+      .leftJoin(tourneesTable, eq(livraisonsTable.tourneeId, tourneesTable.id))
+      .where(sql`${tourneesTable.grossisteId} = ${grossisteId} AND ${livraisonsTable.statut} = 'livree'`)
+      .orderBy(desc(livraisonsTable.createdAt));
+
+    const enriched = await Promise.all(livraisons.map(async (row) => {
+      const liv = row.livraisons;
+      const [boutique] = await db.select().from(boutiquesTable).where(eq(boutiquesTable.id, liv.boutiqueId)).limit(1);
+      const preuves = await db.select().from(preuvesLivraisonTable).where(eq(preuvesLivraisonTable.livraisonId, liv.id));
+      return {
+        ...liv,
+        numeroBl: `BL-${String(liv.id).padStart(5, "0")}`,
+        boutique: boutique ?? null,
+        tournee: row.tournees,
+        preuves,
+      };
+    }));
+
+    res.json(enriched);
+  } catch (e) {
+    res.status(500).json({ error: String(e) });
+  }
+});
+
+// ─── RAPPROCHEMENT BC / BL ─────────────────────────────────────────────────
+
+router.get("/rapprochement", async (req, res) => {
+  try {
+    const grossisteId = parseInt(req.params.grossisteId);
+
+    const commandes = await db.select().from(commandesTable)
+      .where(eq(commandesTable.grossisteId, grossisteId))
+      .orderBy(desc(commandesTable.createdAt));
+
+    const livraisons = await db.select({
+      id: livraisonsTable.id,
+      boutiqueId: livraisonsTable.boutiqueId,
+      montant: livraisonsTable.montantTotal,
+      statut: livraisonsTable.statut,
+      methodePaiement: livraisonsTable.methodePaiement,
+      createdAt: livraisonsTable.createdAt,
+      tourneeId: livraisonsTable.tourneeId,
+    })
+      .from(livraisonsTable)
+      .leftJoin(tourneesTable, eq(livraisonsTable.tourneeId, tourneesTable.id))
+      .where(eq(tourneesTable.grossisteId, grossisteId));
+
+    const boutiquesRows = await db.select({ id: boutiquesTable.id, nom: boutiquesTable.nom })
+      .from(boutiquesTable).where(eq(boutiquesTable.grossisteId, grossisteId));
+    const boutiquesMap = Object.fromEntries(boutiquesRows.map(b => [b.id, b.nom]));
+
+    const livByBoutique: Record<number, typeof livraisons> = {};
+    for (const l of livraisons) {
+      if (!livByBoutique[l.boutiqueId]) livByBoutique[l.boutiqueId] = [];
+      livByBoutique[l.boutiqueId].push(l);
+    }
+
+    const rows = await Promise.all(commandes.map(async (bc) => {
+      const items = await db.select({ count: sql<number>`count(*)` })
+        .from(commandeItemsTable).where(eq(commandeItemsTable.commandeId, bc.id));
+      const nbItems = Number(items[0]?.count ?? 0);
+
+      const livsBoutique = livByBoutique[bc.boutiqueId] ?? [];
+      const bcDate = new Date(bc.createdAt).getTime();
+      const matched = livsBoutique
+        .filter(l => Math.abs(new Date(l.createdAt).getTime() - bcDate) < 7 * 24 * 60 * 60 * 1000)
+        .sort((a, b) => Math.abs(new Date(a.createdAt).getTime() - bcDate) - Math.abs(new Date(b.createdAt).getTime() - bcDate))[0];
+
+      const montantBc = parseFloat(bc.montantTotal as string) || 0;
+      const montantBl = matched ? parseFloat(matched.montant as string) || 0 : 0;
+      const ecart = matched ? montantBl - montantBc : 0;
+
+      let statut: string;
+      if (bc.statut === "annulee") statut = "annulee";
+      else if (!matched && bc.statut === "livree") statut = "non_rapproche";
+      else if (matched && bc.statut === "livree" && Math.abs(ecart) < 100) statut = "rapproche";
+      else if (matched && bc.statut === "livree" && Math.abs(ecart) >= 100) statut = "ecart";
+      else statut = "en_cours";
+
+      return {
+        numeroBc: `BC-${String(bc.id).padStart(5, "0")}`,
+        commandeId: bc.id,
+        boutiqueId: bc.boutiqueId,
+        boutiqueNom: boutiquesMap[bc.boutiqueId] ?? "Boutique #" + bc.boutiqueId,
+        dateBc: bc.createdAt,
+        statutCommande: bc.statut,
+        montantBc,
+        nbItems,
+        numeroBl: matched ? `BL-${String(matched.id).padStart(5, "0")}` : null,
+        livraisonId: matched?.id ?? null,
+        dateBl: matched?.createdAt ?? null,
+        montantBl,
+        methodePaiement: matched?.methodePaiement ?? null,
+        ecart,
+        statut,
+      };
+    }));
+
+    const totaux = {
+      totalBc: rows.length,
+      totalBl: rows.filter(r => r.numeroBl).length,
+      rapproches: rows.filter(r => r.statut === "rapproche").length,
+      ecarts: rows.filter(r => r.statut === "ecart").length,
+      nonRapproches: rows.filter(r => r.statut === "non_rapproche").length,
+      enCours: rows.filter(r => r.statut === "en_cours").length,
+      montantTotalBc: rows.reduce((s, r) => s + r.montantBc, 0),
+      montantTotalBl: rows.reduce((s, r) => s + r.montantBl, 0),
+    };
+
+    res.json({ rows, totaux });
+  } catch (e) {
+    res.status(500).json({ error: String(e) });
+  }
+});
+
 // ─── BOUTIQUES — commandes ─────────────────────────────────────────────────
 
 router.get("/boutiques/:boutiqueId/commandes", async (req, res) => {
