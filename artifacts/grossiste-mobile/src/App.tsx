@@ -186,7 +186,7 @@ function Dashboard() {
             <div style={{ width: 40, height: 40, borderRadius: 10, background: "#0f172a", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 18, flexShrink: 0 }}>🚚</div>
             <div style={{ flex: 1 }}>
               <div style={{ color: "#fff", fontWeight: 600, fontSize: 15 }}>{t.chauffeurNom || `Tournée #${t.id}`}</div>
-              <div style={{ color: "#64748b", fontSize: 13 }}>{t.nombreLivraisons || 0} livraisons</div>
+              <div style={{ color: "#64748b", fontSize: 13 }}>{t.nombreArrets || 0} livraisons</div>
             </div>
             <span style={{ background: s.bg, color: s.color, padding: "4px 10px", borderRadius: 20, fontSize: 12, fontWeight: 600 }}>{t.statut?.replace("_", " ")}</span>
           </div>
@@ -247,15 +247,15 @@ function Tournees() {
             </div>
             <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 8, marginTop: 8 }}>
               <div style={{ background: "#0f172a", borderRadius: 10, padding: "10px 8px", textAlign: "center" }}>
-                <div style={{ color: "#fff", fontWeight: 700 }}>{t.nombreLivraisons || 0}</div>
+                <div style={{ color: "#fff", fontWeight: 700 }}>{t.nombreArrets || 0}</div>
                 <div style={{ color: "#64748b", fontSize: 11 }}>Livraisons</div>
               </div>
               <div style={{ background: "#0f172a", borderRadius: 10, padding: "10px 8px", textAlign: "center" }}>
-                <div style={{ color: "#22c55e", fontWeight: 700 }}>{t.livreesCount || 0}</div>
+                <div style={{ color: "#22c55e", fontWeight: 700 }}>{t.livraisonsReussies || 0}</div>
                 <div style={{ color: "#64748b", fontSize: 11 }}>Livrées</div>
               </div>
               <div style={{ background: "#0f172a", borderRadius: 10, padding: "10px 8px", textAlign: "center" }}>
-                <div style={{ color: "#f97316", fontWeight: 700, fontSize: 13 }}>{t.montantTotal ? fmtK(t.montantTotal) : "—"}</div>
+                <div style={{ color: "#f97316", fontWeight: 700, fontSize: 13 }}>{t.totalLivraisons ? fmtK(t.totalLivraisons) : "—"}</div>
                 <div style={{ color: "#64748b", fontSize: 11 }}>FCFA</div>
               </div>
             </div>
