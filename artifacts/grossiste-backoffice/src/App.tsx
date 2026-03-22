@@ -20,6 +20,7 @@ import Rapports from "@/pages/Rapports";
 import Carte from "@/pages/Carte";
 import Commandes from "@/pages/Commandes";
 import Rapprochement from "@/pages/Rapprochement";
+import Documents from "@/pages/Documents";
 
 const queryClient = new QueryClient();
 
@@ -49,6 +50,7 @@ function AuthenticatedApp() {
           <Route path="/carte" component={Carte} />
           <Route path="/commandes" component={Commandes} />
           <Route path="/rapprochement" component={Rapprochement} />
+          <Route path="/documents" component={Documents} />
           <Route>
             <div className="flex flex-col items-center justify-center py-24 text-center">
               <h2 className="text-4xl font-display font-bold text-slate-800 mb-2">404</h2>

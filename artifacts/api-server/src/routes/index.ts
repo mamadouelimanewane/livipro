@@ -5,6 +5,7 @@ import grossistesRouter from "./grossistes";
 import innovationsRouter from "./innovations";
 import commandesRouter from "./commandes";
 import authRouter from "./auth";
+import documentsRouter from "./documents";
 
 const router: IRouter = Router();
 
@@ -14,5 +15,6 @@ router.use("/admin", adminRouter);
 router.use("/grossistes/:grossisteId", grossistesRouter);
 router.use("/grossistes/:grossisteId/innovations", innovationsRouter);
 router.use("/grossistes/:grossisteId", commandesRouter);
+router.use("/grossistes/:grossisteId", documentsRouter);
 
 export default router;

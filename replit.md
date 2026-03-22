@@ -106,6 +106,13 @@ Tous sous `/api/grossistes/:id/innovations/` :
 
 Admin : `GET /api/admin/benchmark` — Benchmark inter-grossistes + score ESG
 
+## Gestion Documentaire (Dernière addition)
+
+- **Table `documents`** — grossiste_id, boutique_id (nullable = tous), type, nom, description, mimeType, taille, contenu (base64), createdAt
+- **Routes API** : `GET /documents`, `POST /documents`, `GET /documents/:id/download`, `DELETE /documents/:id`
+- **Grossiste Backoffice** `/documents` — Import fichier + scan photo, filtre par type/boutique, tableau desktop + cards mobile, téléchargement
+- **Boutiquier App** — Bouton 📂 dans le header, onglet "Mes Documents" avec filtres + téléchargement
+
 ## Fonctionnalités Implémentées
 
 ### App Mobile Livreur

@@ -1371,9 +1371,109 @@ function Profil() {
   );
 }
 
+// ─── DOCUMENTS BOUTIQUIER ─────────────────────────────────────────────────────
+
+const DOC_TYPE_LABELS: Record<string, { icon: string; label: string; color: string }> = {
+  facture: { icon: "🧾", label: "Facture", color: "#f97316" },
+  devis: { icon: "📋", label: "Devis", color: "#3b82f6" },
+  bon_commande: { icon: "🛒", label: "Bon de Commande", color: "#8b5cf6" },
+  bon_livraison: { icon: "📦", label: "Bon de Livraison", color: "#22c55e" },
+  contrat: { icon: "📜", label: "Contrat", color: "#f59e0b" },
+  autre: { icon: "📄", label: "Autre", color: "#64748b" },
+};
+
+function DocumentsBoutiquier() {
+  const { auth } = useAuth();
+  const [search, setSearch] = useState("");
+  const [filterType, setFilterType] = useState("all");
+
+  const { data: docs = [], isLoading, refetch } = useQuery({
+    queryKey: ["boutique-documents", auth.grossisteId, auth.boutiqueId],
+    queryFn: () => fetch(`${API}/grossistes/${auth.grossisteId}/documents?boutiqueId=${auth.boutiqueId}`).then(r => r.json()),
+    enabled: !!auth.grossisteId && !!auth.boutiqueId,
+    refetchInterval: 60000,
+  });
+
+  const filtered = docs.filter((d: any) => {
+    if (filterType !== "all" && d.type !== filterType) return false;
+    if (search && !d.nom.toLowerCase().includes(search.toLowerCase())) return false;
+    return true;
+  });
+
+  const downloadDoc = (doc: any) => {
+    const a = document.createElement("a");
+    a.href = `${API}/grossistes/${auth.grossisteId}/documents/${doc.id}/download`;
+    a.download = doc.nom;
+    a.click();
+  };
+
+  return (
+    <div style={{ padding: "0 16px 16px" }}>
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }}>
+        <h2 style={{ color: "#fff", fontSize: 20, fontWeight: 700, margin: 0 }}>📂 Mes Documents</h2>
+        <button onClick={() => refetch()} style={{ background: "none", border: "1px solid #334155", borderRadius: 10, padding: "6px 12px", color: "#94a3b8", cursor: "pointer", fontSize: 12 }}>↻ Actualiser</button>
+      </div>
+
+      <p style={{ color: "#64748b", fontSize: 13, marginBottom: 16, marginTop: -8 }}>
+        Factures, devis et documents partagés par votre distributeur
+      </p>
+
+      {/* Search + Filter */}
+      <div style={{ display: "flex", gap: 8, marginBottom: 16, flexWrap: "wrap" }}>
+        <input
+          value={search}
+          onChange={e => setSearch(e.target.value)}
+          placeholder="🔍 Rechercher..."
+          style={{ flex: 1, minWidth: 140, background: "#1e293b", border: "1px solid #334155", borderRadius: 12, padding: "10px 14px", color: "#fff", fontSize: 14 }}
+        />
+        <select value={filterType} onChange={e => setFilterType(e.target.value)}
+          style={{ background: "#1e293b", border: "1px solid #334155", borderRadius: 12, padding: "10px 14px", color: "#e2e8f0", fontSize: 13 }}>
+          <option value="all">Tous types</option>
+          {Object.entries(DOC_TYPE_LABELS).map(([k, v]) => <option key={k} value={k}>{v.icon} {v.label}</option>)}
+        </select>
+      </div>
+
+      {isLoading ? (
+        <div style={{ textAlign: "center", padding: 48, color: "#64748b" }}>Chargement...</div>
+      ) : filtered.length === 0 ? (
+        <div style={{ textAlign: "center", padding: 48 }}>
+          <div style={{ fontSize: 48, marginBottom: 12 }}>📂</div>
+          <div style={{ color: "#94a3b8", fontSize: 16, fontWeight: 600, marginBottom: 4 }}>Aucun document</div>
+          <div style={{ color: "#64748b", fontSize: 13 }}>Votre distributeur n'a pas encore partagé de documents.</div>
+        </div>
+      ) : (
+        <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+          {filtered.map((doc: any) => {
+            const t = DOC_TYPE_LABELS[doc.type] || DOC_TYPE_LABELS.autre;
+            return (
+              <div key={doc.id} style={{ ...S.card, background: "#1e293b", border: "1px solid #334155" }}>
+                <div style={{ display: "flex", alignItems: "flex-start", gap: 12, marginBottom: 12 }}>
+                  <div style={{ fontSize: 32 }}>{t.icon}</div>
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <div style={{ color: "#fff", fontWeight: 700, fontSize: 15, marginBottom: 4, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{doc.nom}</div>
+                    <div style={{ display: "flex", gap: 8, flexWrap: "wrap", alignItems: "center" }}>
+                      <span style={{ background: t.color + "20", color: t.color, borderRadius: 8, padding: "2px 8px", fontSize: 12, fontWeight: 600 }}>{t.label}</span>
+                      <span style={{ color: "#64748b", fontSize: 12 }}>{new Date(doc.createdAt).toLocaleDateString("fr-FR", { day: "2-digit", month: "short", year: "numeric" })}</span>
+                    </div>
+                    {doc.description && <div style={{ color: "#64748b", fontSize: 12, marginTop: 4 }}>{doc.description}</div>}
+                  </div>
+                </div>
+                <button onClick={() => downloadDoc(doc)} style={{ ...S.btn("#f97316"), padding: "10px 16px", fontSize: 14, display: "flex", alignItems: "center", justifyContent: "center", gap: 8 }}>
+                  ⬇️ Télécharger
+                </button>
+              </div>
+            );
+          })}
+          <div style={{ textAlign: "center", color: "#475569", fontSize: 12, marginTop: 4 }}>{filtered.length} document(s)</div>
+        </div>
+      )}
+    </div>
+  );
+}
+
 // ─── MAIN APP ─────────────────────────────────────────────────────────────────
 
-type Tab = "dashboard" | "commander" | "suivi" | "livraisons" | "wallet" | "chat" | "fidelite" | "profil";
+type Tab = "dashboard" | "commander" | "suivi" | "livraisons" | "wallet" | "chat" | "fidelite" | "profil" | "documents";
 
 function MobileApp() {
   const { auth } = useAuth();
@@ -1401,7 +1501,8 @@ function MobileApp() {
           <div style={{ color: "#fff", fontWeight: 800, fontSize: 17 }}>{auth.boutiqueNom}</div>
         </div>
         <div style={{ display: "flex", gap: 8 }}>
-          <button onClick={() => setTab("chat")} style={{ width: 38, height: 38, borderRadius: 19, background: "#1e293b", border: "none", cursor: "pointer", fontSize: 18 }}>💬</button>
+          <button onClick={() => setTab("chat")} style={{ width: 38, height: 38, borderRadius: 19, background: tab === "chat" ? "#1e293b" : "#1e293b", border: "none", cursor: "pointer", fontSize: 18 }}>💬</button>
+          <button onClick={() => setTab("documents")} style={{ width: 38, height: 38, borderRadius: 19, background: tab === "documents" ? "#f9731625" : "#1e293b", border: tab === "documents" ? "1.5px solid #f97316" : "none", cursor: "pointer", fontSize: 18 }}>📂</button>
           <button onClick={() => setTab("fidelite")} style={{ width: 38, height: 38, borderRadius: 19, background: "#f9731620", border: "none", cursor: "pointer", fontSize: 18 }}>⭐</button>
         </div>
       </div>
@@ -1416,6 +1517,7 @@ function MobileApp() {
         {tab === "chat" && <Chat />}
         {tab === "fidelite" && <Fidelite />}
         {tab === "profil" && <Profil />}
+        {tab === "documents" && <DocumentsBoutiquier />}
       </div>
 
       {/* Bottom Nav */}

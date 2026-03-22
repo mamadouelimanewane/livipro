@@ -99,3 +99,22 @@ export type PreuveLivraison = typeof preuvesLivraisonTable.$inferSelect;
 export const insertGeolocationSchema = createInsertSchema(geolocationsTable).omit({ id: true, createdAt: true });
 export type InsertGeolocation = z.infer<typeof insertGeolocationSchema>;
 export type Geolocation = typeof geolocationsTable.$inferSelect;
+
+// ─── DOCUMENTS (factures, devis, contrats, BL, BC) ───────────────────────────
+
+export const documentsTable = pgTable("documents", {
+  id: serial("id").primaryKey(),
+  grossisteId: integer("grossiste_id").notNull().references(() => grossistesTable.id, { onDelete: "cascade" }),
+  boutiqueId: integer("boutique_id").references(() => boutiquesTable.id, { onDelete: "set null" }),
+  type: text("type").notNull().default("autre"),
+  nom: text("nom").notNull(),
+  description: text("description"),
+  mimeType: text("mime_type").notNull().default("application/pdf"),
+  taille: integer("taille"),
+  contenu: text("contenu").notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+export const insertDocumentSchema = createInsertSchema(documentsTable).omit({ id: true, createdAt: true });
+export type InsertDocument = z.infer<typeof insertDocumentSchema>;
+export type Document = typeof documentsTable.$inferSelect;
