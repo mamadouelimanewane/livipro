@@ -12,21 +12,21 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Java 17
+      - name: Java 21
         uses: actions/setup-java@v4
         with:
-          java-version: "17"
+          java-version: "21"
           distribution: "temurin"
 
-      - name: Node.js 20
+      - name: Node.js 22
         uses: actions/setup-node@v4
         with:
-          node-version: "20"
+          node-version: "22"
 
-      - name: pnpm
+      - name: pnpm 10
         uses: pnpm/action-setup@v4
         with:
-          version: 9
+          version: 10
 
       - name: Debug - vérifier structure
         run: |
@@ -47,7 +47,7 @@ jobs:
           PORT: "3000"
           BASE_PATH: /grossiste-mobile/
           NODE_ENV: production
-          VITE_API_BASE_URL: ${{ secrets.PROD_API_URL || 'https://workspace.mamadouelimaned.replit.app' }}
+          VITE_API_BASE_URL: ${{ secrets.PROD_API_URL || 'https://livi-pro-admin.replit.app' }}
         run: |
           echo "Démarrage vite build..."
           pnpm run build
