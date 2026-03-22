@@ -41,8 +41,8 @@ export default function Livraisons() {
                   <tr key={l.id} className="hover:bg-slate-50/50 transition-colors">
                     <td className="px-6 py-4 text-muted-foreground">{formatDate(l.createdAt)}</td>
                     <td className="px-6 py-4 font-bold text-slate-500">#TRN-{l.tourneeId}</td>
-                    <td className="px-6 py-4 font-bold text-foreground">{l.boutiqueNom}</td>
-                    <td className="px-6 py-4 font-bold text-navy">{formatFCFA(l.montantTotal)}</td>
+                    <td className="px-6 py-4 font-bold text-foreground">{l.boutique?.nom ?? "—"}</td>
+                    <td className="px-6 py-4 font-bold text-navy">{formatFCFA(l.montant)}</td>
                     <td className="px-6 py-4"><StatusBadge status={l.methodePaiement} /></td>
                     <td className="px-6 py-4"><StatusBadge status={l.statut} /></td>
                   </tr>
