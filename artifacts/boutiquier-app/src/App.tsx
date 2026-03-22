@@ -13,20 +13,46 @@ interface AuthState {
   boutiqueId: number | null;
   boutiqueNom: string;
   grossisteNom: string;
+  token: string | null;
 }
-const AuthCtx = createContext<{ auth: AuthState; setAuth: (a: AuthState) => void }>({
-  auth: { grossisteId: null, boutiqueId: null, boutiqueNom: "", grossisteNom: "" },
+
+const EMPTY_AUTH: AuthState = { grossisteId: null, boutiqueId: null, boutiqueNom: "", grossisteNom: "", token: null };
+
+const AuthCtx = createContext<{
+  auth: AuthState;
+  setAuth: (a: AuthState) => void;
+  authFetch: (url: string, opts?: RequestInit) => Promise<Response>;
+}>({
+  auth: EMPTY_AUTH,
   setAuth: () => {},
+  authFetch: (url, opts) => fetch(url, opts),
 });
 function useAuth() { return useContext(AuthCtx); }
 
 function AuthProvider({ children }: { children: React.ReactNode }) {
   const [auth, setAuthState] = useState<AuthState>(() => {
-    try { return JSON.parse(localStorage.getItem("boutiquier_auth") || "null") || { grossisteId: null, boutiqueId: null, boutiqueNom: "", grossisteNom: "" }; }
-    catch { return { grossisteId: null, boutiqueId: null, boutiqueNom: "", grossisteNom: "" }; }
+    try { return JSON.parse(localStorage.getItem("boutiquier_auth") || "null") || EMPTY_AUTH; }
+    catch { return EMPTY_AUTH; }
   });
-  const setAuth = (a: AuthState) => { setAuthState(a); localStorage.setItem("boutiquier_auth", JSON.stringify(a)); };
-  return <AuthCtx.Provider value={{ auth, setAuth }}>{children}</AuthCtx.Provider>;
+
+  const setAuth = (a: AuthState) => {
+    setAuthState(a);
+    localStorage.setItem("boutiquier_auth", JSON.stringify(a));
+  };
+
+  // Fetch wrapper qui injecte le Bearer token automatiquement
+  const authFetch = (url: string, opts: RequestInit = {}) => {
+    const headers: Record<string, string> = {
+      "Content-Type": "application/json",
+      ...(opts.headers as Record<string, string> || {}),
+    };
+    if (auth.token) {
+      headers["Authorization"] = `Bearer ${auth.token}`;
+    }
+    return fetch(url, { ...opts, headers });
+  };
+
+  return <AuthCtx.Provider value={{ auth, setAuth, authFetch }}>{children}</AuthCtx.Provider>;
 }
 
 // ─── CART CONTEXT ─────────────────────────────────────────────────────────────
@@ -84,6 +110,7 @@ function Login() {
   const [selectedBoutique, setSelectedBoutique] = useState<any>(null);
   const [pin, setPin] = useState("");
   const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
 
   const { data: grossistes } = useQuery({ queryKey: ["g"], queryFn: () => fetch(`${API}/admin/grossistes`).then(r => r.json()) });
   const { data: boutiques } = useQuery({
@@ -92,14 +119,42 @@ function Login() {
     enabled: !!selectedGrossiste,
   });
 
-  const handlePin = (digit: string) => {
-    if (pin.length >= 4) return;
+  const handlePin = async (digit: string) => {
+    if (pin.length >= 4 || loading) return;
     const newPin = pin + digit;
     setPin(newPin);
     if (newPin.length === 4) {
-      setTimeout(() => {
-        setAuth({ grossisteId: selectedGrossiste.id, boutiqueId: selectedBoutique.id, boutiqueNom: selectedBoutique.nom, grossisteNom: selectedGrossiste.nom });
-      }, 300);
+      setLoading(true);
+      setError("");
+      try {
+        const res = await fetch(`${API}/auth/boutiquier`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            grossisteId: selectedGrossiste.id,
+            boutiqueId: selectedBoutique.id,
+            pin: newPin,
+          }),
+        });
+        const data = await res.json();
+        if (!res.ok) {
+          setError(data.error || "PIN incorrect. Veuillez réessayer.");
+          setPin("");
+          setLoading(false);
+          return;
+        }
+        setAuth({
+          grossisteId: selectedGrossiste.id,
+          boutiqueId: selectedBoutique.id,
+          boutiqueNom: selectedBoutique.nom,
+          grossisteNom: selectedGrossiste.nom,
+          token: data.token,
+        });
+      } catch {
+        setError("Erreur de connexion. Vérifiez votre réseau.");
+        setPin("");
+        setLoading(false);
+      }
     }
   };
 
@@ -142,12 +197,17 @@ function Login() {
         </>}
 
         {step === 3 && <>
-          <button onClick={() => setStep(2)} style={{ background: "none", border: "none", color: "#f97316", cursor: "pointer", fontSize: 13, marginBottom: 16, padding: 0 }}>← Retour</button>
+          <button onClick={() => { setStep(2); setPin(""); setError(""); }} style={{ background: "none", border: "none", color: "#f97316", cursor: "pointer", fontSize: 13, marginBottom: 16, padding: 0 }}>← Retour</button>
           <p style={{ color: "#64748b", fontSize: 13, marginBottom: 4 }}>Étape 3/3</p>
           <h2 style={{ color: "#fff", fontSize: 20, fontWeight: 700, marginBottom: 4 }}>Code PIN</h2>
           <p style={{ color: "#94a3b8", fontSize: 14, marginBottom: 24 }}>{selectedBoutique?.nom}</p>
           <div style={{ display: "flex", gap: 12, justifyContent: "center", marginBottom: 32 }}>
-            {[0,1,2,3].map(i => (
+            {loading ? (
+              <div style={{ display: "flex", alignItems: "center", gap: 8, color: "#f97316", fontSize: 14 }}>
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#f97316" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ animation: "spin 1s linear infinite" }}><circle cx="12" cy="12" r="10" opacity=".25"/><path d="M12 2a10 10 0 0 1 10 10"/></svg>
+                Vérification en cours…
+              </div>
+            ) : [0,1,2,3].map(i => (
               <div key={i} style={{ width: 52, height: 52, borderRadius: 14, background: pin.length > i ? "#f97316" : "#0f172a", border: "2px solid " + (pin.length > i ? "#f97316" : "#334155"), display: "flex", alignItems: "center", justifyContent: "center", transition: "all 0.2s" }}>
                 {pin.length > i && <div style={{ width: 12, height: 12, borderRadius: 6, background: "#fff" }} />}
               </div>
@@ -156,7 +216,7 @@ function Login() {
           {error && <p style={{ color: "#ef4444", textAlign: "center", fontSize: 13, marginBottom: 16 }}>{error}</p>}
           <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 10 }}>
             {["1","2","3","4","5","6","7","8","9","","0","⌫"].map((d, i) => (
-              <button key={i} onClick={() => d === "⌫" ? setPin(p => p.slice(0,-1)) : d !== "" ? handlePin(d) : undefined}
+              <button key={i} onClick={() => d === "⌫" ? (loading ? null : setPin(p => p.slice(0,-1))) : d !== "" ? handlePin(d) : undefined}
                 disabled={d === ""}
                 style={{ height: 60, borderRadius: 14, background: d === "" ? "transparent" : "#0f172a", border: d === "" ? "none" : "1px solid #334155", color: "#fff", fontSize: 22, fontWeight: 600, cursor: d === "" ? "default" : "pointer", transition: "background 0.1s" }}>
                 {d}
@@ -345,7 +405,7 @@ function Dashboard({ setTab }: { setTab: (t: string) => void }) {
 // ─── CATALOGUE / COMMANDER ────────────────────────────────────────────────────
 
 function Commander() {
-  const { auth } = useAuth();
+  const { auth, authFetch } = useAuth();
   const { cart, add, remove, update, clear } = useCart();
   const qc = useQueryClient();
   const [view, setView] = useState<"catalogue" | "panier" | "confirmation">("catalogue");
@@ -361,8 +421,8 @@ function Commander() {
   });
 
   const createCommande = useMutation({
-    mutationFn: (data: any) => fetch(`${API}/grossistes/${auth.grossisteId}/commandes`, {
-      method: "POST", headers: { "Content-Type": "application/json" },
+    mutationFn: (data: any) => authFetch(`${API}/grossistes/${auth.grossisteId}/commandes`, {
+      method: "POST",
       body: JSON.stringify(data),
     }).then(r => r.json()),
     onSuccess: () => {
@@ -818,7 +878,7 @@ function SuiviLivraison() {
 // ─── WALLET ────────────────────────────────────────────────────────────────────
 
 function Wallet() {
-  const { auth } = useAuth();
+  const { auth, authFetch } = useAuth();
   const [methode, setMethode] = useState("especes");
   const [montant, setMontant] = useState("");
   const [desc, setDesc] = useState("");
@@ -831,8 +891,8 @@ function Wallet() {
   });
 
   const addTx = useMutation({
-    mutationFn: (data: any) => fetch(`${API}/grossistes/${auth.grossisteId}/wallet/boutique/${auth.boutiqueId}`, {
-      method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(data),
+    mutationFn: (data: any) => authFetch(`${API}/grossistes/${auth.grossisteId}/wallet/boutique/${auth.boutiqueId}`, {
+      method: "POST", body: JSON.stringify(data),
     }).then(r => r.json()),
     onSuccess: () => { qc.invalidateQueries({ queryKey: ["wallet"] }); setMontant(""); setDesc(""); },
   });

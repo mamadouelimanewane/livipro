@@ -4,10 +4,12 @@ import adminRouter from "./admin";
 import grossistesRouter from "./grossistes";
 import innovationsRouter from "./innovations";
 import commandesRouter from "./commandes";
+import authRouter from "./auth";
 
 const router: IRouter = Router();
 
 router.use(healthRouter);
+router.use("/auth", authRouter);
 router.use("/admin", adminRouter);
 router.use("/grossistes/:grossisteId", grossistesRouter);
 router.use("/grossistes/:grossisteId/innovations", innovationsRouter);

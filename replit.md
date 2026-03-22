@@ -193,6 +193,27 @@ pnpm --filter @workspace/db run push
 3. **Konaté & Fils** — Bamako (actif)
 4. **TransLog Conakry** — Conakry (inactif)
 
+## Sécurité JWT (Implémentée)
+
+### Architecture d'authentification
+- **Boutiquier** — Login 3 étapes : Grossiste → Boutique → PIN 4 chiffres → JWT 24h
+  - 1ère connexion : le PIN est enregistré (hashé PBKDF2 + sel par boutiqueId)
+  - Connexions suivantes : vérification via `timingSafeEqual` (anti-timing-attack)
+- **Grossiste Backoffice** — Sélection grossiste → Code = 4 derniers chiffres du téléphone → JWT 8h
+- **Endpoints protégés** : `POST /commandes`, `POST /wallet` requièrent `Authorization: Bearer <token>`
+- **Signature HMAC-SHA256** des bons de commande (BC) à la création → champ `signature` en DB
+- **Idempotence wallet** : clé unique par transaction → évite les doublons en cas de retry
+
+### Fichiers de sécurité
+- `artifacts/api-server/src/lib/security.ts` — hashPin, verifyPin, signBoutiqueToken, signGrossisteToken, verifyToken, signDocument, verifyDocument, bcSignaturePayload, generateIdempotencyKey
+- `artifacts/api-server/src/middleware/requireAuth.ts` — `requireBoutiqueAuth`, `optionalBoutiqueAuth` middlewares
+- `artifacts/api-server/src/routes/auth.ts` — POST /auth/boutiquier, POST /auth/boutiquier/reset, POST /auth/grossiste, GET /auth/verify, GET /auth/verify-doc
+
+### Côté frontend
+- **Boutiquier App** : `authFetch()` dans `AuthCtx` injecte automatiquement le Bearer token
+- **Grossiste Backoffice** : `authFetch()` dans `GrossisteContext`, écran de login `Login.tsx`, bouton "Déconnexion" dans la sidebar
+- Token stocké dans `localStorage` (`boutiquier_auth.token`, `grossiste_auth.token`)
+
 ## Notes importantes
 
 - `react-native-maps` est pinné à 1.18.0 avec des fichiers platform-specific (AppMap.native.tsx / AppMap.web.tsx)
@@ -201,3 +222,4 @@ pnpm --filter @workspace/db run push
 - Les statuts de livraison valides: `"en_attente"`, `"livree"`, `"echec"`, `"litige"`
 - Le PIN est stocké dans AsyncStorage sous la clé `pin_{chauffeurId}`
 - Les photos de preuve sont stockées localement dans AsyncStorage sous `localPhotos`
+- Le code grossiste = 4 derniers chiffres du téléphone (ex: +221 77 123 4567 → code: 4567)

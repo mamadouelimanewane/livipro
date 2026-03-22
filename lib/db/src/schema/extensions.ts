@@ -12,6 +12,7 @@ export const commandesTable = pgTable("commandes", {
   statut: text("statut").notNull().default("en_attente"),
   montantTotal: numeric("montant_total", { precision: 12, scale: 2 }).notNull().default("0"),
   notes: text("notes"),
+  signature: text("signature"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 
@@ -34,6 +35,7 @@ export const walletTransactionsTable = pgTable("wallet_transactions", {
   description: text("description").notNull(),
   reference: text("reference"),
   methodePaiement: text("methode_paiement").default("especes"),
+  idempotencyKey: text("idempotency_key").unique(),
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 

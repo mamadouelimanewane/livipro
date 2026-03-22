@@ -3,7 +3,7 @@ import { Link, useLocation } from "wouter";
 import {
   LayoutDashboard, Users, Store, Package, Truck, MapPin,
   Menu, X, Building2, CreditCard, Brain, Star, BarChart3,
-  Navigation, ShoppingCart, GitMerge
+  Navigation, ShoppingCart, GitMerge, LogOut
 } from "lucide-react";
 import { useGrossiste } from "@/context/GrossisteContext";
 import { useGrossistes } from "@/hooks/use-grossistes";
@@ -40,7 +40,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [location] = useLocation();
   const { data: grossistes } = useGrossistes();
-  const { grossisteId, setGrossisteId } = useGrossiste();
+  const { grossisteId, setGrossisteId, grossisteNom, logout } = useGrossiste();
 
   const isActive = (href: string) =>
     href === "/" ? location === "/" : location.startsWith(href);
@@ -116,6 +116,26 @@ export function Layout({ children }: { children: React.ReactNode }) {
           );
         })}
       </nav>
+
+      {/* Logout button */}
+      <div className="p-4 border-t border-slate-800">
+        <div className="flex items-center gap-3 px-2 mb-3">
+          <div className="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center shrink-0">
+            <span className="text-primary font-bold text-sm">{grossisteNom?.charAt(0) || "G"}</span>
+          </div>
+          <div className="min-w-0">
+            <p className="text-white text-sm font-semibold truncate">{grossisteNom || "Grossiste"}</p>
+            <p className="text-slate-500 text-xs">Connecté</p>
+          </div>
+        </div>
+        <button
+          onClick={() => { logout(); setMobileMenuOpen(false); }}
+          className="w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-slate-400 hover:text-red-400 hover:bg-red-500/10 transition-all duration-200 text-sm font-medium"
+        >
+          <LogOut className="w-4 h-4" />
+          Déconnexion
+        </button>
+      </div>
     </>
   );
 

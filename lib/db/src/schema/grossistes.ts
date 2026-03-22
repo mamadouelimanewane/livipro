@@ -41,6 +41,7 @@ export const boutiquesTable = pgTable("boutiques", {
   limiteCredit: numeric("limite_credit", { precision: 12, scale: 2 }).notNull().default("0"),
   soldeCredit: numeric("solde_credit", { precision: 12, scale: 2 }).notNull().default("0"),
   statut: boutiqueStatutEnum("statut").notNull().default("actif"),
+  pinHash: text("pin_hash"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 

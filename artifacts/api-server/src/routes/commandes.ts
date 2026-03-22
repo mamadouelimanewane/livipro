@@ -3,6 +3,8 @@ import { db } from "@workspace/db";
 import { commandesTable, commandeItemsTable, walletTransactionsTable, preuvesLivraisonTable, geolocationsTable, messagesTable } from "@workspace/db/schema";
 import { boutiquesTable, produitsTable, chauffeursTable, livraisonsTable, tourneesTable } from "@workspace/db/schema";
 import { eq, and, desc, sql } from "drizzle-orm";
+import { signDocument, bcSignaturePayload, verifyDocument, generateIdempotencyKey } from "../lib/security";
+import { requireBoutiqueAuth } from "../middleware/requireAuth";
 
 const router: IRouter = Router({ mergeParams: true });
 
@@ -33,11 +35,21 @@ router.get("/commandes", async (req, res) => {
   }
 });
 
-router.post("/commandes", async (req, res) => {
+router.post("/commandes", requireBoutiqueAuth, async (req, res) => {
   try {
     const grossisteId = parseInt(req.params.grossisteId);
     const { boutiqueId, items, notes } = req.body;
     if (!boutiqueId || !items?.length) return res.status(400).json({ error: "boutiqueId et items requis" });
+
+    // Vérification que la boutique autentifiée correspond à la boutique dans la requête
+    if (req.boutiqueAuth && req.boutiqueAuth.boutiqueId !== parseInt(boutiqueId)) {
+      return res.status(403).json({ error: "Vous ne pouvez passer des commandes que pour votre propre boutique", code: "FORBIDDEN" });
+    }
+
+    const [boutique] = await db.select({ id: boutiquesTable.id, statut: boutiquesTable.statut, limiteCredit: boutiquesTable.limiteCredit, soldeCredit: boutiquesTable.soldeCredit })
+      .from(boutiquesTable).where(eq(boutiquesTable.id, parseInt(boutiqueId))).limit(1);
+    if (!boutique) return res.status(404).json({ error: "Boutique introuvable" });
+    if (boutique.statut === "suspendu") return res.status(403).json({ error: "Boutique suspendue", code: "BOUTIQUE_SUSPENDED" });
 
     let montantTotal = 0;
     const itemsResolved = await Promise.all(items.map(async (it: { produitId: number; quantite: number }) => {
@@ -49,12 +61,19 @@ router.post("/commandes", async (req, res) => {
     }));
 
     const [commande] = await db.insert(commandesTable).values({
-      grossisteId, boutiqueId, montantTotal: String(montantTotal), notes: notes ?? null, statut: "en_attente",
+      grossisteId, boutiqueId: parseInt(boutiqueId), montantTotal: String(montantTotal), notes: notes ?? null, statut: "en_attente",
     }).returning();
 
     await db.insert(commandeItemsTable).values(itemsResolved.map(it => ({ commandeId: commande.id, ...it })));
 
-    res.json(commande);
+    // Générer la signature HMAC du bon de commande
+    const signature = signDocument(bcSignaturePayload(commande as any));
+    const [signed] = await db.update(commandesTable)
+      .set({ signature })
+      .where(eq(commandesTable.id, commande.id))
+      .returning();
+
+    res.json({ ...signed, numeroBc: `BC-${String(signed.id).padStart(5, "0")}`, signature });
   } catch (e) {
     res.status(500).json({ error: String(e) });
   }
@@ -98,14 +117,38 @@ router.get("/wallet/:actorType/:actorId", async (req, res) => {
   }
 });
 
-router.post("/wallet/:actorType/:actorId", async (req, res) => {
+router.post("/wallet/:actorType/:actorId", requireBoutiqueAuth, async (req, res) => {
   try {
     const grossisteId = parseInt(req.params.grossisteId);
     const { actorType, actorId } = req.params;
-    const { type, montant, description, reference, methodePaiement } = req.body;
+    const { type, montant, description, reference, methodePaiement, idempotencyKey } = req.body;
+
+    // Vérification d'autorisation — le boutiquier ne peut opérer que sur son propre wallet
+    if (req.boutiqueAuth && actorType === "boutique" && req.boutiqueAuth.boutiqueId !== parseInt(actorId)) {
+      return res.status(403).json({ error: "Accès non autorisé à ce wallet", code: "FORBIDDEN" });
+    }
+
+    if (!montant || !description || !type) {
+      return res.status(400).json({ error: "montant, description et type requis" });
+    }
+    if (parseFloat(String(montant)) <= 0) {
+      return res.status(400).json({ error: "Le montant doit être positif" });
+    }
+
+    // Clé d'idempotence — auto-générée si non fournie par le client
+    const iKey = idempotencyKey || generateIdempotencyKey(actorType, parseInt(actorId), String(montant), description);
+
+    // Vérification idempotence — si la clé existe déjà, retourner la transaction existante
+    const [existing] = await db.select().from(walletTransactionsTable)
+      .where(eq(walletTransactionsTable.idempotencyKey, iKey)).limit(1);
+    if (existing) {
+      return res.json({ ...existing, idempotent: true, message: "Transaction déjà enregistrée" });
+    }
+
     const [tx] = await db.insert(walletTransactionsTable).values({
       grossisteId, actorType, actorId: parseInt(actorId), type, montant: String(montant),
       description, reference: reference ?? null, methodePaiement: methodePaiement ?? "especes",
+      idempotencyKey: iKey,
     }).returning();
     res.json(tx);
   } catch (e) {
