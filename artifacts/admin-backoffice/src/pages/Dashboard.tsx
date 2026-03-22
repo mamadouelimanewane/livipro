@@ -2,7 +2,7 @@ import { Layout } from "@/components/layout/Layout";
 import { useGetAdminStats, useListGrossistes } from "@workspace/api-client-react";
 import { formatFCFA } from "@/lib/utils";
 import {
-  Building2, Users, Store, Map, Truck, DollarSign, TrendingUp, Activity,
+  Building2, Users, Store, Map, Truck, Banknote, TrendingUp, Activity,
   AlertCircle, CheckCircle2, Clock, Award
 } from "lucide-react";
 import { motion } from "framer-motion";
@@ -57,7 +57,7 @@ export default function Dashboard() {
   }
 
   const kpis = [
-    { title: "CA Mensuel", value: formatFCFA(stats.chiffreAffairesMensuel), icon: DollarSign, color: "text-emerald-600", bg: "bg-emerald-50", border: "border-emerald-200", highlight: true },
+    { title: "CA Mensuel", value: formatFCFA(stats.chiffreAffairesMensuel), icon: Banknote, color: "text-emerald-600", bg: "bg-emerald-50", border: "border-emerald-200", highlight: true },
     { title: "Grossistes Actifs", value: stats.totalGrossistes, icon: Building2, color: "text-indigo-600", bg: "bg-indigo-50", border: "border-indigo-100" },
     { title: "Chauffeurs", value: stats.totalChauffeurs, icon: Users, color: "text-blue-600", bg: "bg-blue-50", border: "border-blue-100" },
     { title: "Boutiques Clientes", value: stats.totalBoutiques, icon: Store, color: "text-violet-600", bg: "bg-violet-50", border: "border-violet-100" },
