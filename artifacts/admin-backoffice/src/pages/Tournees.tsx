@@ -2,7 +2,7 @@ import { Layout } from "@/components/layout/Layout";
 import { Badge } from "@/components/ui/Badge";
 import { formatFCFA, formatDate } from "@/lib/utils";
 import { useListAllTournees } from "@workspace/api-client-react";
-import { Map, MapPin, Search } from "lucide-react";
+import { Map, MapPin, Search, Users } from "lucide-react";
 import { useState } from "react";
 
 export default function Tournees() {
@@ -32,7 +32,8 @@ export default function Tournees() {
         </div>
       </div>
 
-      <div className="bg-surface rounded-2xl border border-border shadow-sm overflow-hidden">
+      {/* Desktop table */}
+      <div className="hidden md:block bg-surface rounded-2xl border border-border shadow-sm overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-left text-sm whitespace-nowrap">
             <thead className="bg-slate-50 border-b border-border text-slate-500 font-medium">
@@ -53,8 +54,7 @@ export default function Tournees() {
                 </tr>
               ) : filteredData?.length === 0 ? (
                 <tr>
-                  <td colSpan={7} className="px-6 py-12 text-center text-slate-500 flex flex-col items-center">
-                    <Map className="w-12 h-12 mb-3 text-slate-300" />
+                  <td colSpan={7} className="px-6 py-12 text-center text-slate-500">
                     Aucune tournée trouvée.
                   </td>
                 </tr>
@@ -97,6 +97,47 @@ export default function Tournees() {
             </tbody>
           </table>
         </div>
+      </div>
+
+      {/* Mobile cards */}
+      <div className="md:hidden space-y-3">
+        {isLoading ? (
+          <div className="bg-surface rounded-2xl border border-border p-6 text-center text-slate-400">Chargement des tournées...</div>
+        ) : filteredData?.length === 0 ? (
+          <div className="bg-surface rounded-2xl border border-border p-10 text-center flex flex-col items-center gap-3">
+            <Map className="w-12 h-12 text-slate-300" />
+            <p className="text-slate-500">Aucune tournée trouvée.</p>
+          </div>
+        ) : (
+          filteredData?.map((tournee) => (
+            <div key={tournee.id} className="bg-surface rounded-2xl border border-border shadow-sm p-4">
+              <div className="flex items-start justify-between mb-3">
+                <div>
+                  <span className="font-mono font-medium text-slate-600 bg-slate-100 px-2 py-0.5 rounded text-xs">
+                    TRN-{tournee.id.toString().padStart(4, '0')}
+                  </span>
+                  <div className="font-semibold text-navy mt-1">{tournee.grossisteNom}</div>
+                  <div className="text-xs text-slate-500">{formatDate(tournee.date)}</div>
+                </div>
+                <Badge variant={tournee.statut}>{tournee.statut}</Badge>
+              </div>
+              <div className="flex items-center gap-2 mb-3">
+                <div className="w-7 h-7 rounded-full bg-blue-100 text-blue-700 flex items-center justify-center text-xs font-bold flex-shrink-0">
+                  {tournee.chauffeurNom.charAt(0)}
+                </div>
+                <span className="text-sm font-medium text-slate-700">{tournee.chauffeurNom}</span>
+              </div>
+              <div className="flex items-center justify-between border-t border-border pt-3">
+                <div className="flex items-center gap-1.5 bg-slate-100 px-2.5 py-1 rounded-full text-slate-700 text-sm font-medium">
+                  <MapPin className="w-3.5 h-3.5 text-primary" /> {tournee.nombreArrets} arrêts
+                </div>
+                <span className="font-bold text-emerald-600 bg-emerald-50 px-3 py-1 rounded-lg text-sm">
+                  {formatFCFA(tournee.totalLivraisons)}
+                </span>
+              </div>
+            </div>
+          ))
+        )}
       </div>
     </Layout>
   );

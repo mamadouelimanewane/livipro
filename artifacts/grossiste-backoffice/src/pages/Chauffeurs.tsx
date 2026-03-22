@@ -3,7 +3,7 @@ import { useChauffeurs, useChauffeurMutations } from "@/hooks/use-chauffeurs";
 import { PageHeader } from "@/components/PageHeader";
 import { StatusBadge } from "@/components/StatusBadge";
 import { Modal } from "@/components/Modal";
-import { Plus, Edit2, Trash2, Users } from "lucide-react";
+import { Plus, Edit2, Trash2, Users, Phone, CreditCard } from "lucide-react";
 import { toast } from "sonner";
 import type { Chauffeur } from "@workspace/api-client-react";
 
@@ -34,6 +34,14 @@ export default function Chauffeurs() {
     }
   };
 
+  const EmptyState = () => (
+    <div className="flex flex-col items-center justify-center p-16 text-center">
+      <Users className="w-16 h-16 text-slate-200 mb-4" />
+      <h3 className="text-xl font-bold text-foreground">Aucun chauffeur</h3>
+      <p className="text-muted-foreground mt-2">Vous n'avez pas encore ajouté de chauffeur à votre flotte.</p>
+    </div>
+  );
+
   return (
     <div>
       <PageHeader 
@@ -46,49 +54,76 @@ export default function Chauffeurs() {
         }
       />
 
-      <div className="bg-card border border-border/50 rounded-2xl shadow-sm overflow-hidden">
-        {isLoading ? (
-          <div className="p-8 text-center text-muted-foreground animate-pulse">Chargement des chauffeurs...</div>
-        ) : chauffeurs?.length === 0 ? (
-          <div className="flex flex-col items-center justify-center p-16 text-center">
-            <Users className="w-16 h-16 text-slate-200 mb-4" />
-            <h3 className="text-xl font-bold text-foreground">Aucun chauffeur</h3>
-            <p className="text-muted-foreground mt-2">Vous n'avez pas encore ajouté de chauffeur à votre flotte.</p>
-          </div>
-        ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full text-left text-sm whitespace-nowrap">
-              <thead className="bg-slate-50/50 border-b border-slate-100 text-slate-500 uppercase tracking-wider text-xs font-bold">
-                <tr>
-                  <th className="px-6 py-4">Nom complet</th>
-                  <th className="px-6 py-4">Téléphone</th>
-                  <th className="px-6 py-4">Permis</th>
-                  <th className="px-6 py-4">Statut</th>
-                  <th className="px-6 py-4 text-right">Actions</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-slate-100">
-                {chauffeurs?.map(c => (
-                  <tr key={c.id} className="hover:bg-slate-50/50 transition-colors">
-                    <td className="px-6 py-4 font-bold text-foreground">{c.prenom} {c.nom}</td>
-                    <td className="px-6 py-4 text-muted-foreground">{c.telephone}</td>
-                    <td className="px-6 py-4 text-muted-foreground">{c.permis}</td>
-                    <td className="px-6 py-4"><StatusBadge status={c.statut} /></td>
-                    <td className="px-6 py-4 flex items-center justify-end gap-2">
-                      <button onClick={() => setEditingItem(c)} className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors">
-                        <Edit2 className="w-4 h-4" />
-                      </button>
-                      <button onClick={() => setDeleteId(c.id)} className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors">
-                        <Trash2 className="w-4 h-4" />
-                      </button>
-                    </td>
+      {isLoading ? (
+        <div className="bg-card border border-border/50 rounded-2xl shadow-sm p-8 text-center text-muted-foreground animate-pulse">Chargement des chauffeurs...</div>
+      ) : chauffeurs?.length === 0 ? (
+        <div className="bg-card border border-border/50 rounded-2xl shadow-sm overflow-hidden"><EmptyState /></div>
+      ) : (
+        <>
+          {/* Desktop table */}
+          <div className="hidden md:block bg-card border border-border/50 rounded-2xl shadow-sm overflow-hidden">
+            <div className="overflow-x-auto">
+              <table className="w-full text-left text-sm whitespace-nowrap">
+                <thead className="bg-slate-50/50 border-b border-slate-100 text-slate-500 uppercase tracking-wider text-xs font-bold">
+                  <tr>
+                    <th className="px-6 py-4">Nom complet</th>
+                    <th className="px-6 py-4">Téléphone</th>
+                    <th className="px-6 py-4">Permis</th>
+                    <th className="px-6 py-4">Statut</th>
+                    <th className="px-6 py-4 text-right">Actions</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
+                </thead>
+                <tbody className="divide-y divide-slate-100">
+                  {chauffeurs?.map(c => (
+                    <tr key={c.id} className="hover:bg-slate-50/50 transition-colors">
+                      <td className="px-6 py-4 font-bold text-foreground">{c.prenom} {c.nom}</td>
+                      <td className="px-6 py-4 text-muted-foreground">{c.telephone}</td>
+                      <td className="px-6 py-4 text-muted-foreground">{c.permis}</td>
+                      <td className="px-6 py-4"><StatusBadge status={c.statut} /></td>
+                      <td className="px-6 py-4 flex items-center justify-end gap-2">
+                        <button onClick={() => setEditingItem(c)} className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors">
+                          <Edit2 className="w-4 h-4" />
+                        </button>
+                        <button onClick={() => setDeleteId(c.id)} className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors">
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           </div>
-        )}
-      </div>
+
+          {/* Mobile cards */}
+          <div className="md:hidden space-y-3">
+            {chauffeurs?.map(c => (
+              <div key={c.id} className="bg-card border border-border/50 rounded-2xl shadow-sm p-4">
+                <div className="flex items-start justify-between mb-3">
+                  <div className="font-bold text-foreground text-base">{c.prenom} {c.nom}</div>
+                  <StatusBadge status={c.statut} />
+                </div>
+                <div className="space-y-1.5 text-sm mb-3">
+                  <div className="flex items-center gap-2 text-muted-foreground">
+                    <Phone className="w-3.5 h-3.5 text-slate-400" /> {c.telephone}
+                  </div>
+                  <div className="flex items-center gap-2 text-muted-foreground text-xs">
+                    <CreditCard className="w-3.5 h-3.5 text-slate-400" /> Permis: {c.permis}
+                  </div>
+                </div>
+                <div className="flex items-center justify-end gap-2 border-t border-slate-100 pt-3">
+                  <button onClick={() => setEditingItem(c)} className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors">
+                    <Edit2 className="w-4 h-4" />
+                  </button>
+                  <button onClick={() => setDeleteId(c.id)} className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors">
+                    <Trash2 className="w-4 h-4" />
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+        </>
+      )}
 
       {/* Delete Confirmation Modal */}
       <Modal isOpen={!!deleteId} onClose={() => setDeleteId(null)} title="Confirmer la suppression">

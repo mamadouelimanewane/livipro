@@ -32,7 +32,8 @@ export default function Livraisons() {
         </div>
       </div>
 
-      <div className="bg-surface rounded-2xl border border-border shadow-sm overflow-hidden">
+      {/* Desktop table */}
+      <div className="hidden md:block bg-surface rounded-2xl border border-border shadow-sm overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-left text-sm whitespace-nowrap">
             <thead className="bg-slate-50 border-b border-border text-slate-500 font-medium">
@@ -52,8 +53,7 @@ export default function Livraisons() {
                 </tr>
               ) : filteredData?.length === 0 ? (
                 <tr>
-                  <td colSpan={6} className="px-6 py-12 text-center text-slate-500 flex flex-col items-center">
-                    <PackageCheck className="w-12 h-12 mb-3 text-slate-300" />
+                  <td colSpan={6} className="px-6 py-12 text-center text-slate-500">
                     Aucune livraison trouvée.
                   </td>
                 </tr>
@@ -93,6 +93,42 @@ export default function Livraisons() {
             </tbody>
           </table>
         </div>
+      </div>
+
+      {/* Mobile cards */}
+      <div className="md:hidden space-y-3">
+        {isLoading ? (
+          <div className="bg-surface rounded-2xl border border-border p-6 text-center text-slate-400">Chargement des livraisons...</div>
+        ) : filteredData?.length === 0 ? (
+          <div className="bg-surface rounded-2xl border border-border p-10 text-center flex flex-col items-center gap-3">
+            <PackageCheck className="w-12 h-12 text-slate-300" />
+            <p className="text-slate-500">Aucune livraison trouvée.</p>
+          </div>
+        ) : (
+          filteredData?.map((livraison) => (
+            <div key={livraison.id} className="bg-surface rounded-2xl border border-border shadow-sm p-4">
+              <div className="flex items-start justify-between mb-2">
+                <div>
+                  <span className="font-mono font-medium text-slate-600 bg-slate-100 px-2 py-0.5 rounded text-xs">
+                    LIV-{livraison.id.toString().padStart(5, '0')}
+                  </span>
+                  <div className="text-xs text-slate-400 mt-0.5">{formatDateTime(livraison.createdAt)}</div>
+                </div>
+                <Badge variant={livraison.statut}>{livraison.statut}</Badge>
+              </div>
+              <div className="font-semibold text-indigo-900 bg-indigo-50 px-3 py-1.5 rounded-lg inline-block text-sm mb-2">
+                🏪 {livraison.boutiqueNom}
+              </div>
+              <div className="text-xs text-slate-500 mb-3">Via {livraison.grossisteNom}</div>
+              <div className="flex items-center justify-between border-t border-border pt-3">
+                <Badge variant={livraison.methodePaiement}>{livraison.methodePaiement}</Badge>
+                <span className="font-bold text-navy text-base">
+                  {formatFCFA(livraison.montantTotal)}
+                </span>
+              </div>
+            </div>
+          ))
+        )}
       </div>
     </Layout>
   );

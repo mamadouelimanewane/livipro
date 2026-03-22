@@ -1,5 +1,5 @@
 import { useGrossiste } from "@/context/GrossisteContext";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell } from "recharts";
 import { TrendingUp, TrendingDown, AlertTriangle, CheckCircle, Clock, CreditCard, Wallet, ArrowUpRight, RefreshCw } from "lucide-react";
 import { useState } from "react";
@@ -68,20 +68,20 @@ export default function CreditFinance() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
+      <div className="flex items-start justify-between gap-3">
         <div>
           <h1 className="text-2xl font-display font-bold text-slate-900">Finance & Crédit</h1>
-          <p className="text-slate-500 mt-1">Scoring automatique, trésorerie prévisionnelle et programme de fidélité</p>
+          <p className="text-slate-500 mt-1 text-sm">Scoring automatique, trésorerie prévisionnelle et programme de fidélité</p>
         </div>
-        <div className="flex items-center gap-2 bg-primary/10 text-primary px-3 py-2 rounded-xl text-sm font-semibold">
-          <RefreshCw className="w-4 h-4" /> Calculé en temps réel
+        <div className="flex items-center gap-2 bg-primary/10 text-primary px-3 py-2 rounded-xl text-xs font-semibold flex-shrink-0">
+          <RefreshCw className="w-3.5 h-3.5" /> <span className="hidden sm:inline">Calculé en </span>temps réel
         </div>
       </div>
 
-      <div className="flex gap-2">
+      <div className="flex gap-2 overflow-x-auto pb-1">
         {tabs.map(t => (
           <button key={t.id} onClick={() => setTab(t.id)}
-            className={cn("flex items-center gap-2 px-4 py-2.5 rounded-xl font-semibold text-sm transition-all",
+            className={cn("flex items-center gap-2 px-4 py-2.5 rounded-xl font-semibold text-sm transition-all whitespace-nowrap flex-shrink-0",
               tab === t.id ? "bg-primary text-white shadow-lg shadow-primary/20" : "bg-white text-slate-600 border border-border hover:border-primary/30")}>
             <t.icon className="w-4 h-4" />{t.label}
           </button>
@@ -107,48 +107,96 @@ export default function CreditFinance() {
           {loadingCredit ? (
             <div className="flex justify-center py-12"><div className="w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin" /></div>
           ) : (
-            <div className="bg-white rounded-2xl border border-border overflow-hidden">
-              <div className="overflow-x-auto">
-                <table className="w-full">
-                  <thead className="bg-slate-50 border-b border-border">
-                    <tr>
-                      {["Boutique", "Score", "Risque", "Limite Actuelle", "Limite Recommandée", "Solde Dû", "CA Total", "Taux Réussite", "Dernière Livraison"].map(h => (
-                        <th key={h} className="px-4 py-3 text-left text-xs font-bold text-slate-500 uppercase tracking-wider">{h}</th>
-                      ))}
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-slate-100">
-                    {credits.map((c: any) => (
-                      <tr key={c.boutiqueId} className="hover:bg-slate-50 transition-colors">
-                        <td className="px-4 py-3">
-                          <div className="font-semibold text-slate-900 text-sm">{c.boutiqueNom}</div>
-                          <div className="text-xs text-slate-400">{c.proprietaire}</div>
-                        </td>
-                        <td className="px-4 py-3"><ScoreBadge score={c.score} risque={c.risque} /></td>
-                        <td className="px-4 py-3 capitalize text-sm font-medium">{c.risque}</td>
-                        <td className="px-4 py-3 text-sm">{fmt(c.limiteActuelle)}</td>
-                        <td className="px-4 py-3">
-                          <div className="flex items-center gap-1 text-sm font-semibold text-primary">{fmt(c.limiteRecommandee)}
-                            {c.limiteRecommandee > c.limiteActuelle ? <TrendingUp className="w-3 h-3 text-green-500" /> : <TrendingDown className="w-3 h-3 text-red-500" />}
-                          </div>
-                        </td>
-                        <td className="px-4 py-3 text-sm font-semibold text-orange-600">{fmt(c.soldeCredit)}</td>
-                        <td className="px-4 py-3 text-sm">{fmt(c.caTotal)}</td>
-                        <td className="px-4 py-3">
-                          <div className="flex items-center gap-1">
-                            <div className="w-16 h-1.5 bg-slate-200 rounded-full overflow-hidden">
-                              <div className="h-full rounded-full" style={{ width: `${c.tauxReussite}%`, background: c.tauxReussite >= 75 ? "#22c55e" : c.tauxReussite >= 50 ? "#f97316" : "#ef4444" }} />
-                            </div>
-                            <span className="text-xs font-semibold text-slate-700">{c.tauxReussite}%</span>
-                          </div>
-                        </td>
-                        <td className="px-4 py-3 text-xs text-slate-400">{c.derniereLivraison ? new Date(c.derniereLivraison).toLocaleDateString("fr-FR") : "—"}</td>
+            <>
+              {/* Desktop table */}
+              <div className="hidden md:block bg-white rounded-2xl border border-border overflow-hidden">
+                <div className="overflow-x-auto">
+                  <table className="w-full">
+                    <thead className="bg-slate-50 border-b border-border">
+                      <tr>
+                        {["Boutique", "Score", "Risque", "Limite Actuelle", "Limite Recommandée", "Solde Dû", "CA Total", "Taux Réussite", "Dernière Livraison"].map(h => (
+                          <th key={h} className="px-4 py-3 text-left text-xs font-bold text-slate-500 uppercase tracking-wider">{h}</th>
+                        ))}
                       </tr>
-                    ))}
-                  </tbody>
-                </table>
+                    </thead>
+                    <tbody className="divide-y divide-slate-100">
+                      {credits.map((c: any) => (
+                        <tr key={c.boutiqueId} className="hover:bg-slate-50 transition-colors">
+                          <td className="px-4 py-3">
+                            <div className="font-semibold text-slate-900 text-sm">{c.boutiqueNom}</div>
+                            <div className="text-xs text-slate-400">{c.proprietaire}</div>
+                          </td>
+                          <td className="px-4 py-3"><ScoreBadge score={c.score} risque={c.risque} /></td>
+                          <td className="px-4 py-3 capitalize text-sm font-medium">{c.risque}</td>
+                          <td className="px-4 py-3 text-sm">{fmt(c.limiteActuelle)}</td>
+                          <td className="px-4 py-3">
+                            <div className="flex items-center gap-1 text-sm font-semibold text-primary">{fmt(c.limiteRecommandee)}
+                              {c.limiteRecommandee > c.limiteActuelle ? <TrendingUp className="w-3 h-3 text-green-500" /> : <TrendingDown className="w-3 h-3 text-red-500" />}
+                            </div>
+                          </td>
+                          <td className="px-4 py-3 text-sm font-semibold text-orange-600">{fmt(c.soldeCredit)}</td>
+                          <td className="px-4 py-3 text-sm">{fmt(c.caTotal)}</td>
+                          <td className="px-4 py-3">
+                            <div className="flex items-center gap-1">
+                              <div className="w-16 h-1.5 bg-slate-200 rounded-full overflow-hidden">
+                                <div className="h-full rounded-full" style={{ width: `${c.tauxReussite}%`, background: c.tauxReussite >= 75 ? "#22c55e" : c.tauxReussite >= 50 ? "#f97316" : "#ef4444" }} />
+                              </div>
+                              <span className="text-xs font-semibold text-slate-700">{c.tauxReussite}%</span>
+                            </div>
+                          </td>
+                          <td className="px-4 py-3 text-xs text-slate-400">{c.derniereLivraison ? new Date(c.derniereLivraison).toLocaleDateString("fr-FR") : "—"}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
               </div>
-            </div>
+
+              {/* Mobile cards */}
+              <div className="md:hidden space-y-3">
+                {credits.map((c: any) => (
+                  <div key={c.boutiqueId} className="bg-white rounded-2xl border border-border p-4">
+                    <div className="flex items-start justify-between mb-3">
+                      <div>
+                        <div className="font-semibold text-slate-900">{c.boutiqueNom}</div>
+                        <div className="text-xs text-slate-400">{c.proprietaire}</div>
+                      </div>
+                      <ScoreBadge score={c.score} risque={c.risque} />
+                    </div>
+                    <div className="grid grid-cols-2 gap-3 text-sm mb-3">
+                      <div>
+                        <div className="text-xs text-slate-400 mb-0.5">Limite actuelle</div>
+                        <div className="font-medium text-slate-700">{fmt(c.limiteActuelle)}</div>
+                      </div>
+                      <div>
+                        <div className="text-xs text-slate-400 mb-0.5">Limite recommandée</div>
+                        <div className="flex items-center gap-1 font-semibold text-primary">
+                          {fmt(c.limiteRecommandee)}
+                          {c.limiteRecommandee > c.limiteActuelle ? <TrendingUp className="w-3 h-3 text-green-500" /> : <TrendingDown className="w-3 h-3 text-red-500" />}
+                        </div>
+                      </div>
+                      <div>
+                        <div className="text-xs text-slate-400 mb-0.5">Solde dû</div>
+                        <div className="font-semibold text-orange-600">{fmt(c.soldeCredit)}</div>
+                      </div>
+                      <div>
+                        <div className="text-xs text-slate-400 mb-0.5">CA Total</div>
+                        <div className="font-medium text-slate-700">{fmt(c.caTotal)}</div>
+                      </div>
+                    </div>
+                    <div className="flex items-center justify-between border-t border-slate-100 pt-3">
+                      <div className="flex items-center gap-2">
+                        <div className="w-20 h-1.5 bg-slate-200 rounded-full overflow-hidden">
+                          <div className="h-full rounded-full" style={{ width: `${c.tauxReussite}%`, background: c.tauxReussite >= 75 ? "#22c55e" : c.tauxReussite >= 50 ? "#f97316" : "#ef4444" }} />
+                        </div>
+                        <span className="text-xs font-semibold text-slate-700">{c.tauxReussite}%</span>
+                      </div>
+                      <span className="text-xs text-slate-400">{c.derniereLivraison ? new Date(c.derniereLivraison).toLocaleDateString("fr-FR") : "—"}</span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </>
           )}
         </div>
       )}
@@ -196,7 +244,7 @@ export default function CreditFinance() {
                     </Bar>
                   </BarChart>
                 </ResponsiveContainer>
-                <div className="flex items-center gap-4 mt-2 text-xs text-slate-400">
+                <div className="flex flex-wrap items-center gap-4 mt-2 text-xs text-slate-400">
                   <span className="flex items-center gap-1"><span className="w-3 h-3 rounded bg-green-500 inline-block" /> Encaissé (espèces + mobile)</span>
                   <span className="flex items-center gap-1"><span className="w-3 h-3 rounded bg-orange-400 inline-block" /> Crédit différé</span>
                   <span className="flex items-center gap-1"><span className="w-3 h-3 rounded bg-green-200 inline-block" /> Prévision</span>
@@ -253,15 +301,15 @@ export default function CreditFinance() {
               <div className="divide-y divide-slate-100">
                 {fidelite.map((f: any, i: number) => (
                   <div key={f.boutiqueId} className="flex items-center gap-4 p-4 hover:bg-slate-50 transition-colors">
-                    <div className="text-lg font-bold text-slate-300 w-6 text-center">#{i + 1}</div>
-                    <div className="flex-1">
+                    <div className="text-lg font-bold text-slate-300 w-6 text-center flex-shrink-0">#{i + 1}</div>
+                    <div className="flex-1 min-w-0">
                       <div className="font-semibold text-slate-900">{f.boutiqueNom}</div>
-                      <div className="text-xs text-slate-400">{f.proprietaire} · {f.totalLivraisons} livraisons · CA {fmt(f.caTotal)}</div>
+                      <div className="text-xs text-slate-400 truncate">{f.proprietaire} · {f.totalLivraisons} livraisons · CA {fmt(f.caTotal)}</div>
                       {f.prochainNiveau && (
                         <div className="mt-1.5">
                           <div className="flex items-center justify-between text-xs text-slate-400 mb-0.5">
                             <span>{f.points} pts</span>
-                            <span>Prochain niveau : {f.prochainNiveau} pts</span>
+                            <span>Prochain : {f.prochainNiveau} pts</span>
                           </div>
                           <div className="w-full h-1.5 bg-slate-200 rounded-full overflow-hidden">
                             <div className="h-full bg-primary rounded-full transition-all" style={{ width: `${Math.min(100, (f.points / f.prochainNiveau) * 100)}%` }} />
@@ -269,9 +317,9 @@ export default function CreditFinance() {
                         </div>
                       )}
                     </div>
-                    <div className="text-right">
+                    <div className="text-right flex-shrink-0">
                       <NiveauBadge niveau={f.niveau} />
-                      <div className="text-xs text-slate-400 mt-1">{f.remisePct > 0 ? `−${f.remisePct}% remise active` : "Pas de remise"}</div>
+                      <div className="text-xs text-slate-400 mt-1">{f.remisePct > 0 ? `−${f.remisePct}% remise` : "Pas de remise"}</div>
                     </div>
                   </div>
                 ))}

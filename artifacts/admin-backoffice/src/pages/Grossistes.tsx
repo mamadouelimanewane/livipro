@@ -81,7 +81,8 @@ export default function Grossistes() {
         </button>
       </div>
 
-      <div className="bg-surface rounded-2xl border border-border shadow-sm overflow-hidden">
+      {/* Desktop table */}
+      <div className="hidden md:block bg-surface rounded-2xl border border-border shadow-sm overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-left text-sm whitespace-nowrap">
             <thead className="bg-slate-50 border-b border-border text-slate-500 font-medium">
@@ -101,8 +102,7 @@ export default function Grossistes() {
                 </tr>
               ) : filteredData?.length === 0 ? (
                 <tr>
-                  <td colSpan={6} className="px-6 py-12 text-center text-slate-500 flex flex-col items-center">
-                    <Building2 className="w-12 h-12 mb-3 text-slate-300" />
+                  <td colSpan={6} className="px-6 py-12 text-center text-slate-500">
                     Aucun grossiste trouvé.
                   </td>
                 </tr>
@@ -160,6 +160,58 @@ export default function Grossistes() {
         </div>
       </div>
 
+      {/* Mobile cards */}
+      <div className="md:hidden space-y-3">
+        {isLoading ? (
+          <div className="bg-surface rounded-2xl border border-border p-6 text-center text-slate-400">Chargement des grossistes...</div>
+        ) : filteredData?.length === 0 ? (
+          <div className="bg-surface rounded-2xl border border-border p-10 text-center flex flex-col items-center gap-3">
+            <Building2 className="w-12 h-12 text-slate-300" />
+            <p className="text-slate-500">Aucun grossiste trouvé.</p>
+          </div>
+        ) : (
+          filteredData?.map((grossiste) => (
+            <div key={grossiste.id} className="bg-surface rounded-2xl border border-border shadow-sm p-4">
+              <div className="flex items-start justify-between mb-3">
+                <div>
+                  <div className="font-bold text-navy text-base">{grossiste.nom}</div>
+                  <div className="flex items-center gap-1 text-slate-500 text-xs mt-0.5">
+                    <MapPin className="w-3 h-3 text-primary" /> {grossiste.ville}
+                  </div>
+                </div>
+                <Badge variant={grossiste.statut}>{grossiste.statut}</Badge>
+              </div>
+              <div className="space-y-1.5 text-sm mb-3">
+                <div className="flex items-center gap-2 text-slate-600"><Phone className="w-3.5 h-3.5 text-slate-400" /> {grossiste.telephone}</div>
+                <div className="flex items-center gap-2 text-slate-500 text-xs"><Mail className="w-3.5 h-3.5 text-slate-400" /> {grossiste.email}</div>
+                <div className="text-slate-400 text-xs truncate">{grossiste.adresse}</div>
+              </div>
+              <div className="flex items-center justify-between border-t border-border pt-3">
+                <span className="text-xs text-slate-400">Inscrit le {formatDate(grossiste.createdAt)}</span>
+                <div className="flex items-center gap-2">
+                  <button 
+                    onClick={() => setEditingGrossiste(grossiste)}
+                    className="p-2 text-slate-400 hover:text-primary hover:bg-orange-50 rounded-lg transition-colors"
+                  >
+                    <Edit2 className="w-4 h-4" />
+                  </button>
+                  <button 
+                    onClick={() => {
+                      if(confirm("Êtes-vous sûr de vouloir supprimer ce grossiste ?")) {
+                        deleteMutation.mutate({ id: grossiste.id });
+                      }
+                    }}
+                    className="p-2 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-colors"
+                  >
+                    <Trash2 className="w-4 h-4" />
+                  </button>
+                </div>
+              </div>
+            </div>
+          ))
+        )}
+      </div>
+
       {/* CREATE MODAL */}
       <Modal 
         isOpen={isCreateModalOpen} 
@@ -191,7 +243,6 @@ export default function Grossistes() {
   );
 }
 
-// Simple uncontrolled form component for Grossiste
 function GrossisteForm({ initialData, onSubmit, isPending, isEdit = false }: any) {
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
