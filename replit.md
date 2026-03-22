@@ -145,6 +145,46 @@ pnpm --filter @workspace/db run push
 # npm install -g eas-cli && eas login && eas build -p android --profile preview
 ```
 
+## Fonctionnalités Premium (nouvelles)
+
+### App Boutiquier PWA (`/boutiquier/`)
+- **Login 3 étapes** — Distributeur → Boutique → PIN 4 chiffres
+- **5 onglets** — Accueil | Commander | Livraisons | Wallet | Profil
+- **Catalogue produits** — Grille + recherche + filtres par catégorie + panier avec badge
+- **Commande en ligne** — Sélection produits, quantités, notes → envoi au grossiste
+- **Suivi livraison (Leaflet)** — Carte Dakar avec position livreur en temps réel + étapes
+- **Wallet** — Solde, historique transactions, enregistrement paiement (Espèces/Wave/Crédit)
+- **Chat** — Messagerie bidirectionnelle avec le grossiste (polling 5s)
+- **Programme fidélité** — Niveaux Bronze/Argent/Or/Platine avec avantages détaillés
+- **Score crédit** — Barre de progression + limite de crédit sur le profil
+
+### Backoffice Grossiste (`/grossiste/`)
+- **Carte Live** — Leaflet map Dakar avec positions GPS simulées des chauffeurs, statuts, boutiques
+- **Commandes** — Gestion des commandes reçues des boutiques (Confirmer → Préparer → Livrer)
+
+### App Livreur Expo
+- **Wallet** — Solde à remettre, enregistrement collectes, historique transactions
+- **4 onglets** — Tournée | Wallet | Historique | Mes Stats
+
+## Nouvelles Tables DB
+
+- **commandes** — Commandes passées par les boutiques (en_attente/confirmée/en_preparation/livree/annulee)
+- **commande_items** — Lignes de commandes (produit × quantite × prix)
+- **wallet_transactions** — Transactions financières (credit/debit, especes/mobile_money/credit)
+- **messages** — Chat bidirectionnel boutique ↔ grossiste ↔ chauffeur
+- **preuves_livraison** — Photos et signatures de preuve (dataUrl base64)
+- **geolocations** — Positions GPS des chauffeurs horodatées
+
+## Nouveaux Endpoints API (Premium)
+
+- `GET/POST /api/grossistes/:id/commandes` — CRUD commandes boutiquiers
+- `PATCH /api/grossistes/:id/commandes/:commandeId/statut` — Mise à jour statut commande
+- `GET/POST /api/grossistes/:id/wallet/:actorType/:actorId` — Wallet (boutique/chauffeur)
+- `GET/POST /api/grossistes/:id/messages` — Chat messages
+- `GET/POST /api/grossistes/:id/geo` — Géolocalisation chauffeurs
+- `GET/POST /api/grossistes/:id/livraisons/:livraisonId/preuves` — Preuves de livraison
+- `GET /api/grossistes/:id/boutiques/:boutiqueId/commandes` — Commandes d'une boutique
+
 ## Données de démo
 
 4 grossistes pré-chargés :

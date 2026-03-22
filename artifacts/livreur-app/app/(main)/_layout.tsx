@@ -51,6 +51,15 @@ export default function MainTabLayout() {
         }}
       />
       <Tabs.Screen
+        name="wallet"
+        options={{
+          title: "Wallet",
+          tabBarIcon: ({ color, size }) => (
+            <Feather name="credit-card" size={22} color={color} />
+          ),
+        }}
+      />
+      <Tabs.Screen
         name="historique"
         options={{
           title: "Historique",

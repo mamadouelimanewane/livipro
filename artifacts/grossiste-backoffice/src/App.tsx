@@ -16,6 +16,8 @@ import CreditFinance from "@/pages/CreditFinance";
 import Intelligence from "@/pages/Intelligence";
 import Notation from "@/pages/Notation";
 import Rapports from "@/pages/Rapports";
+import Carte from "@/pages/Carte";
+import Commandes from "@/pages/Commandes";
 
 const queryClient = new QueryClient();
 
@@ -38,6 +40,8 @@ function App() {
               <Route path="/intelligence" component={Intelligence} />
               <Route path="/notation" component={Notation} />
               <Route path="/rapports" component={Rapports} />
+              <Route path="/carte" component={Carte} />
+              <Route path="/commandes" component={Commandes} />
               <Route>
                 <div className="flex flex-col items-center justify-center py-24 text-center">
                   <h2 className="text-4xl font-display font-bold text-slate-800 mb-2">404</h2>

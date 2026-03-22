@@ -2,7 +2,8 @@ import { useState } from "react";
 import { Link, useLocation } from "wouter";
 import {
   LayoutDashboard, Users, Store, Package, Truck, MapPin,
-  Menu, X, Building2, CreditCard, Brain, Star, BarChart3
+  Menu, X, Building2, CreditCard, Brain, Star, BarChart3,
+  Navigation, ShoppingCart
 } from "lucide-react";
 import { useGrossiste } from "@/context/GrossisteContext";
 import { useGrossistes } from "@/hooks/use-grossistes";
@@ -15,6 +16,8 @@ const navItems = [
   { href: "/produits", label: "Produits", icon: Package },
   { href: "/tournees", label: "Tournées", icon: Truck },
   { href: "/livraisons", label: "Livraisons", icon: MapPin },
+  { href: "/commandes", label: "Commandes", icon: ShoppingCart },
+  { href: "/carte", label: "Carte Live", icon: Navigation },
   { href: "/rapports", label: "Rapports", icon: BarChart3 },
 ];
 
@@ -27,9 +30,9 @@ const innovationItems = [
 const bottomNavItems = [
   { href: "/", label: "Accueil", icon: LayoutDashboard },
   { href: "/tournees", label: "Tournées", icon: Truck },
-  { href: "/livraisons", label: "Livraisons", icon: MapPin },
+  { href: "/commandes", label: "Commandes", icon: ShoppingCart },
+  { href: "/carte", label: "Carte", icon: Navigation },
   { href: "/rapports", label: "Rapports", icon: BarChart3 },
-  { href: "/boutiques", label: "Boutiques", icon: Store },
 ];
 
 export function Layout({ children }: { children: React.ReactNode }) {
