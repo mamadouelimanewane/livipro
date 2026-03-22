@@ -6,22 +6,26 @@ import { useBoutiques } from "@/hooks/use-boutiques";
 import { PageHeader } from "@/components/PageHeader";
 import { StatusBadge } from "@/components/StatusBadge";
 import { Modal } from "@/components/Modal";
-import { Plus, Truck, ArrowRight, Zap, MapPin, X, Info } from "lucide-react";
+import { Plus, Truck, ArrowRight, Zap, MapPin, X, Info, LayoutGrid, List, SlidersHorizontal } from "lucide-react";
 import { toast } from "sonner";
 import { formatDate, formatFCFA } from "@/lib/utils";
 
 const ZONES: Record<string, { zone: string; order: number }> = {};
 const ZONE_NAMES = ["Plateau", "Medina", "Parcelles", "Pikine", "Guediawaye", "Rufisque", "Thiès"];
-
 function getZone(id: number) {
-  if (!ZONES[id]) {
-    ZONES[id] = { zone: ZONE_NAMES[id % ZONE_NAMES.length], order: id % ZONE_NAMES.length };
-  }
+  if (!ZONES[id]) ZONES[id] = { zone: ZONE_NAMES[id % ZONE_NAMES.length], order: id % ZONE_NAMES.length };
   return ZONES[id];
 }
 
 interface Boutique { id: number; nom: string; adresse: string; proprietaire?: string; telephone?: string; }
 interface SelectedBoutique extends Boutique { order: number; }
+
+const KANBAN_COLS = [
+  { id: "planifiee", label: "Planifiées", color: "border-blue-400 bg-blue-50", header: "bg-blue-100 text-blue-700", dot: "bg-blue-400" },
+  { id: "en_cours", label: "En cours", color: "border-amber-400 bg-amber-50", header: "bg-amber-100 text-amber-700", dot: "bg-amber-400" },
+  { id: "terminee", label: "Terminées", color: "border-emerald-400 bg-emerald-50", header: "bg-emerald-100 text-emerald-700", dot: "bg-emerald-400" },
+  { id: "annulee", label: "Annulées", color: "border-rose-300 bg-rose-50", header: "bg-rose-100 text-rose-600", dot: "bg-rose-400" },
+];
 
 export default function Tournees() {
   const { data: tournees, isLoading } = useTournees();
@@ -33,6 +37,8 @@ export default function Tournees() {
   const [optimized, setOptimized] = useState(false);
   const [hoveredBoutique, setHoveredBoutique] = useState<number | null>(null);
   const [searchBoutique, setSearchBoutique] = useState("");
+  const [viewMode, setViewMode] = useState<"list" | "kanban">("list");
+  const [filterStatut, setFilterStatut] = useState("");
 
   const filteredBoutiques = useMemo(() => {
     if (!boutiques) return [];
@@ -41,6 +47,11 @@ export default function Tournees() {
       b.adresse.toLowerCase().includes(searchBoutique.toLowerCase())
     );
   }, [boutiques, searchBoutique]);
+
+  const filteredTournees = useMemo(() => {
+    if (!tournees) return [];
+    return tournees.filter((t: any) => !filterStatut || t.statut === filterStatut);
+  }, [tournees, filterStatut]);
 
   const toggleBoutique = (b: Boutique) => {
     setSelectedBoutiques(prev => {
@@ -69,10 +80,7 @@ export default function Tournees() {
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    if (selectedBoutiques.length === 0) {
-      toast.error("Veuillez sélectionner au moins une boutique");
-      return;
-    }
+    if (selectedBoutiques.length === 0) { toast.error("Veuillez sélectionner au moins une boutique"); return; }
     const fd = new FormData(e.currentTarget);
     create.mutate({
       data: {
@@ -81,21 +89,11 @@ export default function Tournees() {
         boutiqueIds: selectedBoutiques.map(b => b.id),
       }
     }, {
-      onSuccess: () => {
-        setIsAddOpen(false);
-        setSelectedBoutiques([]);
-        setOptimized(false);
-        toast.success("Tournée planifiée avec succès");
-      }
+      onSuccess: () => { setIsAddOpen(false); setSelectedBoutiques([]); setOptimized(false); toast.success("Tournée planifiée avec succès"); }
     });
   };
 
-  const resetModal = () => {
-    setIsAddOpen(false);
-    setSelectedBoutiques([]);
-    setOptimized(false);
-    setSearchBoutique("");
-  };
+  const resetModal = () => { setIsAddOpen(false); setSelectedBoutiques([]); setOptimized(false); setSearchBoutique(""); };
 
   return (
     <div>
@@ -126,6 +124,37 @@ export default function Tournees() {
         </div>
       )}
 
+      {/* Toolbar: view toggle + filter */}
+      <div className="flex items-center gap-3 mb-5">
+        <div className="flex items-center bg-slate-100 rounded-xl p-1 gap-1">
+          <button
+            onClick={() => setViewMode("list")}
+            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-semibold transition-all ${viewMode === "list" ? "bg-white shadow text-navy" : "text-slate-500 hover:text-slate-700"}`}
+          >
+            <List className="w-4 h-4" /> Liste
+          </button>
+          <button
+            onClick={() => setViewMode("kanban")}
+            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-semibold transition-all ${viewMode === "kanban" ? "bg-white shadow text-navy" : "text-slate-500 hover:text-slate-700"}`}
+          >
+            <LayoutGrid className="w-4 h-4" /> Kanban
+          </button>
+        </div>
+        {viewMode === "list" && (
+          <select
+            value={filterStatut}
+            onChange={e => setFilterStatut(e.target.value)}
+            className="px-3 py-2 rounded-xl border border-border text-sm bg-white focus:border-primary outline-none font-medium text-slate-600"
+          >
+            <option value="">Tous les statuts</option>
+            <option value="planifiee">Planifiée</option>
+            <option value="en_cours">En cours</option>
+            <option value="terminee">Terminée</option>
+            <option value="annulee">Annulée</option>
+          </select>
+        )}
+      </div>
+
       {isLoading ? (
         <div className="bg-card border border-border/50 rounded-2xl shadow-sm p-8 text-center text-muted-foreground animate-pulse">Chargement des tournées...</div>
       ) : tournees?.length === 0 ? (
@@ -134,9 +163,49 @@ export default function Tournees() {
           <h3 className="text-xl font-bold text-foreground">Aucune tournée</h3>
           <p className="text-muted-foreground mt-2">Planifiez votre première tournée pour commencer à livrer.</p>
         </div>
+      ) : viewMode === "kanban" ? (
+        /* ── Kanban ── */
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          {KANBAN_COLS.map(col => {
+            const colTournees = (tournees ?? []).filter((t: any) => t.statut === col.id);
+            return (
+              <div key={col.id} className={`rounded-2xl border-2 ${col.color} overflow-hidden`}>
+                <div className={`flex items-center justify-between px-4 py-3 ${col.header}`}>
+                  <div className="flex items-center gap-2">
+                    <div className={`w-2 h-2 rounded-full ${col.dot}`} />
+                    <span className="text-sm font-bold">{col.label}</span>
+                  </div>
+                  <span className="text-sm font-bold opacity-70">{colTournees.length}</span>
+                </div>
+                <div className="p-3 space-y-2 min-h-[120px]">
+                  {colTournees.length === 0 && (
+                    <p className="text-center text-xs text-slate-400 py-6">Aucune tournée</p>
+                  )}
+                  {colTournees.map((t: any) => (
+                    <Link key={t.id} href={`/tournees/${t.id}`}>
+                      <div className="bg-white rounded-xl border border-white/80 shadow-sm p-3 hover:shadow-md hover:-translate-y-0.5 transition-all cursor-pointer">
+                        <div className="flex items-center justify-between mb-1.5">
+                          <span className="font-mono text-xs font-bold text-slate-500">#TRN-{t.id}</span>
+                          <span className="text-xs text-slate-400">{formatDate(t.date)}</span>
+                        </div>
+                        <div className="text-sm font-bold text-slate-800 truncate mb-1">{t.chauffeurNom}</div>
+                        <div className="flex items-center justify-between text-xs">
+                          <span className="text-slate-500 flex items-center gap-1">
+                            <MapPin className="w-3 h-3" /> {t.nombreArrets} arrêts
+                          </span>
+                          <span className="font-bold text-emerald-600">{formatFCFA(t.totalLivraisons)}</span>
+                        </div>
+                      </div>
+                    </Link>
+                  ))}
+                </div>
+              </div>
+            );
+          })}
+        </div>
       ) : (
+        /* ── List ── */
         <>
-          {/* Desktop table */}
           <div className="hidden md:block bg-card border border-border/50 rounded-2xl shadow-sm overflow-hidden">
             <div className="overflow-x-auto">
               <table className="w-full text-left text-sm whitespace-nowrap">
@@ -151,16 +220,14 @@ export default function Tournees() {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100">
-                  {tournees?.map((t: any) => (
+                  {filteredTournees.map((t: any) => (
                     <tr key={t.id} className="hover:bg-slate-50/50 transition-colors group">
                       <td className="px-6 py-4">
                         <div className="font-bold text-foreground">#TRN-{t.id}</div>
                         <div className="text-muted-foreground text-xs mt-0.5">{formatDate(t.date)}</div>
                       </td>
                       <td className="px-6 py-4 font-medium text-slate-700">{t.chauffeurNom}</td>
-                      <td className="px-6 py-4">
-                        <span className="px-3 py-1 bg-slate-100 text-slate-700 font-bold rounded-lg">{t.nombreArrets} boutiques</span>
-                      </td>
+                      <td className="px-6 py-4"><span className="px-3 py-1 bg-slate-100 text-slate-700 font-bold rounded-lg">{t.nombreArrets} boutiques</span></td>
                       <td className="px-6 py-4 font-bold text-navy">{formatFCFA(t.totalLivraisons)}</td>
                       <td className="px-6 py-4"><StatusBadge status={t.statut} /></td>
                       <td className="px-6 py-4 text-right">
@@ -175,9 +242,8 @@ export default function Tournees() {
             </div>
           </div>
 
-          {/* Mobile cards */}
           <div className="md:hidden space-y-3">
-            {tournees?.map((t: any) => (
+            {filteredTournees.map((t: any) => (
               <div key={t.id} className="bg-card border border-border/50 rounded-2xl shadow-sm p-4">
                 <div className="flex items-start justify-between mb-2">
                   <div>
@@ -189,9 +255,7 @@ export default function Tournees() {
                 <div className="text-sm font-medium text-slate-700 mb-3">{t.chauffeurNom}</div>
                 <div className="flex items-center justify-between border-t border-slate-100 pt-3">
                   <div className="flex items-center gap-3">
-                    <span className="px-2.5 py-1 bg-slate-100 text-slate-700 font-bold rounded-lg text-xs">
-                      {t.nombreArrets} arrêts
-                    </span>
+                    <span className="px-2.5 py-1 bg-slate-100 text-slate-700 font-bold rounded-lg text-xs">{t.nombreArrets} arrêts</span>
                     <span className="font-bold text-navy text-sm">{formatFCFA(t.totalLivraisons)}</span>
                   </div>
                   <Link href={`/tournees/${t.id}`} className="inline-flex items-center justify-center p-2 text-primary hover:bg-primary/10 rounded-lg transition-colors">
@@ -228,33 +292,19 @@ export default function Tournees() {
               <label className="text-sm font-bold text-slate-700">Sélectionner les arrêts</label>
               <span className="text-xs text-muted-foreground">{selectedBoutiques.length}/{boutiques?.length ?? 0} sélectionnées</span>
             </div>
-            <input
-              type="text"
-              value={searchBoutique}
-              onChange={e => setSearchBoutique(e.target.value)}
-              placeholder="Rechercher une boutique..."
-              className="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-xl text-sm mb-2 outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
-            />
+            <input type="text" value={searchBoutique} onChange={e => setSearchBoutique(e.target.value)} placeholder="Rechercher une boutique..." className="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-xl text-sm mb-2 outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary" />
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 max-h-52 overflow-y-auto p-1">
               {filteredBoutiques.map((b: Boutique) => {
                 const isSelected = selectedBoutiques.some(s => s.id === b.id);
                 const zone = getZone(b.id);
                 return (
-                  <label
-                    key={b.id}
-                    className={`flex items-start gap-3 p-3 border rounded-xl cursor-pointer transition-all ${isSelected ? "border-primary bg-primary/5" : "border-slate-200 hover:border-primary/30 hover:bg-primary/5"}`}
-                    onMouseEnter={() => setHoveredBoutique(b.id)}
-                    onMouseLeave={() => setHoveredBoutique(null)}
-                  >
+                  <label key={b.id} className={`flex items-start gap-3 p-3 border rounded-xl cursor-pointer transition-all ${isSelected ? "border-primary bg-primary/5" : "border-slate-200 hover:border-primary/30 hover:bg-primary/5"}`} onMouseEnter={() => setHoveredBoutique(b.id)} onMouseLeave={() => setHoveredBoutique(null)}>
                     <input type="checkbox" checked={isSelected} onChange={() => toggleBoutique(b)} className="w-4 h-4 mt-0.5 rounded border-slate-300 accent-primary" />
                     <div className="flex-1 min-w-0">
                       <div className="text-sm font-bold text-foreground truncate">{b.nom}</div>
                       <div className="text-xs text-muted-foreground truncate">{b.adresse}</div>
                       {hoveredBoutique === b.id && (
-                        <div className="flex items-center gap-1 mt-1">
-                          <MapPin className="w-3 h-3 text-primary" />
-                          <span className="text-xs font-medium text-primary">Zone {zone.zone}</span>
-                        </div>
+                        <div className="flex items-center gap-1 mt-1"><MapPin className="w-3 h-3 text-primary" /><span className="text-xs font-medium text-primary">Zone {zone.zone}</span></div>
                       )}
                     </div>
                   </label>
@@ -271,13 +321,8 @@ export default function Tournees() {
                   <div className={`w-1.5 h-1.5 rounded-full ${optimized ? "bg-emerald-500" : "bg-amber-400"}`} />
                   <span className="text-sm font-bold text-slate-700">Ordre des arrêts ({selectedBoutiques.length})</span>
                 </div>
-                <button
-                  type="button"
-                  onClick={optimizeRoute}
-                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${optimized ? "bg-emerald-100 text-emerald-700" : "bg-amber-100 text-amber-700 hover:bg-amber-200"}`}
-                >
-                  <Zap className="w-3.5 h-3.5" />
-                  {optimized ? "✓ Optimisé" : "Optimiser l'itinéraire"}
+                <button type="button" onClick={optimizeRoute} className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${optimized ? "bg-emerald-100 text-emerald-700" : "bg-amber-100 text-amber-700 hover:bg-amber-200"}`}>
+                  <Zap className="w-3.5 h-3.5" />{optimized ? "✓ Optimisé" : "Optimiser l'itinéraire"}
                 </button>
               </div>
               <div className="max-h-44 overflow-y-auto">
@@ -293,9 +338,7 @@ export default function Tournees() {
                       <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                         <button type="button" onClick={() => moveStop(i, -1)} disabled={i === 0} className="p-1 hover:bg-slate-200 rounded disabled:opacity-30 text-slate-500">▲</button>
                         <button type="button" onClick={() => moveStop(i, 1)} disabled={i === selectedBoutiques.length - 1} className="p-1 hover:bg-slate-200 rounded disabled:opacity-30 text-slate-500">▼</button>
-                        <button type="button" onClick={() => toggleBoutique(b)} className="p-1 hover:bg-rose-100 rounded text-rose-400">
-                          <X className="w-3.5 h-3.5" />
-                        </button>
+                        <button type="button" onClick={() => toggleBoutique(b)} className="p-1 hover:bg-rose-100 rounded text-rose-400"><X className="w-3.5 h-3.5" /></button>
                       </div>
                     </div>
                   );
