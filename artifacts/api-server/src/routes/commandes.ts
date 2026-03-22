@@ -92,6 +92,122 @@ router.patch("/commandes/:commandeId/statut", async (req, res) => {
   }
 });
 
+// ─── COLISAGE — Authentification livreur au retrait entrepôt ─────────────────
+// PATCH /api/grossistes/:grossisteId/commandes/:commandeId/colisage
+// Body: { chauffeurId, signatureColisage (dataUrl), itemsVerifies[] }
+
+router.patch("/commandes/:commandeId/colisage", async (req, res) => {
+  try {
+    const commandeId = parseInt(req.params.commandeId);
+    const grossisteId = parseInt(req.params.grossisteId);
+    const { chauffeurId, signatureColisage } = req.body;
+
+    if (!chauffeurId || !signatureColisage) {
+      return res.status(400).json({ error: "chauffeurId et signatureColisage requis" });
+    }
+
+    const [commande] = await db.select().from(commandesTable)
+      .where(and(eq(commandesTable.id, commandeId), eq(commandesTable.grossisteId, grossisteId)))
+      .limit(1);
+
+    if (!commande) return res.status(404).json({ error: "Commande introuvable" });
+    if (commande.signatureColisage) {
+      return res.status(409).json({ error: "Colisage déjà authentifié", dateColisage: commande.dateColisage });
+    }
+    if (!["confirmee", "en_preparation"].includes(commande.statut)) {
+      return res.status(400).json({ error: `Colisage impossible pour une commande en statut "${commande.statut}"` });
+    }
+
+    const [updated] = await db.update(commandesTable)
+      .set({
+        signatureColisage,
+        dateColisage: new Date(),
+        chauffeurId: parseInt(chauffeurId),
+        statut: "enleve",
+      })
+      .where(eq(commandesTable.id, commandeId))
+      .returning();
+
+    return res.json({
+      ...updated,
+      numeroBc: `BC-${String(updated.id).padStart(5, "0")}`,
+      message: "Colisage authentifié avec succès",
+    });
+  } catch (e) {
+    res.status(500).json({ error: String(e) });
+  }
+});
+
+// ─── RÉCEPTION — Certification conformité boutiquier ─────────────────────────
+// PATCH /api/grossistes/:grossisteId/livraisons/:livraisonId/reception
+// Body: { signatureReception (dataUrl), conformite (boolean), remarquesReception? }
+
+router.patch("/livraisons/:livraisonId/reception", requireBoutiqueAuth, async (req, res) => {
+  try {
+    const livraisonId = parseInt(req.params.livraisonId);
+    const grossisteId = parseInt(req.params.grossisteId);
+    const { signatureReception, conformite, remarquesReception } = req.body;
+
+    if (!signatureReception || conformite === undefined) {
+      return res.status(400).json({ error: "signatureReception et conformite requis" });
+    }
+
+    // Vérifier que la livraison appartient à la boutique authentifiée
+    const [livraison] = await db.select({
+      id: livraisonsTable.id,
+      boutiqueId: livraisonsTable.boutiqueId,
+      statut: livraisonsTable.statut,
+      signatureReception: livraisonsTable.signatureReception,
+      tourneeId: livraisonsTable.tourneeId,
+    })
+      .from(livraisonsTable)
+      .where(eq(livraisonsTable.id, livraisonId))
+      .limit(1);
+
+    if (!livraison) return res.status(404).json({ error: "Livraison introuvable" });
+
+    if (req.boutiqueAuth && req.boutiqueAuth.boutiqueId !== livraison.boutiqueId) {
+      return res.status(403).json({ error: "Vous ne pouvez certifier que vos propres réceptions", code: "FORBIDDEN" });
+    }
+    if (livraison.signatureReception) {
+      return res.status(409).json({ error: "Réception déjà certifiée", dateReception: (livraison as any).dateReception });
+    }
+    if (livraison.statut !== "livree") {
+      return res.status(400).json({ error: `Certification impossible — livraison en statut "${livraison.statut}"` });
+    }
+
+    const [updated] = await db.update(livraisonsTable)
+      .set({
+        signatureReception,
+        dateReception: new Date(),
+        conformite: Boolean(conformite),
+        remarquesReception: remarquesReception ?? null,
+      })
+      .where(eq(livraisonsTable.id, livraisonId))
+      .returning();
+
+    // Générer la signature HMAC du BL certifié
+    const blPayload = {
+      id: updated.id,
+      boutiqueId: updated.boutiqueId,
+      tourneeId: updated.tourneeId,
+      montantTotal: updated.montantTotal,
+      createdAt: String(updated.createdAt),
+    };
+    const { signDocument } = await import("../lib/security");
+    const blSignature = signDocument(blPayload);
+
+    return res.json({
+      ...updated,
+      numeroBl: `BL-${String(updated.id).padStart(5, "0")}`,
+      blSignature,
+      message: conformite ? "Réception certifiée conforme ✓" : "Réception enregistrée avec réserves",
+    });
+  } catch (e) {
+    res.status(500).json({ error: String(e) });
+  }
+});
+
 // ─── WALLET ────────────────────────────────────────────────────────────────
 
 router.get("/wallet/:actorType/:actorId", async (req, res) => {
@@ -407,6 +523,41 @@ router.get("/boutiques/:boutiqueId/commandes", async (req, res) => {
       return { ...c, items: itemsEnriched };
     }));
     res.json(enriched);
+  } catch (e) {
+    res.status(500).json({ error: String(e) });
+  }
+});
+
+// ─── BOUTIQUES — livraisons (pour certification réception) ───────────────────
+// GET /api/grossistes/:id/boutiques/:boutiqueId/livraisons
+// Retourne les livraisons d'une boutique, notamment celles en statut "livree" sans signature réception
+
+router.get("/boutiques/:boutiqueId/livraisons", async (req, res) => {
+  try {
+    const boutiqueId = parseInt(req.params.boutiqueId);
+    const grossisteId = parseInt(req.params.grossisteId);
+
+    const rows = await db.select({
+      livraison: livraisonsTable,
+      tourneeDate: tourneesTable.date,
+    })
+      .from(livraisonsTable)
+      .innerJoin(tourneesTable, eq(tourneesTable.id, livraisonsTable.tourneeId))
+      .where(and(
+        eq(livraisonsTable.boutiqueId, boutiqueId),
+        sql`${tourneesTable.grossisteId} = ${grossisteId}`
+      ))
+      .orderBy(desc(livraisonsTable.createdAt))
+      .limit(20);
+
+    const result = rows.map(row => ({
+      ...row.livraison,
+      numeroBl: `BL-${String(row.livraison.id).padStart(5, "0")}`,
+      tourneeDate: row.tourneeDate,
+      certifiee: !!row.livraison.signatureReception,
+    }));
+
+    res.json(result);
   } catch (e) {
     res.status(500).json({ error: String(e) });
   }

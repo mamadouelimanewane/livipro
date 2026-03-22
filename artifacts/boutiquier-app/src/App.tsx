@@ -584,8 +584,16 @@ function Commander() {
 // ─── MES COMMANDES (BONS DE COMMANDE) ────────────────────────────────────────
 
 function MesCommandes() {
-  const { auth } = useAuth();
+  const { auth, authFetch } = useAuth();
+  const qc = useQueryClient();
   const [selected, setSelected] = useState<any>(null);
+  const [showCertForm, setShowCertForm] = useState(false);
+  const [conformite, setConformite] = useState(true);
+  const [remarques, setRemarques] = useState("");
+  const [certSubmitting, setCertSubmitting] = useState(false);
+  const [certDone, setCertDone] = useState<Record<number, boolean>>({});
+  const sigCanvasRef = useRef<HTMLCanvasElement | null>(null);
+  const sigPadRef = useRef<SignaturePad | null>(null);
 
   const { data: commandes, isLoading, refetch } = useQuery({
     queryKey: ["mes-commandes", auth.boutiqueId],
@@ -593,6 +601,55 @@ function MesCommandes() {
     enabled: !!auth.boutiqueId,
     refetchInterval: 30000,
   });
+
+  const { data: livraisonsData } = useQuery({
+    queryKey: ["boutique-livraisons", auth.grossisteId, auth.boutiqueId],
+    queryFn: () => fetch(`${API}/grossistes/${auth.grossisteId}/boutiques/${auth.boutiqueId}/livraisons`).then(r => r.json()),
+    enabled: !!auth.boutiqueId && selected?.statut === "livree",
+  });
+
+  // Trouver la livraison à certifier: statut livree, pas encore certifiée
+  const livraisonACertifier = (livraisonsData || []).find((l: any) => l.statut === "livree" && !l.certifiee && !certDone[l.id]);
+
+  useEffect(() => {
+    if (!showCertForm) return;
+    const timer = setTimeout(() => {
+      const canvas = document.getElementById("cert-sig-canvas") as HTMLCanvasElement;
+      if (canvas && !sigPadRef.current) {
+        sigCanvasRef.current = canvas;
+        sigPadRef.current = new SignaturePad(canvas, { penColor: "#f97316", backgroundColor: "rgba(0,0,0,0)" });
+      }
+    }, 200);
+    return () => clearTimeout(timer);
+  }, [showCertForm]);
+
+  const clearSig = () => { sigPadRef.current?.clear(); };
+
+  const handleCertifier = async () => {
+    if (!livraisonACertifier) return;
+    const sigData = sigPadRef.current?.isEmpty() ? null : sigPadRef.current?.toDataURL("image/png");
+    if (!sigData) { alert("Veuillez signer pour certifier la réception."); return; }
+    setCertSubmitting(true);
+    try {
+      const res = await authFetch(`${API}/grossistes/${auth.grossisteId}/livraisons/${livraisonACertifier.id}/reception`, {
+        method: "PATCH",
+        body: JSON.stringify({ signatureReception: sigData, conformite: conformite ? "conforme" : "avec_reserves", remarquesReception: remarques }),
+      });
+      if (res.ok) {
+        setCertDone(prev => ({ ...prev, [livraisonACertifier.id]: true }));
+        setShowCertForm(false);
+        setRemarques("");
+        setConformite(true);
+        sigPadRef.current = null;
+        qc.invalidateQueries({ queryKey: ["mes-commandes"] });
+        qc.invalidateQueries({ queryKey: ["boutique-livraisons"] });
+      } else {
+        const err = await res.json().catch(() => ({}));
+        alert("Erreur: " + (err.error || "Certification échouée"));
+      }
+    } catch (e) { alert("Erreur réseau: " + String(e)); }
+    finally { setCertSubmitting(false); }
+  };
 
   const exportBC = (c: any) => {
     const lines = [
@@ -714,6 +771,81 @@ function MesCommandes() {
             );
           })}
         </div>
+
+        {/* ─── CERTIFICATION RÉCEPTION ─── */}
+        {bc.statut === "livree" && (
+          <div style={{ ...S.card, border: livraisonACertifier ? "1px solid #22c55e40" : "1px solid #334155", background: certDone[livraisonACertifier?.id] ? "#22c55e10" : "#1e293b" }}>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 14 }}>
+              <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                <span style={{ fontSize: 18 }}>{certDone[livraisonACertifier?.id] ? "✅" : "🏪"}</span>
+                <div>
+                  <div style={{ color: "#e2e8f0", fontWeight: 700, fontSize: 15 }}>Certification de réception</div>
+                  <div style={{ color: "#64748b", fontSize: 12 }}>
+                    {certDone[livraisonACertifier?.id] ? "Réception certifiée" : livraisonACertifier ? `BL-${String(livraisonACertifier.id).padStart(5, "0")} trouvé` : "Aucune livraison à certifier"}
+                  </div>
+                </div>
+              </div>
+              {livraisonACertifier && !certDone[livraisonACertifier.id] && (
+                <button onClick={() => setShowCertForm(!showCertForm)} style={{ background: showCertForm ? "#334155" : "#22c55e20", border: "1px solid " + (showCertForm ? "#475569" : "#22c55e50"), borderRadius: 10, padding: "6px 14px", color: showCertForm ? "#94a3b8" : "#22c55e", cursor: "pointer", fontSize: 13, fontWeight: 600 }}>
+                  {showCertForm ? "Annuler" : "Certifier ✍️"}
+                </button>
+              )}
+            </div>
+
+            {showCertForm && livraisonACertifier && (
+              <div style={{ borderTop: "1px solid #334155", paddingTop: 16 }}>
+                {/* Conformité toggle */}
+                <div style={{ marginBottom: 16 }}>
+                  <div style={{ color: "#94a3b8", fontSize: 11, fontWeight: 700, textTransform: "uppercase", letterSpacing: 1, marginBottom: 10 }}>Conformité de la livraison</div>
+                  <div style={{ display: "flex", gap: 10 }}>
+                    <button onClick={() => setConformite(true)} style={{ flex: 1, padding: "10px 0", borderRadius: 10, border: `2px solid ${conformite ? "#22c55e" : "#334155"}`, background: conformite ? "#22c55e15" : "transparent", color: conformite ? "#22c55e" : "#64748b", fontWeight: 700, fontSize: 14, cursor: "pointer" }}>
+                      ✓ Conforme
+                    </button>
+                    <button onClick={() => setConformite(false)} style={{ flex: 1, padding: "10px 0", borderRadius: 10, border: `2px solid ${!conformite ? "#f97316" : "#334155"}`, background: !conformite ? "#f9731615" : "transparent", color: !conformite ? "#f97316" : "#64748b", fontWeight: 700, fontSize: 14, cursor: "pointer" }}>
+                      ⚠ Avec réserves
+                    </button>
+                  </div>
+                </div>
+
+                {/* Remarques */}
+                {!conformite && (
+                  <div style={{ marginBottom: 16 }}>
+                    <div style={{ color: "#94a3b8", fontSize: 11, fontWeight: 700, textTransform: "uppercase", letterSpacing: 1, marginBottom: 8 }}>Remarques / Réserves</div>
+                    <textarea
+                      value={remarques}
+                      onChange={e => setRemarques(e.target.value)}
+                      placeholder="Décrivez les problèmes constatés..."
+                      rows={3}
+                      style={{ width: "100%", background: "#0f172a", border: "1px solid #334155", borderRadius: 10, color: "#e2e8f0", fontSize: 14, padding: "10px 12px", resize: "vertical", boxSizing: "border-box", fontFamily: "inherit" }}
+                    />
+                  </div>
+                )}
+
+                {/* Signature pad */}
+                <div style={{ marginBottom: 16 }}>
+                  <div style={{ color: "#94a3b8", fontSize: 11, fontWeight: 700, textTransform: "uppercase", letterSpacing: 1, marginBottom: 8 }}>Signature du responsable</div>
+                  <div style={{ background: "#0f172a", borderRadius: 12, border: "1px solid #334155", overflow: "hidden", position: "relative" }}>
+                    <canvas
+                      id="cert-sig-canvas"
+                      width={400}
+                      height={130}
+                      style={{ width: "100%", height: 130, cursor: "crosshair", touchAction: "none" }}
+                    />
+                    <div style={{ position: "absolute", top: 8, right: 8 }}>
+                      <button onClick={clearSig} style={{ background: "#1e293b", border: "1px solid #334155", borderRadius: 8, padding: "4px 10px", color: "#64748b", cursor: "pointer", fontSize: 12 }}>Effacer</button>
+                    </div>
+                    <div style={{ position: "absolute", bottom: 8, left: 12, color: "#334155", fontSize: 12, pointerEvents: "none" }}>Signez ici</div>
+                  </div>
+                </div>
+
+                {/* Submit */}
+                <button onClick={handleCertifier} disabled={certSubmitting} style={{ ...S.btn("#22c55e"), width: "100%", textAlign: "center", opacity: certSubmitting ? 0.7 : 1 }}>
+                  {certSubmitting ? "Certification en cours..." : "✅ Certifier la réception"}
+                </button>
+              </div>
+            )}
+          </div>
+        )}
 
         {/* Actions */}
         <button onClick={() => exportBC(bc)} style={{ ...S.btnOutline, width: "100%", textAlign: "center", display: "flex", alignItems: "center", justifyContent: "center", gap: 8, marginBottom: 12 }}>

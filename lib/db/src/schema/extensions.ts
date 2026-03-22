@@ -13,6 +13,10 @@ export const commandesTable = pgTable("commandes", {
   montantTotal: numeric("montant_total", { precision: 12, scale: 2 }).notNull().default("0"),
   notes: text("notes"),
   signature: text("signature"),
+  // Colisage — authentification livreur au retrait entrepôt
+  signatureColisage: text("signature_colisage"),
+  dateColisage: timestamp("date_colisage"),
+  chauffeurId: integer("chauffeur_id").references(() => chauffeursTable.id),
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 

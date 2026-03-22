@@ -25,6 +25,7 @@ import { PhotoModal } from "@/components/PhotoModal";
 import { ScannerModal } from "@/components/ScannerModal";
 import { VoiceAssistant } from "@/components/VoiceAssistant";
 import { RatingModal } from "@/components/RatingModal";
+import { ColisageModal } from "@/components/ColisageModal";
 import Colors from "@/constants/colors";
 
 const BASE_URL = `https://${process.env.EXPO_PUBLIC_DOMAIN}/api`;
@@ -104,6 +105,7 @@ export default function ManifestScreen() {
   const [localStatuts, setLocalStatuts] = useState<Record<number, string>>({});
   const [photos, setPhotos] = useState<Record<number, string>>({});
   const [isOffline, setIsOffline] = useState(false);
+  const [showColisage, setShowColisage] = useState(false);
 
   useEffect(() => {
     AsyncStorage.multiGet(["grossisteId", "chauffeurId", "chauffeurNom"]).then(
@@ -327,6 +329,20 @@ export default function ManifestScreen() {
       </View>
 
       <ScrollView style={styles.body} showsVerticalScrollIndicator={false}>
+        {/* ─── Colisage Banner ─── */}
+        <TouchableOpacity style={styles.colisageBanner} onPress={() => setShowColisage(true)}>
+          <View style={styles.colisageBannerLeft}>
+            <View style={styles.colisageIcon}>
+              <Feather name="package" size={16} color="#f97316" />
+            </View>
+            <View>
+              <Text style={styles.colisageTitle}>Colisage</Text>
+              <Text style={styles.colisageSub}>Authentifier la prise en charge des colis</Text>
+            </View>
+          </View>
+          <Feather name="chevron-right" size={18} color="#64748b" />
+        </TouchableOpacity>
+
         <View style={styles.mapContainer}>
           <AppMap stops={mapStops} currentStopId={currentStop?.id} />
         </View>
@@ -498,6 +514,16 @@ export default function ManifestScreen() {
           tourneeId={activeTournee.id}
         />
       )}
+      {grossisteId && chauffeurId && (
+        <ColisageModal
+          visible={showColisage}
+          onClose={() => setShowColisage(false)}
+          grossisteId={grossisteId}
+          chauffeurId={chauffeurId}
+          tourneeId={activeTournee?.id ?? null}
+          onSuccess={() => qc.invalidateQueries({ queryKey: ["tournees"] })}
+        />
+      )}
     </View>
   );
 }
@@ -578,6 +604,11 @@ const styles = StyleSheet.create({
   stopRowMontant: { fontSize: 13, fontFamily: "Inter_700Bold", color: Colors.navy, marginBottom: 3 },
   miniChip: { paddingHorizontal: 6, paddingVertical: 2, borderRadius: 6 },
   miniChipText: { fontSize: 10, fontFamily: "Inter_600SemiBold" },
+  colisageBanner: { flexDirection: "row", alignItems: "center", justifyContent: "space-between", marginHorizontal: 14, marginTop: 14, marginBottom: 0, backgroundColor: "#1e293b", borderRadius: 14, padding: 14, borderWidth: 1, borderColor: "#f9731630" },
+  colisageBannerLeft: { flexDirection: "row", alignItems: "center", gap: 12 },
+  colisageIcon: { width: 36, height: 36, borderRadius: 10, backgroundColor: "#f9731615", alignItems: "center", justifyContent: "center" },
+  colisageTitle: { color: "#fff", fontWeight: "700" as const, fontSize: 14, fontFamily: "Inter_700Bold" },
+  colisageSub: { color: "#64748b", fontSize: 11, fontFamily: "Inter_400Regular", marginTop: 1 },
   emptyBody: { flex: 1, alignItems: "center", justifyContent: "center", gap: 12 },
   emptyTitle: { fontSize: 18, fontFamily: "Inter_700Bold", color: Colors.navy },
   emptySub: { fontSize: 13, fontFamily: "Inter_400Regular", color: Colors.slate, textAlign: "center", paddingHorizontal: 40 },

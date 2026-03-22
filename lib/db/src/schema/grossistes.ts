@@ -1,4 +1,4 @@
-import { pgTable, serial, text, timestamp, pgEnum, integer, numeric } from "drizzle-orm/pg-core";
+import { pgTable, serial, text, timestamp, pgEnum, integer, numeric, boolean } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod/v4";
 
@@ -72,6 +72,11 @@ export const livraisonsTable = pgTable("livraisons", {
   statut: livraisonStatutEnum("statut").notNull().default("en_attente"),
   montantTotal: numeric("montant_total", { precision: 12, scale: 2 }).notNull().default("0"),
   methodePaiement: paiementMethodeEnum("methode_paiement").notNull().default("especes"),
+  // Certification réception — boutiquier certifie la conformité à la réception
+  signatureReception: text("signature_reception"),
+  dateReception: timestamp("date_reception"),
+  conformite: boolean("conformite"),
+  remarquesReception: text("remarques_reception"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 
