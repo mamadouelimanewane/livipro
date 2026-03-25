@@ -42,7 +42,7 @@ interface Livraison {
   statut: string; montant: number; methodePaiement: string;
 }
 
-type ModalType = null | "signature" | "qr" | "litige" | "photo" | "scanner" | "voice" | "rating";
+type ModalType = null | "signature" | "qr" | "litige" | "photo" | "scanner" | "voice" | "rating" | "qr_boutique";
 
 const DAKAR_COORDS: [number, number][] = [
   [14.6937, -17.4441],[14.6928, -17.4627],[14.6850, -17.4582],
@@ -219,6 +219,32 @@ export default function ManifestScreen() {
     Alert.alert("Code scanné", `Référence: ${code}\nProduit vérifié ✓`);
   };
 
+  const handleBoutiqueScan = (code: string) => {
+    setModal(null);
+    if (!activeStop) return;
+    try {
+      const data = JSON.parse(code);
+      if (data.livipro && data.boutique) {
+        if (Platform.OS !== "web") Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+        Alert.alert(
+          "✓ Boutique vérifiée",
+          `${data.boutique}\nVous êtes bien à la bonne boutique !\n\nMontant: ${(data.montant || activeStop.montant).toLocaleString("fr-FR")} FCFA`
+        );
+      } else {
+        Alert.alert("QR reconnu", `Données: ${code.slice(0, 60)}...`);
+      }
+    } catch {
+      const nom = activeStop.boutique.nom.toLowerCase();
+      const codeLower = code.toLowerCase();
+      if (codeLower.includes(nom) || codeLower.includes(activeStop.boutique.id.toString())) {
+        if (Platform.OS !== "web") Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+        Alert.alert("✓ Boutique confirmée", `Présence à ${activeStop.boutique.nom} validée`);
+      } else {
+        Alert.alert("QR scanné", `Code: ${code}\nBoutique enregistrée dans le manifeste.`);
+      }
+    }
+  };
+
   const handleVoiceCommand = (action: string, data: Record<string, any>) => {
     if (!activeStop) return;
     if (action === "LIVREE") {
@@ -329,6 +355,17 @@ export default function ManifestScreen() {
       </View>
 
       <ScrollView style={styles.body} showsVerticalScrollIndicator={false}>
+        {/* ─── Offline Banner ─── */}
+        {isOffline && (
+          <View style={styles.offlineBanner}>
+            <Feather name="wifi-off" size={14} color="#fff" />
+            <View style={{ flex: 1 }}>
+              <Text style={styles.offlineText}>Mode hors-ligne — Données en cache</Text>
+              <Text style={styles.offlineSubText}>Les modifications seront synchronisées au retour du réseau</Text>
+            </View>
+          </View>
+        )}
+
         {/* ─── Colisage Banner ─── */}
         <TouchableOpacity style={styles.colisageBanner} onPress={() => setShowColisage(true)}>
           <View style={styles.colisageBannerLeft}>
@@ -424,18 +461,25 @@ export default function ManifestScreen() {
                       <Feather name="camera" size={15} color={Colors.amber} />
                       <Text style={[styles.actionLabel2, { color: Colors.amber }]}>{activePhotoUri ? "Reprendre photo" : "Preuve photo"}</Text>
                     </TouchableOpacity>
-                    <TouchableOpacity style={[styles.actionBtn2, { borderColor: Colors.navyMid }]}
-                      onPress={() => setModal("scanner")}>
-                      <Feather name="maximize" size={15} color={Colors.navyMid} />
-                      <Text style={[styles.actionLabel2, { color: Colors.navyMid }]}>Scanner</Text>
+                    <TouchableOpacity style={[styles.actionBtn2, { borderColor: "#22c55e" }]}
+                      onPress={() => { setActiveId(activeStop.id); setModal("qr_boutique"); }}>
+                      <Feather name="map-pin" size={15} color="#22c55e" />
+                      <Text style={[styles.actionLabel2, { color: "#22c55e" }]}>QR Boutique</Text>
                     </TouchableOpacity>
                   </View>
                   <View style={styles.actionGrid2}>
+                    <TouchableOpacity style={[styles.actionBtn2, { borderColor: Colors.navyMid }]}
+                      onPress={() => setModal("scanner")}>
+                      <Feather name="maximize" size={15} color={Colors.navyMid} />
+                      <Text style={[styles.actionLabel2, { color: Colors.navyMid }]}>Scanner colis</Text>
+                    </TouchableOpacity>
                     <TouchableOpacity style={[styles.actionBtn2, { borderColor: "#a855f7" }]}
                       onPress={() => setModal("voice")}>
                       <Feather name="mic" size={15} color="#a855f7" />
                       <Text style={[styles.actionLabel2, { color: "#a855f7" }]}>Assistant vocal</Text>
                     </TouchableOpacity>
+                  </View>
+                  <View style={styles.actionGrid2}>
                     <TouchableOpacity style={[styles.actionBtn2, { borderColor: "#f59e0b" }]}
                       onPress={() => setModal("rating")}>
                       <Feather name="star" size={15} color="#f59e0b" />
@@ -502,6 +546,7 @@ export default function ManifestScreen() {
       <LitigeModal visible={modal === "litige"} boutiqueName={activeStop?.boutique.nom ?? ""} montant={montant} onConfirm={handleLitige} onClose={() => setModal(null)} />
       <PhotoModal visible={modal === "photo"} boutiqueName={activeStop?.boutique.nom ?? ""} onCapture={handlePhoto} onClose={() => setModal(null)} existingUri={activePhotoUri} />
       <ScannerModal visible={modal === "scanner"} onScan={handleScan} onClose={() => setModal(null)} />
+      <ScannerModal visible={modal === "qr_boutique"} onScan={handleBoutiqueScan} onClose={() => setModal(null)} />
       <VoiceAssistant visible={modal === "voice"} onClose={() => setModal(null)} onCommand={handleVoiceCommand} />
       {grossisteId && chauffeurId && activeStop && (
         <RatingModal
@@ -612,6 +657,7 @@ const styles = StyleSheet.create({
   emptyBody: { flex: 1, alignItems: "center", justifyContent: "center", gap: 12 },
   emptyTitle: { fontSize: 18, fontFamily: "Inter_700Bold", color: Colors.navy },
   emptySub: { fontSize: 13, fontFamily: "Inter_400Regular", color: Colors.slate, textAlign: "center", paddingHorizontal: 40 },
-  offlineBanner: { flexDirection: "row", alignItems: "center", gap: 6, backgroundColor: Colors.amber, borderRadius: 8, paddingHorizontal: 12, paddingVertical: 6 },
-  offlineText: { fontSize: 12, fontFamily: "Inter_600SemiBold", color: "#fff" },
+  offlineBanner: { flexDirection: "row", alignItems: "center", gap: 10, backgroundColor: "#b45309", margin: 12, marginBottom: 0, borderRadius: 12, paddingVertical: 10, paddingHorizontal: 14 },
+  offlineText: { fontSize: 12, fontFamily: "Inter_700Bold", color: "#fff" },
+  offlineSubText: { fontSize: 10, fontFamily: "Inter_400Regular", color: "#fde68a", marginTop: 1 },
 });

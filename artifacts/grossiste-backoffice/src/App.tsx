@@ -21,6 +21,14 @@ import Carte from "@/pages/Carte";
 import Commandes from "@/pages/Commandes";
 import Rapprochement from "@/pages/Rapprochement";
 import Documents from "@/pages/Documents";
+import DashboardFinancier from "@/pages/DashboardFinancier";
+import Retours from "@/pages/Retours";
+import Promotions from "@/pages/Promotions";
+import Factures from "@/pages/Factures";
+import Depots from "@/pages/Depots";
+import Conges from "@/pages/Conges";
+import ScoringChauffeur from "@/pages/ScoringChauffeur";
+import PlanificationIA from "@/pages/PlanificationIA";
 
 const queryClient = new QueryClient();
 
@@ -43,14 +51,22 @@ function AuthenticatedApp() {
           <Route path="/tournees" component={Tournees} />
           <Route path="/tournees/:id" component={TourneeDetails} />
           <Route path="/livraisons" component={Livraisons} />
+          <Route path="/commandes" component={Commandes} />
+          <Route path="/documents" component={Documents} />
+          <Route path="/rapprochement" component={Rapprochement} />
+          <Route path="/carte" component={Carte} />
+          <Route path="/rapports" component={Rapports} />
           <Route path="/credit-finance" component={CreditFinance} />
           <Route path="/intelligence" component={Intelligence} />
           <Route path="/notation" component={Notation} />
-          <Route path="/rapports" component={Rapports} />
-          <Route path="/carte" component={Carte} />
-          <Route path="/commandes" component={Commandes} />
-          <Route path="/rapprochement" component={Rapprochement} />
-          <Route path="/documents" component={Documents} />
+          <Route path="/dashboard-financier" component={DashboardFinancier} />
+          <Route path="/retours" component={Retours} />
+          <Route path="/promotions" component={Promotions} />
+          <Route path="/factures" component={Factures} />
+          <Route path="/depots" component={Depots} />
+          <Route path="/conges" component={Conges} />
+          <Route path="/scoring" component={ScoringChauffeur} />
+          <Route path="/planification-ia" component={PlanificationIA} />
           <Route>
             <div className="flex flex-col items-center justify-center py-24 text-center">
               <h2 className="text-4xl font-display font-bold text-slate-800 mb-2">404</h2>

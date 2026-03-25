@@ -535,6 +535,7 @@ function Commander() {
             style={{ ...S.input, paddingLeft: 40 }} />
           <span style={{ position: "absolute", left: 14, top: "50%", transform: "translateY(-50%)", color: "#64748b" }}>🔍</span>
         </div>
+        <PromoBanner onApply={(code) => { alert(`Code "${code}" copié ! Il sera appliqué à votre prochaine commande.`); }} />
         <div style={{ display: "flex", gap: 8, overflowX: "auto", paddingBottom: 4 }}>
           <button onClick={() => setActiveCateg("all")} style={{ background: activeCateg === "all" ? "#f97316" : "#1e293b", border: "none", borderRadius: 20, padding: "6px 14px", color: activeCateg === "all" ? "#fff" : "#94a3b8", cursor: "pointer", whiteSpace: "nowrap", fontSize: 13, fontWeight: 600 }}>Tout</button>
           {categories.map((c: any) => (
@@ -1471,9 +1472,119 @@ function DocumentsBoutiquier() {
   );
 }
 
+// ─── NOTIFICATIONS ────────────────────────────────────────────────────────────
+
+interface Notif { id: number; titre: string; message: string; type: string; lu: boolean; createdAt: string; }
+
+const NOTIF_ICONS: Record<string, string> = {
+  livraison: "📦", paiement: "💰", promotion: "🎁", alerte: "⚠️", info: "ℹ️", commande: "🛒"
+};
+
+function Notifications() {
+  const { auth } = useAuth();
+  const [notifs, setNotifs] = useState<Notif[]>([
+    { id: 1, titre: "Nouvelle livraison prévue", message: "Votre commande #BC-2024-0042 est en cours de préparation.", type: "livraison", lu: false, createdAt: new Date(Date.now() - 20 * 60000).toISOString() },
+    { id: 2, titre: "Promotion spéciale !", message: "Utilisez le code PROMO10 pour 10% de réduction sur votre prochaine commande.", type: "promotion", lu: false, createdAt: new Date(Date.now() - 60 * 60000).toISOString() },
+    { id: 3, titre: "Paiement confirmé", message: "Votre règlement de 45 000 FCFA a bien été enregistré.", type: "paiement", lu: true, createdAt: new Date(Date.now() - 120 * 60000).toISOString() },
+    { id: 4, titre: "Livreur en route", message: "Ibrahima Sow est en chemin vers votre boutique. Temps estimé : 25 min.", type: "livraison", lu: true, createdAt: new Date(Date.now() - 180 * 60000).toISOString() },
+    { id: 5, titre: "Rappel de solde", message: "Votre solde crédit est de 12 000 FCFA. Réglez avant le 30 pour maintenir votre limite.", type: "alerte", lu: false, createdAt: new Date(Date.now() - 240 * 60000).toISOString() },
+  ]);
+
+  const markAll = () => setNotifs(n => n.map(x => ({ ...x, lu: true })));
+  const markOne = (id: number) => setNotifs(n => n.map(x => x.id === id ? { ...x, lu: true } : x));
+  const unread = notifs.filter(n => !n.lu).length;
+
+  function ago(d: string) {
+    const s = (Date.now() - new Date(d).getTime()) / 1000;
+    if (s < 60) return "À l'instant";
+    if (s < 3600) return `il y a ${Math.floor(s / 60)} min`;
+    if (s < 86400) return `il y a ${Math.floor(s / 3600)}h`;
+    return new Date(d).toLocaleDateString("fr-FR");
+  }
+
+  return (
+    <div style={{ padding: "0 16px 16px" }}>
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }}>
+        <div>
+          <h2 style={{ color: "#fff", fontSize: 20, fontWeight: 800, margin: 0 }}>🔔 Notifications</h2>
+          {unread > 0 && <p style={{ color: "#f97316", fontSize: 12, margin: "4px 0 0", fontWeight: 600 }}>{unread} non lue(s)</p>}
+        </div>
+        {unread > 0 && (
+          <button onClick={markAll} style={{ background: "#1e293b", border: "1px solid #334155", borderRadius: 10, padding: "8px 14px", color: "#94a3b8", fontSize: 13, fontWeight: 600, cursor: "pointer" }}>
+            Tout marquer lu
+          </button>
+        )}
+      </div>
+
+      <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+        {notifs.map(n => (
+          <div key={n.id} onClick={() => markOne(n.id)} style={{ background: n.lu ? "#1e293b" : "#1e293b", border: n.lu ? "1px solid #1e293b" : "1px solid #f97316", borderRadius: 16, padding: 16, cursor: "pointer", opacity: n.lu ? 0.7 : 1, position: "relative" }}>
+            {!n.lu && <div style={{ position: "absolute", top: 14, right: 14, width: 8, height: 8, borderRadius: 4, background: "#f97316" }} />}
+            <div style={{ display: "flex", gap: 12, alignItems: "flex-start" }}>
+              <div style={{ fontSize: 28, lineHeight: 1 }}>{NOTIF_ICONS[n.type] || "📩"}</div>
+              <div style={{ flex: 1 }}>
+                <div style={{ color: "#fff", fontWeight: 700, fontSize: 14, marginBottom: 4 }}>{n.titre}</div>
+                <div style={{ color: "#94a3b8", fontSize: 13 }}>{n.message}</div>
+                <div style={{ color: "#475569", fontSize: 11, marginTop: 8 }}>{ago(n.createdAt)}</div>
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+// ─── PROMOS BANNER ────────────────────────────────────────────────────────────
+
+const DEMO_PROMOS = [
+  { id: 1, code: "PROMO10", description: "10% de réduction sur votre prochaine commande", reduction: 10, type: "pourcentage", dateExpiration: new Date(Date.now() + 7 * 86400000).toISOString() },
+  { id: 2, code: "BIENVENUE", description: "Remise de 2 500 FCFA pour les nouveaux clients", reduction: 2500, type: "montant_fixe", dateExpiration: new Date(Date.now() + 30 * 86400000).toISOString() },
+];
+
+function PromoBanner({ onApply }: { onApply: (code: string) => void }) {
+  const [open, setOpen] = useState(false);
+  if (DEMO_PROMOS.length === 0) return null;
+  return (
+    <div style={{ marginBottom: 12 }}>
+      <button onClick={() => setOpen(o => !o)} style={{ width: "100%", background: "linear-gradient(135deg, #f9731620, #f97316)", border: "1px solid #f97316", borderRadius: 14, padding: "12px 16px", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+          <span style={{ fontSize: 22 }}>🎁</span>
+          <div style={{ textAlign: "left" }}>
+            <div style={{ color: "#fff", fontWeight: 700, fontSize: 14 }}>Codes promo disponibles</div>
+            <div style={{ color: "#fed7aa", fontSize: 12 }}>{DEMO_PROMOS.length} offre(s) active(s) — Appuyez pour voir</div>
+          </div>
+        </div>
+        <span style={{ color: "#fff", fontSize: 18 }}>{open ? "▲" : "▼"}</span>
+      </button>
+      {open && (
+        <div style={{ background: "#1e293b", border: "1px solid #334155", borderRadius: "0 0 14px 14px", overflow: "hidden" }}>
+          {DEMO_PROMOS.map(p => (
+            <div key={p.id} style={{ padding: "12px 16px", borderTop: "1px solid #334155", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+              <div>
+                <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 4 }}>
+                  <span style={{ background: "#f97316", color: "#fff", borderRadius: 8, padding: "2px 10px", fontSize: 12, fontWeight: 800, fontFamily: "monospace" }}>{p.code}</span>
+                  <span style={{ color: "#f97316", fontWeight: 700, fontSize: 14 }}>
+                    -{p.type === "pourcentage" ? `${p.reduction}%` : `${p.reduction.toLocaleString("fr-FR")} FCFA`}
+                  </span>
+                </div>
+                <div style={{ color: "#94a3b8", fontSize: 12 }}>{p.description}</div>
+                <div style={{ color: "#475569", fontSize: 11, marginTop: 2 }}>Expire le {new Date(p.dateExpiration).toLocaleDateString("fr-FR")}</div>
+              </div>
+              <button onClick={() => { onApply(p.code); setOpen(false); }} style={{ background: "#f97316", color: "#fff", border: "none", borderRadius: 10, padding: "8px 14px", fontSize: 13, fontWeight: 700, cursor: "pointer", whiteSpace: "nowrap" }}>
+                Utiliser
+              </button>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
 // ─── MAIN APP ─────────────────────────────────────────────────────────────────
 
-type Tab = "dashboard" | "commander" | "suivi" | "livraisons" | "wallet" | "chat" | "fidelite" | "profil" | "documents";
+type Tab = "dashboard" | "commander" | "suivi" | "livraisons" | "wallet" | "chat" | "fidelite" | "profil" | "documents" | "notifications";
 
 function MobileApp() {
   const { auth } = useAuth();
@@ -1501,6 +1612,10 @@ function MobileApp() {
           <div style={{ color: "#fff", fontWeight: 800, fontSize: 17 }}>{auth.boutiqueNom}</div>
         </div>
         <div style={{ display: "flex", gap: 8 }}>
+          <button onClick={() => setTab("notifications")} style={{ width: 38, height: 38, borderRadius: 19, background: tab === "notifications" ? "#f9731630" : "#1e293b", border: tab === "notifications" ? "1.5px solid #f97316" : "none", cursor: "pointer", fontSize: 18, position: "relative" }}>
+            🔔
+            <span style={{ position: "absolute", top: 4, right: 4, width: 8, height: 8, borderRadius: 4, background: "#f97316", display: "block" }} />
+          </button>
           <button onClick={() => setTab("chat")} style={{ width: 38, height: 38, borderRadius: 19, background: tab === "chat" ? "#1e293b" : "#1e293b", border: "none", cursor: "pointer", fontSize: 18 }}>💬</button>
           <button onClick={() => setTab("documents")} style={{ width: 38, height: 38, borderRadius: 19, background: tab === "documents" ? "#f9731625" : "#1e293b", border: tab === "documents" ? "1.5px solid #f97316" : "none", cursor: "pointer", fontSize: 18 }}>📂</button>
           <button onClick={() => setTab("fidelite")} style={{ width: 38, height: 38, borderRadius: 19, background: "#f9731620", border: "none", cursor: "pointer", fontSize: 18 }}>⭐</button>
@@ -1518,6 +1633,7 @@ function MobileApp() {
         {tab === "fidelite" && <Fidelite />}
         {tab === "profil" && <Profil />}
         {tab === "documents" && <DocumentsBoutiquier />}
+        {tab === "notifications" && <Notifications />}
       </div>
 
       {/* Bottom Nav */}

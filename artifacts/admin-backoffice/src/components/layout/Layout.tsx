@@ -14,6 +14,8 @@ import {
   Bell,
   Search,
   Settings,
+  Shield,
+  FileBarChart,
 } from "lucide-react";
 
 const navItems = [
@@ -22,6 +24,8 @@ const navItems = [
   { name: "Tournées Globales", href: "/tournees", icon: Map },
   { name: "Livraisons", href: "/livraisons", icon: PackageCheck },
   { name: "Paramètres Système", href: "/parametres", icon: Settings },
+  { name: "Journal d'Audit", href: "/audit", icon: Shield },
+  { name: "Rapport Hebdo", href: "/rapport-hebdo", icon: FileBarChart },
 ];
 
 const innovationItems = [

@@ -10,6 +10,8 @@ import Tournees from "./pages/Tournees";
 import Livraisons from "./pages/Livraisons";
 import Benchmark from "./pages/Benchmark";
 import Parametres from "./pages/Parametres";
+import AuditTrail from "./pages/AuditTrail";
+import RapportHebdo from "./pages/RapportHebdo";
 import NotFound from "./pages/not-found";
 
 const queryClient = new QueryClient({
@@ -30,6 +32,8 @@ function Router() {
       <Route path="/livraisons" component={Livraisons} />
       <Route path="/benchmark" component={Benchmark} />
       <Route path="/parametres" component={Parametres} />
+      <Route path="/audit" component={AuditTrail} />
+      <Route path="/rapport-hebdo" component={RapportHebdo} />
       <Route component={NotFound} />
     </Switch>
   );

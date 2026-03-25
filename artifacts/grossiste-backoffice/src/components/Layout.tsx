@@ -3,7 +3,9 @@ import { Link, useLocation } from "wouter";
 import {
   LayoutDashboard, Users, Store, Package, Truck, MapPin,
   Menu, X, Building2, CreditCard, Brain, Star, BarChart3,
-  Navigation, ShoppingCart, GitMerge, LogOut, FileText
+  Navigation, ShoppingCart, GitMerge, LogOut, FileText,
+  RotateCcw, Tag, Receipt, Warehouse, CalendarOff, Trophy,
+  Route, DollarSign
 } from "lucide-react";
 import { useGrossiste } from "@/context/GrossisteContext";
 import { useGrossistes } from "@/hooks/use-grossistes";
@@ -27,6 +29,17 @@ const innovationItems = [
   { href: "/credit-finance", label: "Finance & Crédit", icon: CreditCard },
   { href: "/intelligence", label: "Intelligence IA", icon: Brain },
   { href: "/notation", label: "Notation Mutuelle", icon: Star },
+];
+
+const newItems = [
+  { href: "/dashboard-financier", label: "Dashboard Financier", icon: DollarSign },
+  { href: "/retours", label: "Retours Marchandises", icon: RotateCcw },
+  { href: "/promotions", label: "Codes Promo", icon: Tag },
+  { href: "/factures", label: "Facturation", icon: Receipt },
+  { href: "/depots", label: "Dépôts", icon: Warehouse },
+  { href: "/conges", label: "Congés Livreurs", icon: CalendarOff },
+  { href: "/scoring", label: "Scoring Livreurs", icon: Trophy },
+  { href: "/planification-ia", label: "Planification IA", icon: Route },
 ];
 
 const bottomNavItems = [
@@ -99,6 +112,27 @@ export function Layout({ children }: { children: React.ReactNode }) {
           <span className="w-2 h-2 rounded-full bg-primary animate-pulse inline-block" /> Innovation
         </div>
         {innovationItems.map((item) => {
+          const active = isActive(item.href);
+          const Icon = item.icon;
+          return (
+            <Link key={item.href} href={item.href}>
+              <div
+                onClick={() => setMobileMenuOpen(false)}
+                className={cn(
+                  "flex items-center gap-3 px-4 py-3 rounded-xl font-semibold transition-all duration-200 cursor-pointer",
+                  active ? "bg-primary text-white shadow-lg shadow-primary/20" : "text-slate-400 hover:text-white hover:bg-slate-800/50"
+                )}
+              >
+                <Icon className={cn("w-5 h-5", active ? "text-white" : "text-slate-500")} />
+                {item.label}
+              </div>
+            </Link>
+          );
+        })}
+        <div className="text-xs font-bold text-slate-500 uppercase tracking-wider px-2 pt-3 pb-1 flex items-center gap-1.5">
+          <span className="w-2 h-2 rounded-full bg-emerald-400 inline-block" /> Nouveau
+        </div>
+        {newItems.map((item) => {
           const active = isActive(item.href);
           const Icon = item.icon;
           return (
