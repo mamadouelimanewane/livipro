@@ -1,0 +1,1164 @@
+openapi: 3.1.0
+info:
+  title: Api
+  version: 1.0.0
+  description: LiviPro B2B - API for Admin and Grossiste backoffices
+servers:
+  - url: /api
+    description: Base API path
+tags:
+  - name: health
+    description: Health operations
+  - name: admin
+    description: Admin backoffice operations
+  - name: grossistes
+    description: Grossiste management
+  - name: chauffeurs
+    description: Driver management
+  - name: boutiques
+    description: Client store management
+  - name: produits
+    description: Product management
+  - name: tournees
+    description: Delivery tour management
+  - name: livraisons
+    description: Delivery management
+paths:
+  /healthz:
+    get:
+      operationId: healthCheck
+      tags: [health]
+      summary: Health check
+      responses:
+        "200":
+          description: Healthy
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HealthStatus"
+
+  /admin/stats:
+    get:
+      operationId: getAdminStats
+      tags: [admin]
+      summary: Get global admin statistics
+      responses:
+        "200":
+          description: Global stats
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AdminStats"
+
+  /admin/grossistes:
+    get:
+      operationId: listGrossistes
+      tags: [grossistes]
+      summary: List all grossistes
+      responses:
+        "200":
+          description: List of grossistes
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Grossiste"
+    post:
+      operationId: createGrossiste
+      tags: [grossistes]
+      summary: Create a grossiste
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateGrossisteInput"
+      responses:
+        "201":
+          description: Created grossiste
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Grossiste"
+
+  /admin/grossistes/{id}:
+    get:
+      operationId: getGrossiste
+      tags: [grossistes]
+      summary: Get a grossiste by ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Grossiste details
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Grossiste"
+        "404":
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+    put:
+      operationId: updateGrossiste
+      tags: [grossistes]
+      summary: Update a grossiste
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateGrossisteInput"
+      responses:
+        "200":
+          description: Updated grossiste
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Grossiste"
+    delete:
+      operationId: deleteGrossiste
+      tags: [grossistes]
+      summary: Delete a grossiste
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Deleted
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SuccessResponse"
+
+  /grossistes/{grossisteId}/stats:
+    get:
+      operationId: getGrossisteStats
+      tags: [grossistes]
+      summary: Get dashboard stats for a grossiste
+      parameters:
+        - name: grossisteId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Grossiste stats
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GrossisteStats"
+
+  /grossistes/{grossisteId}/chauffeurs:
+    get:
+      operationId: listChauffeurs
+      tags: [chauffeurs]
+      summary: List chauffeurs for a grossiste
+      parameters:
+        - name: grossisteId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: List of chauffeurs
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Chauffeur"
+    post:
+      operationId: createChauffeur
+      tags: [chauffeurs]
+      summary: Create a chauffeur
+      parameters:
+        - name: grossisteId
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateChauffeurInput"
+      responses:
+        "201":
+          description: Created chauffeur
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Chauffeur"
+
+  /grossistes/{grossisteId}/chauffeurs/{chauffeurId}:
+    put:
+      operationId: updateChauffeur
+      tags: [chauffeurs]
+      summary: Update a chauffeur
+      parameters:
+        - name: grossisteId
+          in: path
+          required: true
+          schema:
+            type: integer
+        - name: chauffeurId
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateChauffeurInput"
+      responses:
+        "200":
+          description: Updated chauffeur
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Chauffeur"
+    delete:
+      operationId: deleteChauffeur
+      tags: [chauffeurs]
+      summary: Delete a chauffeur
+      parameters:
+        - name: grossisteId
+          in: path
+          required: true
+          schema:
+            type: integer
+        - name: chauffeurId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Deleted
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SuccessResponse"
+
+  /grossistes/{grossisteId}/boutiques:
+    get:
+      operationId: listBoutiques
+      tags: [boutiques]
+      summary: List boutiques for a grossiste
+      parameters:
+        - name: grossisteId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: List of boutiques
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Boutique"
+    post:
+      operationId: createBoutique
+      tags: [boutiques]
+      summary: Create a boutique client
+      parameters:
+        - name: grossisteId
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateBoutiqueInput"
+      responses:
+        "201":
+          description: Created boutique
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Boutique"
+
+  /grossistes/{grossisteId}/boutiques/{boutiqueId}:
+    put:
+      operationId: updateBoutique
+      tags: [boutiques]
+      summary: Update a boutique
+      parameters:
+        - name: grossisteId
+          in: path
+          required: true
+          schema:
+            type: integer
+        - name: boutiqueId
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateBoutiqueInput"
+      responses:
+        "200":
+          description: Updated boutique
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Boutique"
+    delete:
+      operationId: deleteBoutique
+      tags: [boutiques]
+      summary: Delete a boutique
+      parameters:
+        - name: grossisteId
+          in: path
+          required: true
+          schema:
+            type: integer
+        - name: boutiqueId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Deleted
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SuccessResponse"
+
+  /grossistes/{grossisteId}/produits:
+    get:
+      operationId: listProduits
+      tags: [produits]
+      summary: List products for a grossiste
+      parameters:
+        - name: grossisteId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: List of products
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Produit"
+    post:
+      operationId: createProduit
+      tags: [produits]
+      summary: Create a product
+      parameters:
+        - name: grossisteId
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateProduitInput"
+      responses:
+        "201":
+          description: Created product
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Produit"
+
+  /grossistes/{grossisteId}/produits/{produitId}:
+    put:
+      operationId: updateProduit
+      tags: [produits]
+      summary: Update a product
+      parameters:
+        - name: grossisteId
+          in: path
+          required: true
+          schema:
+            type: integer
+        - name: produitId
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateProduitInput"
+      responses:
+        "200":
+          description: Updated product
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Produit"
+    delete:
+      operationId: deleteProduit
+      tags: [produits]
+      summary: Delete a product
+      parameters:
+        - name: grossisteId
+          in: path
+          required: true
+          schema:
+            type: integer
+        - name: produitId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Deleted
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SuccessResponse"
+
+  /grossistes/{grossisteId}/tournees:
+    get:
+      operationId: listTournees
+      tags: [tournees]
+      summary: List delivery tours for a grossiste
+      parameters:
+        - name: grossisteId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: List of tournees
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Tournee"
+    post:
+      operationId: createTournee
+      tags: [tournees]
+      summary: Create a delivery tour
+      parameters:
+        - name: grossisteId
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateTourneeInput"
+      responses:
+        "201":
+          description: Created tournee
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Tournee"
+
+  /grossistes/{grossisteId}/tournees/{tourneeId}:
+    get:
+      operationId: getTournee
+      tags: [tournees]
+      summary: Get tournee details
+      parameters:
+        - name: grossisteId
+          in: path
+          required: true
+          schema:
+            type: integer
+        - name: tourneeId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Tournee details
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TourneeDetail"
+    put:
+      operationId: updateTourneeStatut
+      tags: [tournees]
+      summary: Update tournee status
+      parameters:
+        - name: grossisteId
+          in: path
+          required: true
+          schema:
+            type: integer
+        - name: tourneeId
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateTourneeStatutInput"
+      responses:
+        "200":
+          description: Updated tournee
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Tournee"
+
+  /grossistes/{grossisteId}/livraisons:
+    get:
+      operationId: listLivraisons
+      tags: [livraisons]
+      summary: List livraisons for a grossiste
+      parameters:
+        - name: grossisteId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: List of livraisons
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Livraison"
+
+  /admin/tournees:
+    get:
+      operationId: listAllTournees
+      tags: [admin, tournees]
+      summary: List all tournees across all grossistes
+      responses:
+        "200":
+          description: List of all tournees
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/TourneeWithGrossiste"
+
+  /admin/livraisons:
+    get:
+      operationId: listAllLivraisons
+      tags: [admin, livraisons]
+      summary: List all livraisons across all grossistes
+      responses:
+        "200":
+          description: List of all livraisons
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/LivraisonWithGrossiste"
+
+components:
+  schemas:
+    HealthStatus:
+      type: object
+      properties:
+        status:
+          type: string
+      required:
+        - status
+
+    ErrorResponse:
+      type: object
+      properties:
+        error:
+          type: string
+      required:
+        - error
+
+    SuccessResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        message:
+          type: string
+      required:
+        - success
+        - message
+
+    AdminStats:
+      type: object
+      properties:
+        totalGrossistes:
+          type: integer
+        totalChauffeurs:
+          type: integer
+        totalBoutiques:
+          type: integer
+        totalTournees:
+          type: integer
+        tourneesEnCours:
+          type: integer
+        livraisonsAujourdHui:
+          type: integer
+        chiffreAffairesMensuel:
+          type: number
+        tauxLivraisonReussi:
+          type: number
+      required:
+        - totalGrossistes
+        - totalChauffeurs
+        - totalBoutiques
+        - totalTournees
+        - tourneesEnCours
+        - livraisonsAujourdHui
+        - chiffreAffairesMensuel
+        - tauxLivraisonReussi
+
+    GrossisteStats:
+      type: object
+      properties:
+        totalChauffeurs:
+          type: integer
+        totalBoutiques:
+          type: integer
+        totalTournees:
+          type: integer
+        tourneesEnCours:
+          type: integer
+        livraisonsAujourdHui:
+          type: integer
+        chiffreAffairesMensuel:
+          type: number
+        tauxLivraisonReussi:
+          type: number
+      required:
+        - totalChauffeurs
+        - totalBoutiques
+        - totalTournees
+        - tourneesEnCours
+        - livraisonsAujourdHui
+        - chiffreAffairesMensuel
+        - tauxLivraisonReussi
+
+    Grossiste:
+      type: object
+      properties:
+        id:
+          type: integer
+        nom:
+          type: string
+        ville:
+          type: string
+        telephone:
+          type: string
+        email:
+          type: string
+        adresse:
+          type: string
+        statut:
+          type: string
+          enum: [actif, inactif, suspendu]
+        createdAt:
+          type: string
+          format: date-time
+      required:
+        - id
+        - nom
+        - ville
+        - telephone
+        - email
+        - adresse
+        - statut
+        - createdAt
+
+    CreateGrossisteInput:
+      type: object
+      properties:
+        nom:
+          type: string
+        ville:
+          type: string
+        telephone:
+          type: string
+        email:
+          type: string
+        adresse:
+          type: string
+      required:
+        - nom
+        - ville
+        - telephone
+        - email
+        - adresse
+
+    UpdateGrossisteInput:
+      type: object
+      properties:
+        nom:
+          type: string
+        ville:
+          type: string
+        telephone:
+          type: string
+        email:
+          type: string
+        adresse:
+          type: string
+        statut:
+          type: string
+          enum: [actif, inactif, suspendu]
+
+    Chauffeur:
+      type: object
+      properties:
+        id:
+          type: integer
+        grossisteId:
+          type: integer
+        nom:
+          type: string
+        prenom:
+          type: string
+        telephone:
+          type: string
+        permis:
+          type: string
+        statut:
+          type: string
+          enum: [disponible, en_tournee, inactif]
+        createdAt:
+          type: string
+          format: date-time
+      required:
+        - id
+        - grossisteId
+        - nom
+        - prenom
+        - telephone
+        - permis
+        - statut
+        - createdAt
+
+    CreateChauffeurInput:
+      type: object
+      properties:
+        nom:
+          type: string
+        prenom:
+          type: string
+        telephone:
+          type: string
+        permis:
+          type: string
+      required:
+        - nom
+        - prenom
+        - telephone
+        - permis
+
+    UpdateChauffeurInput:
+      type: object
+      properties:
+        nom:
+          type: string
+        prenom:
+          type: string
+        telephone:
+          type: string
+        permis:
+          type: string
+        statut:
+          type: string
+          enum: [disponible, en_tournee, inactif]
+
+    Boutique:
+      type: object
+      properties:
+        id:
+          type: integer
+        grossisteId:
+          type: integer
+        nom:
+          type: string
+        proprietaire:
+          type: string
+        adresse:
+          type: string
+        telephone:
+          type: string
+        limiteCredit:
+          type: number
+        soldeCredit:
+          type: number
+        statut:
+          type: string
+          enum: [actif, suspendu]
+        createdAt:
+          type: string
+          format: date-time
+      required:
+        - id
+        - grossisteId
+        - nom
+        - proprietaire
+        - adresse
+        - telephone
+        - limiteCredit
+        - soldeCredit
+        - statut
+        - createdAt
+
+    CreateBoutiqueInput:
+      type: object
+      properties:
+        nom:
+          type: string
+        proprietaire:
+          type: string
+        adresse:
+          type: string
+        telephone:
+          type: string
+        limiteCredit:
+          type: number
+      required:
+        - nom
+        - proprietaire
+        - adresse
+        - telephone
+        - limiteCredit
+
+    UpdateBoutiqueInput:
+      type: object
+      properties:
+        nom:
+          type: string
+        proprietaire:
+          type: string
+        adresse:
+          type: string
+        telephone:
+          type: string
+        limiteCredit:
+          type: number
+        statut:
+          type: string
+          enum: [actif, suspendu]
+
+    Produit:
+      type: object
+      properties:
+        id:
+          type: integer
+        grossisteId:
+          type: integer
+        nom:
+          type: string
+        categorie:
+          type: string
+        prixUnitaire:
+          type: number
+        unite:
+          type: string
+        stockDisponible:
+          type: integer
+        createdAt:
+          type: string
+          format: date-time
+      required:
+        - id
+        - grossisteId
+        - nom
+        - categorie
+        - prixUnitaire
+        - unite
+        - stockDisponible
+        - createdAt
+
+    CreateProduitInput:
+      type: object
+      properties:
+        nom:
+          type: string
+        categorie:
+          type: string
+        prixUnitaire:
+          type: number
+        unite:
+          type: string
+        stockDisponible:
+          type: integer
+      required:
+        - nom
+        - categorie
+        - prixUnitaire
+        - unite
+        - stockDisponible
+
+    UpdateProduitInput:
+      type: object
+      properties:
+        nom:
+          type: string
+        categorie:
+          type: string
+        prixUnitaire:
+          type: number
+        unite:
+          type: string
+        stockDisponible:
+          type: integer
+
+    Tournee:
+      type: object
+      properties:
+        id:
+          type: integer
+        grossisteId:
+          type: integer
+        chauffeurId:
+          type: integer
+        chauffeurNom:
+          type: string
+        date:
+          type: string
+          format: date
+        statut:
+          type: string
+          enum: [planifiee, en_cours, terminee, annulee]
+        nombreArrets:
+          type: integer
+        totalLivraisons:
+          type: number
+        createdAt:
+          type: string
+          format: date-time
+      required:
+        - id
+        - grossisteId
+        - chauffeurId
+        - chauffeurNom
+        - date
+        - statut
+        - nombreArrets
+        - totalLivraisons
+        - createdAt
+
+    TourneeDetail:
+      type: object
+      properties:
+        id:
+          type: integer
+        grossisteId:
+          type: integer
+        chauffeurId:
+          type: integer
+        chauffeurNom:
+          type: string
+        date:
+          type: string
+          format: date
+        statut:
+          type: string
+          enum: [planifiee, en_cours, terminee, annulee]
+        nombreArrets:
+          type: integer
+        totalLivraisons:
+          type: number
+        livraisons:
+          type: array
+          items:
+            $ref: "#/components/schemas/Livraison"
+        createdAt:
+          type: string
+          format: date-time
+      required:
+        - id
+        - grossisteId
+        - chauffeurId
+        - chauffeurNom
+        - date
+        - statut
+        - nombreArrets
+        - totalLivraisons
+        - livraisons
+        - createdAt
+
+    TourneeWithGrossiste:
+      type: object
+      properties:
+        id:
+          type: integer
+        grossisteId:
+          type: integer
+        grossisteNom:
+          type: string
+        chauffeurId:
+          type: integer
+        chauffeurNom:
+          type: string
+        date:
+          type: string
+          format: date
+        statut:
+          type: string
+          enum: [planifiee, en_cours, terminee, annulee]
+        nombreArrets:
+          type: integer
+        totalLivraisons:
+          type: number
+        createdAt:
+          type: string
+          format: date-time
+      required:
+        - id
+        - grossisteId
+        - grossisteNom
+        - chauffeurId
+        - chauffeurNom
+        - date
+        - statut
+        - nombreArrets
+        - totalLivraisons
+        - createdAt
+
+    CreateTourneeInput:
+      type: object
+      properties:
+        chauffeurId:
+          type: integer
+        date:
+          type: string
+          format: date
+        boutiqueIds:
+          type: array
+          items:
+            type: integer
+      required:
+        - chauffeurId
+        - date
+        - boutiqueIds
+
+    UpdateTourneeStatutInput:
+      type: object
+      properties:
+        statut:
+          type: string
+          enum: [planifiee, en_cours, terminee, annulee]
+      required:
+        - statut
+
+    Livraison:
+      type: object
+      properties:
+        id:
+          type: integer
+        tourneeId:
+          type: integer
+        boutiqueId:
+          type: integer
+        boutiqueNom:
+          type: string
+        statut:
+          type: string
+          enum: [en_attente, livree, echec, litige]
+        montantTotal:
+          type: number
+        methodePaiement:
+          type: string
+          enum: [especes, mobile_money, credit]
+        createdAt:
+          type: string
+          format: date-time
+      required:
+        - id
+        - tourneeId
+        - boutiqueId
+        - boutiqueNom
+        - statut
+        - montantTotal
+        - methodePaiement
+        - createdAt
+
+    LivraisonWithGrossiste:
+      type: object
+      properties:
+        id:
+          type: integer
+        tourneeId:
+          type: integer
+        grossisteId:
+          type: integer
+        grossisteNom:
+          type: string
+        boutiqueId:
+          type: integer
+        boutiqueNom:
+          type: string
+        statut:
+          type: string
+          enum: [en_attente, livree, echec, litige]
+        montantTotal:
+          type: number
+        methodePaiement:
+          type: string
+          enum: [especes, mobile_money, credit]
+        createdAt:
+          type: string
+          format: date-time
+      required:
+        - id
+        - tourneeId
+        - grossisteId
+        - grossisteNom
+        - boutiqueId
+        - boutiqueNom
+        - statut
+        - montantTotal
+        - methodePaiement
+        - createdAt

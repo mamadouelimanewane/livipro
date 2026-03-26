@@ -1,0 +1,13 @@
+packages:
+  "lucide-react": "Icons for UI"
+  "recharts": "Beautiful charts for the dashboard"
+  "framer-motion": "Smooth animations for modals and page transitions"
+  "date-fns": "Date formatting utilities"
+  "clsx": "Class merging"
+  "tailwind-merge": "Tailwind class merging utility"
+  "sonner": "Elegant toast notifications"
+
+images:
+  - path: "artifacts/grossiste-backoffice/public/images/logo.png"
+    description: "Minimalist geometric logo mark for a modern logistics and delivery company, vibrant orange color, transparent background"
+    aspect_ratio: "1:1"
