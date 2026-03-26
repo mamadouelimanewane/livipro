@@ -1,5 +1,5 @@
 import { useState, useRef } from 'react'
-import { CheckCircle, Truck, Package, Banknote, PhoneCall, CheckSquare, ScanBarcode, PenTool, X, MapPin, QrCode, Sparkles, Receipt, AlertTriangle, FileText, Send } from 'lucide-react'
+import { CheckCircle, Truck, Package, Banknote, PhoneCall, CheckSquare, ScanBarcode, PenTool, X, MapPin, QrCode, Sparkles, Receipt, AlertTriangle, FileText, Send, ShieldCheck } from 'lucide-react'
 import SignatureCanvas from 'react-signature-canvas'
 import MapView from './components/MapView'
 import './index.css'

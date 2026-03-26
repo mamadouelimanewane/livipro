@@ -15,7 +15,8 @@ import {
   Coins,
   Gavel,
   History,
-  Sparkles
+  Sparkles,
+  Truck
 } from "lucide-react";
 
 // --- SIMULATION DATA ---
