@@ -16,14 +16,9 @@ import {
 import LiviFleetManager from "./LiviFleetManager";
 import LiviBranchManager from "./LiviBranchManager";
 import LiviDirectory from "./LiviDirectory";
+import { PRODUCTS } from "./LiviData";
 
-// --- SIMULATION DATA ---
-const PRODUCTS = [
-  { id: "p1", name: "Lait Nido (Carton 12)", price: 45000, stock: 450, promo: false, category: "Laitier" },
-  { id: "p2", name: "Huile Dinor 5L (Carton)", price: 38500, stock: 120, promo: true, category: "Alimentaire" },
-  { id: "p3", name: "Riz Parfumé (Sac 50kg)", price: 21500, stock: 800, promo: false, category: "Céréales" },
-  { id: "p4", name: "Sucre St Louis (Fardeau)", price: 21000, stock: 15, promo: false, category: "Alimentaire" },
-];
+// --- SIMULATION DATA (MOVED TO LIVIDATA) ---
 
 const DARK_NAVY = "#0f172a";
 const GOLD = "#f59e0b";
