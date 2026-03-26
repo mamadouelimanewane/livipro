@@ -3,6 +3,7 @@ import DriverApp from './DriverApp'
 import ClientPortal from './ClientPortal'
 import AssociatesBank from './AssociatesBank'
 import CommModule from './CommModule'
+import AdminPlatform from './AdminPlatform'
 import './index.css'
 
 function DemoHome() {
@@ -27,16 +28,23 @@ function DemoHome() {
             🏦 Banque des Associés (Fintech)
           </div>
         </Link>
-        <Link to="/comm" style={{ textDecoration: 'none' }}>
-          <div style={{ background: '#25D366', color: '#fff', padding: 18, borderRadius: 20, boxShadow: '0 10px 30px rgba(37, 211, 102, 0.3)', fontWeight: 800, fontSize: 16 }}>
-            💬 Hub Communication (IA & Meet)
-          </div>
-        </Link>
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
+          <Link to="/comm" style={{ textDecoration: 'none' }}>
+            <div style={{ background: '#25D366', color: '#fff', padding: 18, borderRadius: 20, boxShadow: '0 10px 30px rgba(37, 211, 102, 0.3)', fontWeight: 800, fontSize: 13 }}>
+              💬 Communication
+            </div>
+          </Link>
+          <Link to="/admin" style={{ textDecoration: 'none' }}>
+            <div style={{ background: '#64748b', color: '#fff', padding: 18, borderRadius: 20, boxShadow: '0 10px 30px rgba(100, 116, 139, 0.3)', fontWeight: 800, fontSize: 13 }}>
+              ⚙️ Admin Console
+            </div>
+          </Link>
+        </div>
       </div>
       
       <div style={{ marginTop: 40, fontSize: 12, color: '#94a3b8', fontWeight: 600, display: 'flex', alignItems: 'center', gap: 8 }}>
-        <span style={{ padding: '4px 8px', background: '#e2e8f0', borderRadius: 6 }}>ALPHA v1.5</span>
-        <span>• Intégration IA & WhatsApp</span>
+        <span style={{ padding: '4px 8px', background: '#e2e8f0', borderRadius: 6 }}>ALPHA v1.8</span>
+        <span>• Console Master Admin</span>
       </div>
     </div>
   )
@@ -51,6 +59,7 @@ export default function App() {
         <Route path="/boutique" element={<ClientPortal />} />
         <Route path="/bank" element={<AssociatesBank />} />
         <Route path="/comm" element={<CommModule />} />
+        <Route path="/admin" element={<AdminPlatform />} />
       </Routes>
     </BrowserRouter>
   )
