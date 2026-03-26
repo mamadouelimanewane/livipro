@@ -1,4 +1,6 @@
 import { useState, useEffect } from "react";
+import LoanManager from "./LoanManager";
+import BankPerformance from "./BankPerformance";
 import { 
   Building2, 
   Users, 
@@ -16,7 +18,12 @@ import {
   Gavel,
   History,
   Sparkles,
-  Truck
+  Truck,
+  FileText,
+  Zap,
+  Lock,
+  Database,
+  ArrowRight
 } from "lucide-react";
 
 // --- SIMULATION DATA ---
@@ -27,6 +34,12 @@ const PARTNERS = [
   { id: "g2", name: "COFISAC Senegal", type: "Wholesaler", contribution: "15,000,000 FCFA", shares: "13%", score: 91, status: "Partner" },
 ];
 
+const SECURE_CHUNKS = [
+  { id: "DOC-9821", name: "Facture Grossiste #122", status: "Clôturé", date: "24/03/2026", hash: "SHA-256: 4f8x...99q" },
+  { id: "DOC-9822", name: "Bon de Livraison #441", status: "En Transit", date: "25/03/2026", hash: "SHA-256: 2a1z...77p" },
+  { id: "DOC-9823", name: "Ordre de Virement OM", status: "Signé (IA)", date: "26/03/2026", hash: "SHA-256: 9c0v...11x" },
+];
+
 const RESOLUTIONS = [
   { id: "r1", title: "Allocation Dividendes Flotte", description: "Distribuer 1,200,000 FCFA de profits générés par les camions TRN-X1 et TRN-X2 aux co-actionnaires Boutiques.", votesFor: "88%", votesAgainst: "2%", status: "Open", deadline: "Demain, 18h" },
   { id: "r2", title: "Baisse Taux Prêt Boutique", description: "Réduire le taux d'intérêt de 5% à 4.2% pour les boutiques ayant un score > 90.", votesFor: "95%", votesAgainst: "2%", status: "Approved", deadline: "Clôturé" },
@@ -35,6 +48,13 @@ const RESOLUTIONS = [
 const FLEET_STAKES = [
   { id: "TRN-X1", name: "Le Distributeur Rapide", stake: "5%", earnings: "45,000 FCFA / mois", fuelEfficiency: "98%", status: "En Route" },
   { id: "TRN-X2", name: "Le Frigo Solaire", stake: "2%", earnings: "18,500 FCFA / mois", fuelEfficiency: "92%", status: "Déchargement" },
+];
+
+const WHOLESALER_CATALOG = [
+  { id: "p1", name: "Lait Nido (Carton 12)", price: 45000, stock: 450, promo: false },
+  { id: "p2", name: "Huile Dinor 5L (Carton)", price: 38500, stock: 120, promo: true },
+  { id: "p3", name: "Riz Parfumé (Sac 50kg)", price: 21500, stock: 800, promo: false },
+  { id: "p4", name: "Sucre St Louis (Fardeau)", price: 21000, stock: 0, promo: false },
 ];
 
 const LOAN_HISTORY = [
@@ -56,7 +76,7 @@ const Badge = ({ children, color = "#64748b", bg = "#f1f5f9" }) => (
 );
 
 export default function AssociatesBank() {
-  const [view, setView] = useState("dashboard"); // dashboard | tontine | assembly | loans | fleet
+  const [view, setView] = useState("dashboard"); // dashboard | tontine | assembly | loans | fleet | catalog
   const [loanStep, setLoanStep] = useState("apply"); // apply | analyzing | result
   const [activeResolution, setActiveResolution] = useState(null);
   const [karmaRating, setKarmaRating] = useState(942); // Score de Karma Logistique
@@ -96,13 +116,16 @@ export default function AssociatesBank() {
         </div>
       </div>
 
+      <div style={{ padding: "0 20px", marginTop: 24, marginBottom: 24 }}>
+         <BankPerformance />
+      </div>
+
       {/* QUICK ACTIONS */}
-      <div style={{ padding: "0 20px", marginTop: -32, display: "grid", gridTemplateColumns: "1fr 1fr 1fr 1fr", gap: 12 }}>
+      <div style={{ padding: "0 20px", marginTop: -32, display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 12 }}>
          {[
-           { id: "fleet", icon: <Truck size={22} />, label: "Flotte", color: "#6366f1" },
            { id: "loans", icon: <HandCoins size={22} />, label: "Prêts IA", color: "#f59e0b" },
            { id: "assembly", icon: <Gavel size={22} />, label: "Karma", color: "#ec4899" },
-           { id: "stats", icon: <TrendingUp size={22} />, label: "Assets", color: "#10b981" }
+           { id: "fleet", icon: <Truck size={22} />, label: "Flotte", color: "#6366f1" }
          ].map(action => (
            <div key={action.id} onClick={() => setView(action.id)} style={{ cursor: "pointer", background: "#fff", borderRadius: 18, height: 80, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", boxShadow: "0 10px 25px rgba(0,0,0,0.05)", border: "1px solid #f1f5f9" }}>
               <div style={{ color: action.color, marginBottom: 6 }}>{action.icon}</div>
@@ -156,99 +179,15 @@ export default function AssociatesBank() {
   );
 
   const renderLoansPage = () => (
-    <div className="animate-fade-in" style={{ padding: 24, paddingBottom: 100 }}>
-       <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 24 }}>
+    <div className="animate-fade-in" style={{ paddingBottom: 100 }}>
+       <div style={{ padding: 24, paddingBottom: 0, display: "flex", alignItems: "center", gap: 12, marginBottom: 12 }}>
           <button onClick={() => setView("dashboard")} style={{ background: "none", border: "none" }}><ArrowLeft size={24} /></button>
           <h2 style={{ fontSize: 22, fontWeight: 900 }}>Prêts IA Boutiques</h2>
        </div>
 
-       {loanStep === "apply" && (
-         <>
-          <Card style={{ background: "linear-gradient(135deg, #f59e0b 0%, #d97706 100%)", color: "#fff", border: "none", marginBottom: 24 }}>
-             <Cpu size={32} style={{ marginBottom: 12 }} />
-             <div style={{ fontSize: 20, fontWeight: 900 }}>Algorithme de Crédit Prédictif</div>
-             <p style={{ fontSize: 13, marginTop: 8, opacity: 0.9, lineHeight: 1.5 }}>
-               En tant qu'associé Boutique, vous pouvez débloquer un prêt instantané basé sur voter historique logistique LiviPro.
-               <br/><br/>
-               • Ponctualité des déchargements<br/>
-               • Taux de litige <br/>
-               • Engagement dans la Tontine
-             </p>
-          </Card>
-
-          <div style={{ fontSize: 14, fontWeight: 800, marginBottom: 12 }}>Simuler une demande de prêt</div>
-          <div style={{ background: "#fff", borderRadius: 20, padding: 24, border: "2px solid #f1f5f9" }}>
-             <div style={{ marginBottom: 20 }}>
-               <label style={{ fontSize: 12, fontWeight: 700, color: "#64748b", textTransform: "uppercase" }}>Montant souhaité</label>
-               <div style={{ fontSize: 32, fontWeight: 900, color: "#0f172a", marginTop: 4 }}>500,000 <span style={{ fontSize: 16 }}>FCFA</span></div>
-               <input type="range" style={{ width: "100%", marginTop: 12, accentColor: GOLD_COLOR }} />
-             </div>
-             
-             <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 24, background: "#f8fafc", padding: 12, borderRadius: 12 }}>
-                <div><div style={{ fontSize: 10, color: "#94a3b8" }}>TAUX ASSOCIÉ</div><div style={{ fontSize: 15, fontWeight: 800 }}>4.2%</div></div>
-                <div><div style={{ fontSize: 10, color: "#94a3b8" }}>DURÉE</div><div style={{ fontSize: 15, fontWeight: 800 }}>6 Mois</div></div>
-                <div><div style={{ fontSize: 10, color: "#94a3b8" }}>MENSUALITÉ</div><div style={{ fontSize: 15, fontWeight: 800 }}>88.500 F</div></div>
-             </div>
-
-             <button onClick={triggerAiAudit} style={{ width: "100%", background: "#0f172a", color: "#fff", border: "none", padding: 18, borderRadius: 16, fontWeight: 900, fontSize: 16, display: "flex", alignItems: "center", justifyContent: "center", gap: 10 }}>
-                <Sparkles size={20} color={GOLD_COLOR} /> Lancer l'Audit IA
-             </button>
-          </div>
-         </>
-       )}
-
-       {loanStep === "analyzing" && (
-         <div style={{ textAlign: "center", padding: "40px 0" }}>
-            <div className="animate-spin" style={{ margin: "0 auto 30px", width: 80, height: 80, border: "4px solid #f1f5f9", borderTopColor: GOLD_COLOR, borderRadius: "50%" }}></div>
-            <h3 style={{ fontSize: 20, fontWeight: 900, marginBottom: 12 }}>Audit IA en cours...</h3>
-            <div style={{ fontSize: 14, color: "#64748b" }}>
-              Analyse des données logistiques de LiviPro...<br/>
-              Vérification des scores de Tontine...<br/>
-              Simulation de solvabilité...
-            </div>
-         </div>
-       )}
-
-       {loanStep === "result" && (
-         <div className="animate-slide-up">
-            <div style={{ background: "#ecfdf5", border: "1px solid #10b981", borderRadius: 24, padding: 24, textAlign: "center", marginBottom: 24 }}>
-               <div style={{ background: "#10b981", width: 64, height: 64, borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 16px" }}>
-                 <CheckCircle2 color="#fff" size={36} />
-               </div>
-               <h3 style={{ fontSize: 22, fontWeight: 900, color: "#065f46" }}>Prêt Pré-Approuvé !</h3>
-               <div style={{ fontSize: 14, color: "#065f46", opacity: 0.8, marginTop: 4 }}>Score de Solvabilité IA : 95/100 (A+)</div>
-            </div>
-
-            <Card style={{ marginBottom: 20 }}>
-               <div style={{ fontSize: 15, fontWeight: 800, marginBottom: 12 }}>Détails du Déblocage</div>
-               <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
-                  <div style={{ display: "flex", justifyContent: "space-between", fontSize: 14 }}><span style={{ color: "#64748b" }}>Fonds disponibles</span><span style={{ fontWeight: 800 }}>Instant-Bank LiviPro</span></div>
-                  <div style={{ display: "flex", justifyContent: "space-between", fontSize: 14 }}><span style={{ color: "#64748b" }}>Destination</span><span style={{ fontWeight: 800 }}>Wallet Supermarché Al-Amine</span></div>
-                  <div style={{ display: "flex", justifyContent: "space-between", fontSize: 14 }}><span style={{ color: "#64748b" }}>Garantie</span><span style={{ fontWeight: 800 }}>Shares Banque Associés</span></div>
-               </div>
-            </Card>
-
-            <button onClick={() => setLoanStep("apply")} style={{ width: "100%", background: "#10b981", color: "#fff", border: "none", padding: 18, borderRadius: 16, fontWeight: 900, fontSize: 16 }}>
-               Signer & Recevoir les Fonds
-            </button>
-         </div>
-       )}
-
-       <div style={{ marginTop: 40 }}>
-          <h3 style={{ fontSize: 17, fontWeight: 900, color: "#0f172a", marginBottom: 16 }}>Historique des Prêts</h3>
-          {LOAN_HISTORY.map(loan => (
-            <div key={loan.id} style={{ display: "flex", justifyContent: "space-between", padding: "16px 0", borderBottom: "1px solid #f1f5f9" }}>
-               <div>
-                 <div style={{ fontSize: 14, fontWeight: 800 }}>{loan.applicant}</div>
-                 <div style={{ fontSize: 12, color: "#64748b" }}>{loan.date} · Score {loan.aiScore}</div>
-               </div>
-               <div style={{ textAlign: "right" }}>
-                 <div style={{ fontSize: 14, fontWeight: 900 }}>{loan.amount}</div>
-                 <Badge color={loan.status === "Paid" ? EMERALD : "#3b82f6"} bg={loan.status === "Paid" ? "#ecfdf5" : "#eff6ff"}>{loan.status}</Badge>
-               </div>
-            </div>
-          ))}
-       </div>
+       <div style={{ padding: "0 24px", color: "#64748b", fontSize: 13, marginBottom: 20 }}>Gérez le cycle de vie des crédits accordés aux partenaires boutiques du réseau. Dossiers analysés par l'algorithme IA.</div>
+       
+       <LoanManager />
     </div>
   );
 
@@ -342,6 +281,88 @@ export default function AssociatesBank() {
     </div>
   );
 
+  const renderCatalogPage = () => (
+    <div className="animate-fade-in" style={{ padding: 24, paddingBottom: 100 }}>
+       <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 24 }}>
+          <button onClick={() => setView("dashboard")} style={{ background: "none", border: "none" }}><ArrowLeft size={24} /></button>
+          <h2 style={{ fontSize: 22, fontWeight: 900 }}>Catalogue de Vente</h2>
+       </div>
+
+       <div style={{ background: "#fff", borderRadius: 24, padding: 24, border: "1px solid #f1f5f9", marginBottom: 24 }}>
+         <div style={{ fontSize: 13, fontWeight: 700, color: "#64748b" }}>EXPOSITION DE PRIX</div>
+         <p style={{ fontSize: 13, color: "#64748b", marginTop: 4 }}>Fixez les prix applicables à l'ensemble du réseau de boutiques LiviPro.</p>
+       </div>
+
+       {WHOLESALER_CATALOG.map(item => (
+         <Card key={item.id} style={{ marginBottom: 16 }}>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+               <div>
+                  <div style={{ fontSize: 15, fontWeight: 800 }}>{item.name}</div>
+                  <div style={{ fontSize: 12, color: "#94a3b8" }}>Stock Entrepôt: {item.stock} CTN</div>
+               </div>
+               <div style={{ textAlign: "right" }}>
+                  <div style={{ fontSize: 18, fontWeight: 900, color: GOLD_COLOR }}>{item.price.toLocaleString()} F</div>
+                  <div style={{ fontSize: 10, color: "#10b981", fontWeight: 700 }}>Prix Associé</div>
+               </div>
+            </div>
+            
+            <div style={{ marginTop: 16, display: "flex", gap: 10 }}>
+               <button style={{ flex: 1, background: "#f8fafc", border: "1px solid #e2e8f0", padding: 10, borderRadius: 10, fontSize: 12, fontWeight: 700 }}>Modifier Prix</button>
+               <button style={{ background: item.promo ? "#fee2e2" : "#f1f5f9", color: item.promo ? "#ef4444" : "#64748b", border: "none", padding: "10px 16px", borderRadius: 10, fontSize: 12, fontWeight: 700 }}>
+                  {item.promo ? "En Promo" : "Activer Promo"}
+               </button>
+            </div>
+         </Card>
+       ))}
+
+       <button style={{ width: "100%", background: DARK_NAVY, color: "#fff", border: "none", padding: 18, borderRadius: 16, fontWeight: 900, fontSize: 15 }}>
+          Ajouter un nouveau produit
+       </button>
+    </div>
+  );
+
+  const renderArchivePage = () => (
+    <div className="animate-fade-in" style={{ padding: 24, paddingBottom: 100 }}>
+       <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 24 }}>
+          <button onClick={() => setView("dashboard")} style={{ background: "none", border: "none" }}><ArrowLeft size={24} /></button>
+          <h2 style={{ fontSize: 22, fontWeight: 900 }}>Flux SÉCURISÉ LiviPro</h2>
+       </div>
+
+       <div style={{ background: "linear-gradient(135deg, #0f172a 0%, #1e293b 100%)", borderRadius: 24, padding: 24, border: "1px solid #f1f5f9", marginBottom: 24, color: "#fff" }}>
+         <div style={{ display: "flex", alignItems: "center", gap: 10, color: GOLD_COLOR, marginBottom: 12 }}>
+            <Lock size={20} /> <div style={{ fontSize: 13, fontWeight: 800 }}>Intégrité Certifiée (Ledger)</div>
+         </div>
+         <p style={{ fontSize: 12, opacity: 0.8, lineHeight: 1.5 }}>Tous vos documents bancaires et logistiques sont archivés dans notre Vault chiffré. Chaque pièce dispose d'un sceau d'intégrité infalsifiable.</p>
+       </div>
+
+       {SECURE_CHUNKS.map(doc => (
+         <Card key={doc.id} style={{ marginBottom: 16 }}>
+            <div style={{ display: "flex", gap: 14 }}>
+               <div style={{ background: "#f8fafc", width: 44, height: 44, borderRadius: 12, display: "flex", alignItems: "center", justifyContent: "center" }}>
+                  <Database size={20} color={DARK_NAVY} />
+               </div>
+               <div style={{ flex: 1 }}>
+                  <div style={{ fontSize: 15, fontWeight: 800 }}>{doc.name}</div>
+                  <div style={{ fontSize: 11, color: "#94a3b8", display: "flex", alignItems: "center", gap: 4 }}>
+                     <ShieldCheck size={12} color="#10b981" /> Hash: {doc.hash}
+                  </div>
+               </div>
+               <Badge color={doc.status === "Clôturé" ? "#10b981" : "#f59e0b"}>{doc.status}</Badge>
+            </div>
+            
+            <div style={{ marginTop: 20, borderTop: "1px dashed #f1f5f9", paddingTop: 16 }}>
+               <div style={{ fontSize: 11, fontWeight: 800, color: "#64748b", marginBottom: 10 }}>WORKFLOW DE VALIDATION</div>
+               <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
+                  <div style={{ background: "#10b981", height: 8, flex: 1, borderRadius: 4 }}></div>
+                  <div style={{ background: doc.status === "Clôturé" ? "#10b981" : "#e2e8f0", height: 8, flex: 1, borderRadius: 4 }}></div>
+                  <div style={{ background: doc.status === "Clôturé" ? "#10b981" : "#e2e8f0", height: 8, flex: 1, borderRadius: 4 }}></div>
+               </div>
+            </div>
+         </Card>
+       ))}
+    </div>
+  );
+
   return (
     <div style={{ maxWidth: 480, margin: "0 auto", background: "#f8fafc", minHeight: "100vh", position: "relative", fontFamily: "'Inter', sans-serif" }}>
        
@@ -358,6 +379,7 @@ export default function AssociatesBank() {
        {view === "loans" && renderLoansPage()}
        {view === "assembly" && renderAssembly()}
        {view === "fleet" && renderFleetPage()}
+       {view === "flux" && renderArchivePage()}
 
        {/* NAV BAR MOCK */}
        <div style={{ position: "fixed", bottom: 0, width: "100%", maxWidth: 480, height: 70, background: "#fff", borderTop: "1px solid #f1f5f9", display: "flex", justifyContent: "space-around", alignItems: "center", zIndex: 100 }}>

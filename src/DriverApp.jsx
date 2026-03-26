@@ -2,6 +2,7 @@ import { useState, useRef } from 'react'
 import { CheckCircle, Truck, Package, Banknote, PhoneCall, CheckSquare, ScanBarcode, PenTool, X, MapPin, QrCode, Sparkles, Receipt, AlertTriangle, FileText, Send, ShieldCheck } from 'lucide-react'
 import SignatureCanvas from 'react-signature-canvas'
 import MapView from './components/MapView'
+import LiviVision from './LiviVision'
 import './index.css'
 
 const BRAND_ORANGE = '#f97316'
@@ -30,12 +31,12 @@ const TOURNEE = {
 
 export default function DriverApp() {
   const [completedArrêts, setCompletedArrêts] = useState(1)
-  const [modalType, setModalType] = useState(null) // 'signature', 'qr', 'litige', 'avoir_pdf'
+  const [modalType, setModalType] = useState(null) // 'signature', 'qr', 'litige', 'avoir_pdf', 'livivision', 'docs'
   
   const [damagedItems, setDamagedItems] = useState(0)
   const [upselledItems, setUpselledItems] = useState(0)
 
-  const sigPad = useRef({})
+  const sigPad = useRef(null)
   const currentStop = TOURNEE.stops[completedArrêts] || TOURNEE.stops[0]
 
   const adjustedPrice = currentStop.expectedCash 
@@ -43,7 +44,7 @@ export default function DriverApp() {
     + (upselledItems * 10000)
 
   const handleValidateSignature = () => {
-    if (sigPad.current.isEmpty() && modalType === 'signature') {
+    if (sigPad.current && sigPad.current.isEmpty() && modalType === 'signature') {
       alert("Veuillez faire signer le client avant de valider.")
       return
     }
@@ -75,7 +76,8 @@ export default function DriverApp() {
               <div style={{ fontSize: 12, opacity: 0.7 }}>Manifeste {TOURNEE.id}</div>
             </div>
           </div>
-          <div style={{ width: 40, height: 40, background: '#334155', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 14, fontWeight: 700 }}>OD</div>
+          </div>
+          <div onClick={() => setModalType('docs')} style={{ cursor: 'pointer', width: 40, height: 40, background: '#334155', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 14, fontWeight: 700 }}>OD</div>
         </div>
 
         <div style={{ background: '#1e293b', padding: '16px', borderRadius: 16 }}>
@@ -139,19 +141,23 @@ export default function DriverApp() {
             </div>
           </div>
 
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', padding: '16px 20px', gap: 16, borderBottom: '1px solid #f1f5f9', background: '#f8fafc' }}>
-             <div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 6, color: '#64748b', fontSize: 12, marginBottom: 4 }}><Package size={14} /> Expédié</div>
-                <div style={{ fontSize: 20, fontWeight: 800, color: '#0f172a' }}>{currentStop.itemsToDeliver + upselledItems - damagedItems} <span style={{ fontSize: 14, fontWeight: 600, color: '#94a3b8' }}>/ {currentStop.itemsToDeliver} CTN</span></div>
-             </div>
-             <div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 6, color: '#64748b', fontSize: 12, marginBottom: 4 }}><Banknote size={14} /> Net à percevoir</div>
-                <div style={{ fontSize: 20, fontWeight: 800, color: '#16a34a' }}>{adjustedPrice.toLocaleString()}</div>
-             </div>
-          </div>
+           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', padding: '16px 20px', gap: 16, borderBottom: '1px solid #f1f5f9', background: '#f8fafc' }}>
+              <div>
+                 <div style={{ display: 'flex', alignItems: 'center', gap: 6, color: '#64748b', fontSize: 12, marginBottom: 4 }}><Package size={14} /> Expédié</div>
+                 <div style={{ fontSize: 20, fontWeight: 800, color: '#0f172a' }}>{currentStop.itemsToDeliver + upselledItems - damagedItems} <span style={{ fontSize: 14, fontWeight: 600, color: '#94a3b8' }}>/ {currentStop.itemsToDeliver} CTN</span></div>
+              </div>
+              <div>
+                 <div style={{ display: 'flex', alignItems: 'center', gap: 6, color: '#64748b', fontSize: 12, marginBottom: 4 }}><Banknote size={14} /> Net à percevoir</div>
+                 <div style={{ fontSize: 20, fontWeight: 800, color: '#16a34a' }}>{adjustedPrice.toLocaleString()}</div>
+              </div>
+           </div>
 
-          <div style={{ padding: '16px', display: 'flex', flexDirection: 'column', gap: 12 }}>
-            <div style={{ display: 'flex', gap: 12 }}>
+           <div style={{ padding: '16px', display: 'flex', flexDirection: 'column', gap: 12 }}>
+             <button onClick={() => setModalType('livivision')} style={{ width: '100%', background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)', color: '#fff', border: 'none', padding: '16px', borderRadius: 16, fontWeight: 900, fontSize: 14, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 12, boxShadow: '0 8px 25px rgba(16,185,129,0.3)' }}>
+                <ScanBarcode size={22} /> LiviVision (Scanner Palette IA)
+             </button>
+             
+             <div style={{ display: 'flex', gap: 12 }}>
               <button onClick={() => setModalType('litige')} style={{ flex: 1, background: '#fff', border: '2px dashed #ef4444', color: '#ef4444', padding: '14px', borderRadius: 12, fontSize: 13, fontWeight: 700, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, cursor: 'pointer' }}>
                 <AlertTriangle size={18} /> Litige / Refus
               </button>
@@ -191,6 +197,11 @@ export default function DriverApp() {
                 <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 6 }}>
                   <div style={{ background: '#f1f5f9', padding: 8, borderRadius: 12 }}><PenTool size={20} color={BRAND_ORANGE} /></div>
                   <h3 style={{ fontSize: 18, fontWeight: 800 }}>Preuve de Livraison (PoD)</h3>
+                </div>
+                
+                <div style={{ background: '#f0fdf4', border: '1px solid #10b981', padding: '10px 14px', borderRadius: 12, display: 'flex', alignItems: 'center', gap: 10, marginBottom: 20 }}>
+                   <MapPin size={16} color="#10b981" />
+                   <div style={{ fontSize: 11, fontWeight: 800, color: '#065f46' }}>GÉO-STAMP CERTIFIÉ : Rayon Boutique 20m OK</div>
                 </div>
                 <p style={{ fontSize: 13, color: '#64748b', marginBottom: 20 }}>Le client certifie la réception de {currentStop.itemsToDeliver + upselledItems - damagedItems} cartons conformes.</p>
 
@@ -254,7 +265,12 @@ export default function DriverApp() {
                    <div style={{ fontSize: 16, fontWeight: 800, marginTop: 4 }}>Dépôt validé par IA</div>
                    <div style={{ fontSize: 12, color: '#16a34a', fontWeight: 600, marginTop: 4 }}>✓ Assurance braquage activée</div>
                 </div>
-                <button onClick={() => setModalType(null)} style={{ width: '100%', background: '#16a34a', color: '#fff', border: 'none', padding: '16px', borderRadius: 14, fontSize: 14, fontWeight: 800 }}>Confirmer le dépôt</button>
+                <button onClick={() => setModalType(null)} style={{ width: '100%', background: '#16a34a', color: '#fff', border: 'none', padding: '16px', borderRadius: 14, fontSize: 14, fontWeight: 800 }}>Confirmer le dépôt (LiviWallet)</button>
+
+                <div style={{ marginTop: 20, display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+                  <button style={{ background: '#4c6ef5', color: '#fff', border: 'none', padding: 12, borderRadius: 12, fontSize: 11, fontWeight: 800 }}>Dépôt Wave</button>
+                  <button style={{ background: '#ff9900', color: '#fff', border: 'none', padding: 12, borderRadius: 12, fontSize: 11, fontWeight: 800 }}>Dépôt Orange Money</button>
+                </div>
               </div>
             )}
 
@@ -320,9 +336,30 @@ export default function DriverApp() {
               </div>
             )}
 
+            {modalType === 'docs' && (
+              <div style={{ padding: '0 10px' }}>
+                <h3 style={{ fontSize: 20, fontWeight: 900, marginBottom: 20 }}>Mes Documents</h3>
+                  {[
+                    { type: "Permis de Conduire", status: "Valide", date: "12/2027", color: "#10b981" },
+                    { type: "Assurance Véhicule", status: "Alerte", date: "04/2026", color: "#f59e0b" },
+                    { type: "Visite Technique", status: "Valide", date: "09/2026", color: "#10b981" },
+                  ].map((doc, i) => (
+                    <div key={i} style={{ background: '#f8fafc', padding: 16, borderRadius: 16, border: '1px solid #e2e8f0', marginBottom: 12, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                       <div>
+                          <div style={{ fontSize: 14, fontWeight: 800 }}>{doc.type}</div>
+                          <div style={{ fontSize: 11, color: '#94a3b8' }}>Expire le : {doc.date}</div>
+                       </div>
+                       <div style={{ fontSize: 11, fontWeight: 800, color: doc.color, padding: '4px 8px', background: '#fff', borderRadius: 8, border: `1px solid ${doc.color}` }}>{doc.status}</div>
+                    </div>
+                  ))}
+                  <button onClick={() => setModalType(null)} style={{ width: '100%', marginTop: 20, background: DARK_NAVY, color: '#fff', border: 'none', padding: 16, borderRadius: 16, fontWeight: 800 }}>Fermer</button>
+              </div>
+            )}
+
           </div>
         </div>
       )}
+      {modalType === 'livivision' && <LiviVision onComplete={() => setModalType(null)} />}
     </div>
   )
 }
