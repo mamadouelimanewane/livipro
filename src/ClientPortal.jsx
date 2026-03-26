@@ -4,13 +4,15 @@ import { BellRing, PackageSearch, BatteryCharging, ShoppingCart, CheckCircle2, C
 // Simulation des données client (Boutiquier)
 const BOUTIQUE = {
   name: "Supermarché Al-Amine",
-  balance: "150 000 FCFA",
-  creditLimit: "500 000 FCFA",
-  lastRestock: "14 Mars 2026",
+  balance: "2.450.000 FCFA",
+  creditLimit: "5.000.000 FCFA",
+  karma: 942,
+  tontineStatus: "Actif (Prélèvement 1.2%)",
+  lastRestock: "20 Mars 2026",
   inventory: [
-    { id: 1, product: "Lait Nido (Carton de 12)", stock: "Faible (2 restants)", usualOrder: 15, price: 45000 },
-    { id: 2, product: "Sucre St Louis (Fardeau)", stock: "Épuisé (Rupture)", usualOrder: 20, price: 21000 },
-    { id: 3, product: "Huile Végétale 5L (Carton)", stock: "Normal (8 restants)", usualOrder: 10, price: 35000 }
+    { id: 1, product: "Lait Nido (Carton de 12)", stock: "Faible (5 restants)", usualOrder: 25, price: 45000 },
+    { id: 2, product: "Huile Dinor 5L (Carton)", stock: "Épuisé (Rupture)", usualOrder: 10, price: 38500 },
+    { id: 3, product: "Riz Parfumé (Sac 50kg)", stock: "Normal (32 restants)", usualOrder: 15, price: 22000 }
   ]
 }
 
@@ -53,8 +55,9 @@ export default function ClientPortal() {
              <div style={{ fontSize: 12, color: '#94a3b8', fontWeight: 600, textTransform: 'uppercase' }}>Portail Partenaire</div>
              <div style={{ fontSize: 20, fontWeight: 800 }}>{BOUTIQUE.name}</div>
           </div>
-          <div className="animate-pulse" style={{ background: '#fef3c7', color: '#b45309', padding: '4px 10px', borderRadius: 12, fontSize: 11, fontWeight: 800, display: 'flex', alignItems: 'center', gap: 6 }}>
-            <Zap size={14} /> SmartTag
+          <div style={{ textAlign: 'right' }}>
+             <div style={{ fontSize: 10, color: '#ec4899', fontWeight: 800 }}>KARMA LOGISTIQUE</div>
+             <div style={{ fontSize: 18, fontWeight: 900, color: '#fff' }}>{BOUTIQUE.karma} <span style={{ fontSize: 10, opacity: 0.6 }}>pts</span></div>
           </div>
         </div>
       </div>
@@ -79,15 +82,17 @@ export default function ClientPortal() {
             </button>
          </div>
 
-         {/* LiviKredit Balance */}
-         <div style={{ background: 'linear-gradient(135deg, #1e293b 0%, #0f172a 100%)', borderRadius: 20, padding: 20, marginTop: 20, color: '#fff', position: 'relative', overflow: 'hidden' }}>
-           <div style={{ position: 'absolute', top: -30, right: -20, opacity: 0.1 }}><PackageSearch size={140} /></div>
-           <div style={{ fontSize: 12, color: '#94a3b8', fontWeight: 600 }}>LiviKredit (Paiement à J+7)</div>
-           <div style={{ fontSize: 28, fontWeight: 900, marginTop: 4 }}>{BOUTIQUE.balance} <span style={{ fontSize: 14, fontWeight: 400, opacity: 0.8 }}>disponibles</span></div>
-           <div style={{ marginTop: 12, fontSize: 12, color: '#10b981', display: 'flex', alignItems: 'center', gap: 6 }}>
-             <CheckCircle2 size={14} /> Solvabilité Excellente (Score A+)
-           </div>
-         </div>
+          <div style={{ background: 'linear-gradient(135deg, #1e293b 0%, #0f172a 100%)', borderRadius: 20, padding: 20, marginTop: 20, color: '#fff', position: 'relative', overflow: 'hidden' }}>
+            <div style={{ position: 'absolute', top: -30, right: -20, opacity: 0.1 }}><PackageSearch size={140} /></div>
+            <div style={{ fontSize: 12, color: '#94a3b8', fontWeight: 600 }}>Cagnotte Banque Associés (J+7)</div>
+            <div style={{ fontSize: 28, fontWeight: 900, marginTop: 4 }}>{BOUTIQUE.balance} <span style={{ fontSize: 14, fontWeight: 400, opacity: 0.8 }}>disponibles</span></div>
+            <div style={{ marginTop: 12, display: 'flex', justifyContent: 'space-between' }}>
+              <div style={{ fontSize: 12, color: '#10b981', display: 'flex', alignItems: 'center', gap: 6 }}>
+                <CheckCircle2 size={14} /> Score IA: A+
+              </div>
+              <div style={{ fontSize: 12, color: '#f59e0b', fontWeight: 700 }}>{BOUTIQUE.tontineStatus}</div>
+            </div>
+          </div>
 
          {/* Catalogue Virtuel (Upsell) */}
          <div style={{ marginTop: 24 }}>

@@ -8,20 +8,21 @@ const BRAND_ORANGE = '#f97316'
 const DARK_NAVY = '#0f172a'
 
 const TOURNEE = {
-  id: "TRN-9824",
+  id: "TRN-DKR-9824",
   driver: "Ousmane Diallo",
-  totalStops: 12,
-  cashCollected: 600000,
+  totalStops: 8,
+  cashCollected: 1450000,
+  fleetROI: "27.500 FCFA",
   stops: [
     {
-      id: 1, shopName: "Boutique Serigne Saliou", address: "Marché Fass", status: "completed", itemsToDeliver: 15, expectedCash: 150000, coords: [14.6850, -17.4582], aiPrediction: null
+      id: 1, shopName: "Boutique Serigne Saliou", address: "Marché Fass, Dakar", status: "completed", itemsToDeliver: 25, expectedCash: 250000, coords: [14.6850, -17.4582], aiPrediction: null
     },
     {
-      id: 2, shopName: "Supermarché Al-Amine", address: "Point E", status: "next", itemsToDeliver: 42, expectedCash: 450000, coords: [14.6928, -17.4627],
-      aiPrediction: "Ce supermarché a commandé 10% de moins de lait Nido ce mois-ci. Vous avez 5 cartons disponibles dans le camion. Proposez-les !"
+      id: 2, shopName: "Supermarché Al-Amine", address: "Avenue Cheikh Anta Diop, Point E", status: "next", itemsToDeliver: 60, expectedCash: 1200000, coords: [14.6928, -17.4627],
+      aiPrediction: "Ce partenaire a un Karma de 942. Il a réduit ses commandes de Boissons Gazéifiées de 15%. Proposez le déstockage de la palette TRN-X1 (+5 cartons) avec remise Associé."
     },
     {
-      id: 3, shopName: "Quincaillerie Ndiaye", address: "Médina", status: "pending", itemsToDeliver: 8, expectedCash: 0, coords: [14.6796, -17.4475], aiPrediction: null
+      id: 3, shopName: "Alimentation Ndiaye & Fils", address: "Médina, Rue 6", status: "pending", itemsToDeliver: 12, expectedCash: 85000, coords: [14.6796, -17.4475], aiPrediction: null
     }
   ],
   route: [[14.6850, -17.4582], [14.6928, -17.4627], [14.6796, -17.4475]]
@@ -84,6 +85,10 @@ export default function DriverApp() {
           </div>
           <div style={{ height: 6, background: '#334155', borderRadius: 3, overflow: 'hidden' }}>
             <div style={{ height: '100%', width: `${(completedArrêts / TOURNEE.totalStops) * 100}%`, background: BRAND_ORANGE, transition: 'width 0.4s ease' }} />
+          </div>
+          <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 12 }}>
+             <div style={{ fontSize: 11, color: '#94a3b8' }}>ROI Flotte Associée</div>
+             <div style={{ fontSize: 13, color: '#10b981', fontWeight: 800 }}>+{TOURNEE.fleetROI} <span style={{ fontSize: 10, opacity: 0.6 }}>(Ce jour)</span></div>
           </div>
         </div>
       </div>
@@ -154,6 +159,10 @@ export default function DriverApp() {
                 <QrCode size={18} /> LiviPay B2B
               </button>
             </div>
+            
+            <button onClick={() => setModalType('livicash')} style={{ width: '100%', background: '#f0fdf4', color: '#16a34a', border: '1.5px solid #16a34a', padding: '14px', borderRadius: 12, fontSize: 13, fontWeight: 800, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, cursor: 'pointer' }}>
+               <ShieldCheck size={18} /> LiviCash Point (Déposer Espèces)
+            </button>
             
             <button onClick={() => setModalType('signature')} style={{ width: '100%', background: BRAND_ORANGE, color: '#fff', border: 'none', padding: '16px', borderRadius: 12, fontSize: 14, fontWeight: 800, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, boxShadow: '0 4px 15px rgba(249, 115, 22, 0.4)', cursor: 'pointer' }}>
               <CheckSquare size={20} /> Valider Livraison (Signature)
@@ -231,6 +240,22 @@ export default function DriverApp() {
                   </button>
                 </div>
               </>
+            )}
+
+            {modalType === 'livicash' && (
+              <div style={{ textAlign: 'center', padding: '20px 0' }}>
+                <div style={{ background: '#dcfce7', width: 64, height: 64, borderRadius: '50%', margin: '0 auto 20px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <ShieldCheck size={32} color="#16a34a" />
+                </div>
+                <h3 style={{ fontSize: 20, fontWeight: 900, marginBottom: 12 }}>Point LiviCash Sécurisé</h3>
+                <p style={{ fontSize: 13, color: '#64748b', marginBottom: 24 }}>Déposez voter collecte d'espèces (<b>{TOURNEE.cashCollected.toLocaleString()} F</b>) dans cette boutique associée pour sécuriser votre tournée.</p>
+                <div style={{ background: '#f8fafc', padding: 20, borderRadius: 16, border: '1px solid #e2e8f0', marginBottom: 24, textAlign: 'left' }}>
+                   <div style={{ fontSize: 11, color: '#94a3b8', fontWeight: 700 }}>REÇU BANCAIRE ASSOCIÉ</div>
+                   <div style={{ fontSize: 16, fontWeight: 800, marginTop: 4 }}>Dépôt validé par IA</div>
+                   <div style={{ fontSize: 12, color: '#16a34a', fontWeight: 600, marginTop: 4 }}>✓ Assurance braquage activée</div>
+                </div>
+                <button onClick={() => setModalType(null)} style={{ width: '100%', background: '#16a34a', color: '#fff', border: 'none', padding: '16px', borderRadius: 14, fontSize: 14, fontWeight: 800 }}>Confirmer le dépôt</button>
+              </div>
             )}
 
             {/* VUE: MOCKUP AVOIR PDF */}
