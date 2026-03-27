@@ -35,6 +35,7 @@ import LiviBranchManager from "./LiviBranchManager";
 import LiviDirectory from "./LiviDirectory";
 import LiviVoice from "./LiviVoice";
 import LiviGreen from "./LiviGreen";
+import LiviCommunity from "./LiviCommunity";
 import MapView from "./components/MapView";
 import { useProducts, useGroupageOffers } from "./useLiviData";
 import DashboardShell from "./components/DashboardShell";
@@ -102,6 +103,7 @@ export default function SalesPortal() {
 
        <div style={{ display: "flex", gap: 10, marginBottom: 30, overflowX: "auto", paddingBottom: 10 }}>
         {[
+          { id: "community", label: "LiviCommunity™", icon: <MessageSquare size={16} /> },
           { id: "catalog", label: "Stocks & Prix", icon: <Package size={16} /> },
           { id: "branches", label: "Multi-Succursales", icon: <Building2 size={16} /> },
           { id: "green", label: "LiviGreen ColdChain", icon: <Thermometer size={16} /> },
@@ -118,6 +120,7 @@ export default function SalesPortal() {
        {isVoiceActive && <div style={{ marginBottom: 32 }}><LiviVoice onCommand={handleCommand} /></div>}
 
        <div style={{ background: "#fff", borderRadius: 28, padding: 32, border: "1px solid #e2e8f0", boxShadow: "0 20px 60px rgba(0,0,0,0.02)" }}>
+          {view === "community" && <LiviCommunity />}
           {view === "catalog" && (
             <div className="animate-fade-in">
                <h2 style={{ fontSize: 24, fontWeight: 900, marginBottom: 24 }}>Inventaire Centralisé</h2>

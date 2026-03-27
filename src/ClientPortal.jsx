@@ -6,7 +6,8 @@ import LiviPredict from './LiviPredict'
 import LiviFintech from './LiviFintech'
 import LiviAcademy from './LiviAcademy'
 import LiviMarket from './LiviMarket'
-import { BellRing, PackageSearch, BatteryCharging, ShoppingCart, CheckCircle2, ChevronRight, Zap, Wallet, Search, ArrowLeft, Users, Mic, Heart, Star, Truck, MoreVertical, Box, Layers, History, ShieldCheck, Settings as SettingsIcon, Send, Receipt, Calculator, CreditCard, GraduationCap, LayoutDashboard, BrainCircuit, Globe, ShoppingBag } from 'lucide-react'
+import LiviCommunity from './LiviCommunity'
+import { BellRing, PackageSearch, BatteryCharging, ShoppingCart, CheckCircle2, ChevronRight, Zap, Wallet, Search, ArrowLeft, Users, Mic, Heart, Star, Truck, MoreVertical, Box, Layers, History, ShieldCheck, Settings as SettingsIcon, Send, Receipt, Calculator, CreditCard, GraduationCap, LayoutDashboard, BrainCircuit, Globe, ShoppingBag, MessageSquare } from 'lucide-react'
 import { useGroupageOffers, useMembers, useProducts } from './useLiviData'
 import DashboardShell from "./components/DashboardShell";
 import { useSearchParams } from "react-router-dom";
@@ -66,6 +67,7 @@ export default function ClientPortal() {
 
        <div style={{ display: "flex", gap: 10, marginBottom: 30, overflowX: "auto", paddingBottom: 10 }}>
         {[
+          { id: "community", label: "LiviCommunity™", icon: <MessageSquare size={16} /> },
           { id: "market", label: "Marketplace B2B", icon: <ShoppingBag size={16} /> },
           { id: "dashboard", label: "Dashboard", icon: <LayoutDashboard size={16} /> },
           { id: "pos", label: "LiviPOS (Caisse)", icon: <Calculator size={16} /> },
@@ -83,6 +85,7 @@ export default function ClientPortal() {
        {isVoiceActive && <div style={{ marginBottom: 32 }}><LiviVoice onCommand={({ action, entity }) => { if (action === 'COMMANDE') handleTabChange('market'); }} /></div>}
 
        <div style={{ background: "#fff", borderRadius: 32, padding: 40, border: "1px solid #f1f5f9", boxShadow: "0 20px 60px rgba(0,0,0,0.02)" }}>
+          {activeTab === "community" && <LiviCommunity />}
           {activeTab === "market" && <LiviMarket onOrder={handleOrder} />}
           {activeTab === "dashboard" && (
             <div className="animate-fade-in">

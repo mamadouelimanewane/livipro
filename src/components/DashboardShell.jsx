@@ -16,7 +16,10 @@ import {
   ShieldCheck,
   Building2,
   Store,
-  Wallet
+  Wallet,
+  MessageSquare,
+  ShoppingBag,
+  HandCoins
 } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
 
@@ -43,7 +46,7 @@ export default function DashboardShell({ children, title, role = "admin" }) {
 
   const menuItems = {
     admin: [
-      { id: "social", label: "Flux Réseau", icon: <LayoutDashboard size={20} />, path: "/admin?view=social" },
+      { id: "community", label: "LiviCommunity™", icon: <MessageSquare size={20} />, path: "/admin?view=community" },
       { id: "users", label: "Gestion Partenaires", icon: <Users size={20} />, path: "/admin?view=users" },
       { id: "compliance", label: "Documents & KYC", icon: <ShieldCheck size={20} />, path: "/admin?view=compliance" },
       { id: "bank", label: "Banque des Associés", icon: <Building2 size={20} />, path: "/bank" },
@@ -51,6 +54,7 @@ export default function DashboardShell({ children, title, role = "admin" }) {
       { id: "track", label: "Atlas Tracking", icon: <Settings size={20} />, path: "/admin?view=track" },
     ],
     grossiste: [
+      { id: "community", label: "LiviCommunity™", icon: <MessageSquare size={20} />, path: "/sales?view=community" },
       { id: "catalog", label: "Stocks & Prix", icon: <Building2 size={20} />, path: "/sales?view=catalog" },
       { id: "fleet", label: "Gestion Flotte", icon: <Truck size={20} />, path: "/sales?view=fleet" },
       { id: "clients", label: "Portefeuille Clients", icon: <Users size={20} />, path: "/sales?view=directory" },
@@ -58,11 +62,11 @@ export default function DashboardShell({ children, title, role = "admin" }) {
       { id: "branches", label: "Relais & Points", icon: <Settings size={20} />, path: "/sales?view=branches" },
     ],
     boutique: [
-      { id: "dashboard", label: "Mon Portail Boutique", icon: <Store size={20} />, path: "/boutique?view=dashboard" },
-      { id: "orders", label: "Mes Ravitaillements", icon: <Package size={20} />, path: "/boutique?view=orders" },
+      { id: "community", label: "LiviCommunity™", icon: <MessageSquare size={20} />, path: "/boutique?view=community" },
+      { id: "market", label: "Marketplace B2B", icon: <ShoppingBag size={20} />, path: "/boutique?view=market" },
+      { id: "dashboard", label: "Tableau de Bord", icon: <Store size={20} />, path: "/boutique?view=dashboard" },
       { id: "wallet", label: "LiviWallet B2B", icon: <Wallet size={20} />, path: "/boutique?view=wallet" },
-      { id: "bank", label: "Banque & Tontine", icon: <HandCoins size={20} />, path: "/bank" },
-      { id: "credit", label: "Score de Crédit", icon: <ShieldCheck size={20} />, path: "/boutique?view=credit" },
+      { id: "bank", label: "Banque & Tontine", icon: <Building2 size={20} />, path: "/bank" },
       { id: "settings", label: "Paramètres Shop", icon: <Settings size={20} />, path: "/boutique?view=settings" },
     ]
   };

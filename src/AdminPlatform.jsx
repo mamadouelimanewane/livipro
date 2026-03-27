@@ -6,6 +6,7 @@ import LiviSwarm from "./LiviSwarm";
 import LiviRelay from "./LiviRelay";
 import LiviDirectory from "./LiviDirectory";
 import LiviMap from "./LiviMap";
+import LiviCommunity from "./LiviCommunity";
 import { 
   ShieldCheck, 
   Users, 
@@ -183,7 +184,7 @@ export default function AdminPlatform() {
 
        <div style={{ display: "flex", gap: 10, marginBottom: 30, overflowX: "auto", paddingBottom: 10 }}>
         {[
-          { id: "social", label: "Flux Réseau", icon: <Globe size={16} /> },
+          { id: "community", label: "LiviCommunity™", icon: <MessageSquare size={16} /> },
           { id: "users", label: "Partenaires", icon: <Users size={16} /> },
           { id: "compliance", label: "Audit KYC", icon: <FileCheck size={16} /> },
           { id: "atlas", label: "Atlas Géo", icon: <Navigation size={16} /> },
@@ -194,6 +195,7 @@ export default function AdminPlatform() {
       </div>
 
        <div style={{ background: "#fff", borderRadius: 28, padding: 32, border: "1px solid #e2e8f0" }}>
+          {activeTab === "community" && <LiviCommunity />}
           {activeTab === "social" && (
             <div className="animate-fade-in">
                <div style={{ background: `linear-gradient(135deg, ${DARK_NAVY} 0%, #1e293b 100%)`, borderRadius: 24, padding: 32, color: "#fff", marginBottom: 32, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
