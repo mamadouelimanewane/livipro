@@ -113,7 +113,7 @@ export default function LiviChain() {
                   </div>
                </div>
                <p style={{ fontSize: 11, color: "#64748b", lineHeight: 1.4, marginBottom: 16 }}>
-                  Exécution automatique : Si [Date=31] ET [Solde_Tontine=100%] -> Transfert [PayOut] -> [Gagnant_Cycle]. Zéro intervention humaine.
+                  Exécution automatique : Si [Date=31] ET [Solde_Tontine=100%] → Transfert [PayOut] → [Gagnant_Cycle]. Zéro intervention humaine.
                </p>
                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                   <div style={{ fontSize: 10, color: "#94a3b8" }}>GAS FEE: 0.00 LVC</div>
