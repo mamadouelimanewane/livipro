@@ -40,11 +40,11 @@ export default function LiviWallet({ owner = "Supermarché Al-Amine", balance = 
              <div style={{ background: "#f0fdf4", width: 44, height: 44, borderRadius: 14, display: "flex", alignItems: "center", justifyContent: "center", color: "#10b981" }}><ArrowUpRight size={22} /></div>
              <span style={{ fontSize: 11, fontWeight: 800 }}>RECHARGER</span>
           </button>
-          <button style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 8, background: "#fff", border: "1px solid #f1f5f9", padding: 16, borderRadius: 20, cursor: "pointer" }}>
+          <button onClick={() => setActiveView("pay")} style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 8, background: "#fff", border: "1px solid #f1f5f9", padding: 16, borderRadius: 20, cursor: "pointer" }}>
              <div style={{ background: "#eff6ff", width: 44, height: 44, borderRadius: 14, display: "flex", alignItems: "center", justifyContent: "center", color: "#3b82f6" }}><ArrowDownLeft size={22} /></div>
              <span style={{ fontSize: 11, fontWeight: 800 }}>PAYER</span>
           </button>
-          <button style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 8, background: "#fff", border: "1px solid #f1f5f9", padding: 16, borderRadius: 20, cursor: "pointer" }}>
+          <button onClick={() => setActiveView("history")} style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 8, background: "#fff", border: "1px solid #f1f5f9", padding: 16, borderRadius: 20, cursor: "pointer" }}>
              <div style={{ background: "#f8fafc", width: 44, height: 44, borderRadius: 14, display: "flex", alignItems: "center", justifyContent: "center", color: "#64748b" }}><RefreshCcw size={22} /></div>
              <span style={{ fontSize: 11, fontWeight: 800 }}>HISTORIQUE</span>
           </button>
@@ -111,6 +111,52 @@ export default function LiviWallet({ owner = "Supermarché Al-Amine", balance = 
     </div>
   );
 
+  const renderPay = () => (
+    <div className="animate-fade-in">
+       <button onClick={() => setActiveView("home")} style={{ background: "none", border: "none", fontWeight: 800, color: DARK_NAVY, display: "flex", alignItems: "center", gap: 8, marginBottom: 24 }}>
+          <ArrowDownLeft size={20} style={{ transform: "rotate(45deg)" }} /> Annuler
+       </button>
+       <h2 style={{ fontSize: 24, fontWeight: 900, marginBottom: 8 }}>Payer un Fournisseur</h2>
+       <p style={{ fontSize: 13, color: "#64748b", marginBottom: 32 }}>Scannez le code QR du grossiste pour valider le paiement.</p>
+       
+       <div style={{ width: "100%", height: 300, background: "#000", borderRadius: 32, display: "flex", alignItems: "center", justifyContent: "center", position: "relative", overflow: "hidden" }}>
+          <div style={{ width: 200, height: 200, border: "2px solid #fff", borderRadius: 20, position: "relative" }}>
+             <div style={{ position: "absolute", top: 0, left: "50%", transform: "translateX(-50%)", width: "100%", height: 2, background: GOLD, boxShadow: `0 0 10px ${GOLD}`, animation: "scan 2s infinite" }}></div>
+          </div>
+          <div style={{ position: "absolute", bottom: 20, color: "#fff", fontSize: 12, fontWeight: 700 }}>Alignez le QR code dans le cadre</div>
+       </div>
+
+       <style>{`
+          @keyframes scan { 0% { top: 0; } 50% { top: 100%; } 100% { top: 0; } }
+       `}</style>
+    </div>
+  );
+
+  const renderHistory = () => (
+    <div className="animate-fade-in">
+       <button onClick={() => setActiveView("home")} style={{ background: "none", border: "none", fontWeight: 800, color: DARK_NAVY, display: "flex", alignItems: "center", gap: 8, marginBottom: 24 }}>
+          <ArrowDownLeft size={20} style={{ transform: "rotate(45deg)" }} /> Retour
+       </button>
+       <h2 style={{ fontSize: 24, fontWeight: 900, marginBottom: 20 }}>Historique Complet</h2>
+       {transactions.map(tx => (
+          <div key={tx.id} style={{ background: "#fff", borderRadius: 18, padding: 16, marginBottom: 12, display: "flex", justifyContent: "space-between", alignItems: "center", border: "1px solid #f1f5f9" }}>
+             <div style={{ display: "flex", gap: 12, alignItems: "center" }}>
+                <div style={{ background: tx.amount > 0 ? "#f0fdf4" : "#fee2e2", width: 40, height: 40, borderRadius: 12, display: "flex", alignItems: "center", justifyContent: "center", color: tx.amount > 0 ? "#10b981" : "#ef4444" }}>
+                   {tx.amount > 0 ? <ArrowUpRight size={20} /> : <ArrowDownLeft size={20} />}
+                </div>
+                <div>
+                   <div style={{ fontSize: 14, fontWeight: 800 }}>{tx.type}</div>
+                   <div style={{ fontSize: 11, color: "#94a3b8" }}>{tx.date} · via {tx.method}</div>
+                </div>
+             </div>
+             <div style={{ fontSize: 15, fontWeight: 900, color: tx.amount > 0 ? "#10b981" : "#0f172a" }}>
+                {tx.amount > 0 ? "+" : ""}{tx.amount.toLocaleString()} F
+             </div>
+          </div>
+       ))}
+    </div>
+  );
+
   return (
     <div style={{ maxWidth: 480, margin: "0 auto", padding: 24, minHeight: "100vh", fontFamily: "'Inter', sans-serif", background: "#f8fafc" }}>
        <style>{`
@@ -119,7 +165,10 @@ export default function LiviWallet({ owner = "Supermarché Al-Amine", balance = 
           .animate-fade-in { animation: fade-in 0.4s ease-out; }
           .animate-slide-up { animation: slide-up 0.4s ease-out forwards; }
        `}</style>
-       {activeView === "home" ? renderHome() : renderTopup()}
+       {activeView === "home" ? renderHome() : 
+        activeView === "topup" ? renderTopup() : 
+        activeView === "pay" ? renderPay() : 
+        renderHistory()}
     </div>
   );
 }
