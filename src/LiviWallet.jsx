@@ -19,6 +19,8 @@ const OM_ORANGE = "#ff9900"; // Orange Money
 export default function LiviWallet({ owner = "Supermarché Al-Amine", balance = 2450000 }) {
   const [activeView, setActiveView] = useState("home"); // home | topup | transactions
   const [selectedMethod, setSelectedMethod] = useState(null);
+  const [payMode, setPayMode] = useState("scan"); // scan | number
+  const [payMethod, setPayMethod] = useState("wave"); // wave | om
 
   const transactions = [
     { id: 1, type: "Order", amount: -45000, date: "26 Mars", method: "Internal" },
@@ -112,9 +114,6 @@ export default function LiviWallet({ owner = "Supermarché Al-Amine", balance = 
   );
 
   const renderPay = () => {
-    const [payMode, setPayMode] = useState("scan"); // scan | number
-    const [payMethod, setPayMethod] = useState("wave"); // wave | om
-
     return (
       <div className="animate-fade-in">
         <button onClick={() => setActiveView("home")} style={{ background: "none", border: "none", fontWeight: 800, color: DARK_NAVY, display: "flex", alignItems: "center", gap: 8, marginBottom: 24 }}>
