@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { 
   Search, 
   ArrowRight, 
@@ -11,9 +11,11 @@ import {
   Zap,
   Mic,
   Volume2,
-  Clock
+  Clock,
+  ShieldCheck
 } from "lucide-react";
 import LiviVoice from "./LiviVoice";
+import { supabase } from "./supabase";
 
 const DARK_NAVY = "#0f172a";
 const GOLD = "#f59e0b";
@@ -22,29 +24,81 @@ const VISION_GREEN = "#10b981";
 export default function LiviSearch() {
   const [query, setQuery] = useState("");
   const [isVoiceActive, setIsVoiceActive] = useState(false);
-  const [results] = useState([
-    { 
-      product: "Riz Parfumé (Sac 50kg)", 
-      category: "Céréales",
-      comparisons: [
-        { wholesaler: "Grossiste Al-Amine", price: 21500, delivery: "2h", rating: 4.8, best: false },
-        { wholesaler: "Ets Saliou & Frères", price: 20900, delivery: "5h", rating: 4.5, best: true },
-        { wholesaler: "Diagne Distribution", price: 22000, delivery: "1h", rating: 4.9, best: false }
-      ]
-    },
-    { 
-      product: "Huile Dinor 5L", 
-      category: "Alimentaire",
-      comparisons: [
-        { wholesaler: "Diagne Distribution", price: 38500, delivery: "1h", rating: 4.9, best: true },
-        { wholesaler: "Grossiste Al-Amine", price: 39000, delivery: "3h", rating: 4.8, best: false }
-      ]
-    }
-  ]);
+  const [loading, setLoading] = useState(false);
+  const [allProducts, setAllProducts] = useState([]);
+  const [results, setResults] = useState([]);
 
-  const filteredResults = query.length > 2 
-    ? results.filter(r => r.product.toLowerCase().includes(query.toLowerCase())) 
-    : [];
+  // Simulation de la récupération des données
+  useEffect(() => {
+    const fetchProducts = async () => {
+      setLoading(true);
+      try {
+        const { data, error } = await supabase.from('products').select(`
+          *,
+          members (name, rating)
+        `);
+        if (error) throw error;
+        
+        // Formater les données pour le comparateur
+        const grouped = data.reduce((acc, item) => {
+          if (!acc[item.name]) {
+            acc[item.name] = { product: item.name, category: item.category, comparisons: [] };
+          }
+          acc[item.name].comparisons.push({
+            wholesaler: item.members?.name || "Grossiste Inconnu",
+            price: item.price,
+            delivery: "2-4h",
+            rating: item.members?.rating || 4.5,
+            best: false 
+          });
+          return acc;
+        }, {});
+
+        // Identifier le meilleur prix
+        Object.values(grouped).forEach(group => {
+           const minPrice = Math.min(...group.comparisons.map(c => c.price));
+           group.comparisons.forEach(c => { if (c.price === minPrice) c.best = true; });
+        });
+
+        setAllProducts(Object.values(grouped));
+      } catch (e) {
+        console.warn("Fallback local pour LiviSearch:", e.message);
+        setAllProducts([
+          { 
+            product: "Riz Parfumé (Sac 50kg)", 
+            category: "Céréales",
+            comparisons: [
+              { wholesaler: "Grossiste Al-Amine", price: 21500, delivery: "2h", rating: 4.8, best: false },
+              { wholesaler: "Ets Saliou & Frères", price: 20900, delivery: "5h", rating: 4.5, best: true },
+              { wholesaler: "Diagne Distribution", price: 22000, delivery: "1h", rating: 4.9, best: false }
+            ]
+          },
+          { 
+            product: "Huile Dinor 5L", 
+            category: "Alimentaire",
+            comparisons: [
+              { wholesaler: "Diagne Distribution", price: 38500, delivery: "1h", rating: 4.9, best: true },
+              { wholesaler: "Grossiste Al-Amine", price: 39000, delivery: "3h", rating: 4.8, best: false }
+            ]
+          }
+        ]);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchProducts();
+  }, []);
+
+  useEffect(() => {
+    if (query.length > 2) {
+      setResults(allProducts.filter(r => r.product.toLowerCase().includes(query.toLowerCase())));
+    } else {
+      setResults([]);
+    }
+  }, [query, allProducts]);
+
+
 
   return (
     <div style={{ padding: 20, background: "#f8fafc", minHeight: "100vh", fontFamily: "'Inter', sans-serif" }}>
@@ -70,12 +124,14 @@ export default function LiviSearch() {
           </div>
        </div>
 
-       {query.length <= 2 && (
+       {loading && <div style={{ textAlign: 'center', padding: '20px', fontSize: 13, color: GOLD, fontWeight: 800 }}>🤖 IA scanne le réseau...</div>}
+
+       {query.length <= 2 && !loading && (
          <div className="animate-fade-in">
             <div style={{ fontSize: 13, fontWeight: 800, color: "#94a3b8", marginBottom: 16 }}>RECHERCHES FRÉQUENTES</div>
             <div style={{ display: "flex", flexWrap: "wrap", gap: 10 }}>
                {["Riz Brisé", "Sucre en Poudre", "Lait Nido", "Savon Diama"].map(tag => (
-                 <button key={tag} onClick={() => setQuery(tag)} style={{ background: "#fff", border: "1px solid #f1f5f9", padding: "8px 16px", borderRadius: 12, fontSize: 12, fontWeight: 800, color: "#64748b" }}>{tag}</button>
+                 <button key={tag} onClick={() => setQuery(tag)} style={{ background: "#fff", border: "1px solid #f1f5f9", padding: "8px 16px", borderRadius: 12, fontSize: 12, fontWeight: 800, color: "#64748b", cursor: 'pointer' }}>{tag}</button>
                ))}
             </div>
             
@@ -89,7 +145,7 @@ export default function LiviSearch() {
          </div>
        )}
 
-       {filteredResults.map((res, idx) => (
+       {results.map((res, idx) => (
          <div key={idx} className="animate-fade-in" style={{ marginBottom: 24 }}>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }}>
                <h3 style={{ fontSize: 18, fontWeight: 800 }}>{res.product}</h3>
@@ -104,10 +160,15 @@ export default function LiviSearch() {
                     <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 16 }}>
                        <div>
                           <div style={{ fontSize: 14, fontWeight: 800 }}>{comp.wholesaler}</div>
-                          <div style={{ display: "flex", alignItems: "center", gap: 4, marginTop: 4 }}>
-                             <Star size={12} fill={GOLD} color={GOLD} />
-                             <span style={{ fontSize: 11, fontWeight: 800 }}>{comp.rating}</span>
-                             <span style={{ fontSize: 11, color: "#94a3b8" }}>· Reliable</span>
+                          <div style={{ display: "flex", alignItems: "center", gap: 8, marginTop: 4 }}>
+                              <div style={{ display: "flex", alignItems: "center", gap: 2, background: "#ecfdf5", padding: "2px 6px", borderRadius: 6 }}>
+                                 <ShieldCheck size={11} color={VISION_GREEN} />
+                                 <span style={{ fontSize: 9, fontWeight: 900, color: VISION_GREEN }}>CERTIFIÉ</span>
+                              </div>
+                              <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
+                                 <Star size={11} fill={GOLD} color={GOLD} />
+                                 <span style={{ fontSize: 11, fontWeight: 800 }}>{comp.rating}</span>
+                              </div>
                           </div>
                        </div>
                        <div style={{ textAlign: "right" }}>
@@ -129,7 +190,7 @@ export default function LiviSearch() {
          </div>
        ))}
 
-       {query.length > 2 && filteredResults.length === 0 && (
+       {query.length > 2 && results.length === 0 && !loading && (
          <div style={{ textAlign: "center", padding: "60px 0" }}>
             <div style={{ fontSize: 40, marginBottom: 20 }}>🔍</div>
             <h3 style={{ fontSize: 18, fontWeight: 900 }}>Aucune correspondance brute</h3>

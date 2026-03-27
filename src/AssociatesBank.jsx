@@ -380,6 +380,33 @@ export default function AssociatesBank() {
        {view === "assembly" && renderAssembly()}
        {view === "fleet" && renderFleetPage()}
        {view === "flux" && renderArchivePage()}
+       {view === "catalog" && renderCatalogPage()}
+       {view === "tontine" && (
+         <div className="animate-fade-in" style={{ padding: 24, paddingBottom: 100 }}>
+            <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 24 }}>
+               <button onClick={() => setView("dashboard")} style={{ background: "none", border: "none" }}><ArrowLeft size={24} /></button>
+               <h2 style={{ fontSize: 22, fontWeight: 900 }}>LiviTontine Numerique</h2>
+            </div>
+            <Card style={{ background: "linear-gradient(135deg, #6366f1 0%, #4338ca 100%)", color: "#fff", border: "none", marginBottom: 24 }}>
+               <div style={{ fontSize: 13, fontWeight: 700, opacity: 0.8 }}>POT COMMUN ACTUEL</div>
+               <div style={{ fontSize: 32, fontWeight: 900, marginTop: 8 }}>12.450.000 F</div>
+               <div style={{ fontSize: 12, marginTop: 12, background: "rgba(255,255,255,0.2)", padding: 8, borderRadius: 8 }}>Prochaine levée : 01 Avril (Boutique Al-Amine)</div>
+            </Card>
+            <h3 style={{ fontSize: 17, fontWeight: 900, marginBottom: 16 }}>Historique des Cotisations</h3>
+            {LOAN_HISTORY.map(l => (
+              <div key={l.id} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "16px", background: "#fff", borderRadius: 16, marginBottom: 12, border: "1px solid #f1f5f9" }}>
+                 <div style={{ display: "flex", gap: 12, alignItems: "center" }}>
+                    <div style={{ width: 40, height: 40, background: "#f0fdf4", borderRadius: 12, display: "flex", alignItems: "center", justifyContent: "center" }}><Coins size={20} color={EMERALD} /></div>
+                    <div>
+                       <div style={{ fontSize: 14, fontWeight: 800 }}>{l.applicant}</div>
+                       <div style={{ fontSize: 11, color: "#94a3b8" }}>Cotisation mensuelle OK</div>
+                    </div>
+                 </div>
+                 <div style={{ fontSize: 14, fontWeight: 900, color: EMERALD }}>+25.000 F</div>
+              </div>
+            ))}
+         </div>
+       )}
 
        {/* NAV BAR MOCK */}
        <div style={{ position: "fixed", bottom: 0, width: "100%", maxWidth: 480, height: 70, background: "#fff", borderTop: "1px solid #f1f5f9", display: "flex", justifyContent: "space-around", alignItems: "center", zIndex: 100 }}>

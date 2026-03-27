@@ -1,22 +1,29 @@
 import { useState, useEffect } from 'react'
 import LiviSearch from './LiviSearch'
 import LiviDirectory from './LiviDirectory'
-import { BellRing, PackageSearch, BatteryCharging, ShoppingCart, CheckCircle2, ChevronRight, Zap, Wallet, Search, ArrowLeft, Users } from 'lucide-react'
+import LiviVoice from './LiviVoice'
+import { BellRing, PackageSearch, BatteryCharging, ShoppingCart, CheckCircle2, ChevronRight, Zap, Wallet, Search, ArrowLeft, Users, Mic, Heart, Star } from 'lucide-react'
+import { useGroupageOffers, useMembers } from './useLiviData'
 
-// Simulation des données client (Boutiquier)
+// Simulation des données client (Boutiquier) - À terme via useAuth
 const BOUTIQUE = {
   name: "Supermarché Al-Amine",
   balance: "2.450.000 FCFA",
   creditLimit: "5.000.000 FCFA",
   karma: 942,
-  tontineStatus: "Actif (Prélèvement 1.2%)",
+  tontineStatus: "Actif (Prélèvements Automatisés)",
 }
 
 const VISION_GREEN = "#10b981";
+const GOLD = "#f59e0b";
+const DARK_NAVY = "#0f172a";
 
 export default function ClientPortal() {
-  const [view, setView] = useState("dashboard"); // dashboard | search | directory
+  const [view, setView] = useState("dashboard"); // dashboard | search | directory | voice
   const [isOrdering, setIsOrdering] = useState(false)
+  const [isVoiceActive, setIsVoiceActive] = useState(false)
+  
+  const { data: groupageOffers, loading: groupageLoading } = useGroupageOffers();
 
   const handleOrder = () => {
     setIsOrdering(true)
@@ -26,6 +33,12 @@ export default function ClientPortal() {
     }, 1500)
   }
 
+  const handleVoiceResult = (result) => {
+    console.log("Résultat vocal :", result);
+    setView("search");
+    // On pourrait injecter le résultat dans la recherche ici si on passait des props à LiviSearch
+  };
+
   if (view === "search") return (
     <div className="animate-fade-in" style={{ maxWidth: 480, margin: "0 auto", position: "relative" }}>
       <button onClick={() => setView("dashboard")} style={{ position: "absolute", top: 20, left: 20, zIndex: 10, background: "#fff", border: "none", width: 40, height: 40, borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center", boxShadow: "0 4px 10px rgba(0,0,0,0.1)", cursor: "pointer" }}>
@@ -34,6 +47,7 @@ export default function ClientPortal() {
       <LiviSearch />
     </div>
   );
+
   if (view === "directory") return (
     <div className="animate-fade-in" style={{ maxWidth: 480, margin: "0 auto", position: "relative" }}>
       <button onClick={() => setView("dashboard")} style={{ position: "absolute", top: 20, left: 20, zIndex: 10, background: "#fff", border: "none", width: 40, height: 40, borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center", boxShadow: "0 4px 10px rgba(0,0,0,0.1)", cursor: "pointer" }}>
@@ -44,8 +58,40 @@ export default function ClientPortal() {
   );
 
   return (
-    <div style={{ maxWidth: 480, margin: '0 auto', background: '#f8fafc', minHeight: '100vh', padding: '20px', paddingBottom: 100, fontFamily: "'Inter', sans-serif" }}>
+    <div style={{ maxWidth: 480, margin: '0 auto', background: '#f8fafc', minHeight: '100vh', padding: '20px', paddingBottom: 100, fontFamily: "'Inter', sans-serif", position: 'relative' }}>
       
+      <style>{`
+        @keyframes fade-in { from { opacity: 0; } to { opacity: 1; } }
+        .animate-fade-in { animation: fade-in 0.4s ease-out; }
+        @keyframes pulse { 0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.4); } 70% { transform: scale(1.05); box-shadow: 0 0 0 10px rgba(16, 185, 129, 0); } 100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); } }
+        .pulse-btn { animation: pulse 2s infinite; }
+      `}</style>
+
+      {/* LiviVoice - Floating Mic Button */}
+      <button 
+        onClick={() => setIsVoiceActive(true)}
+        style={{ position: 'fixed', bottom: 100, left: 20, zIndex: 1000, background: VISION_GREEN, color: '#fff', border: 'none', width: 60, height: 60, borderRadius: '50%', boxShadow: '0 8px 30px rgba(0,0,0,0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', transition: 'all 0.3s ease' }}
+        className="pulse-btn"
+      >
+        <Mic size={28} />
+      </button>
+
+      {isVoiceActive && <LiviVoice onClose={() => setIsVoiceActive(false)} onResult={handleVoiceResult} />}
+
+      {/* LiviRelay - New B2B Commission Feature */}
+      <div style={{ background: 'linear-gradient(135deg, #0f172a 0%, #334155 100%)', borderRadius: 24, padding: '24px', color: '#fff', marginBottom: 24, boxShadow: '0 8px 25px rgba(0,0,0,0.1)', position: 'relative', overflow: 'hidden' }}>
+          <div style={{ position: 'absolute', right: -20, top: -20, opacity: 0.1 }}><Users size={120} /></div>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
+            <div style={{ fontSize: 13, fontWeight: 800, color: '#f59e0b' }}>🔵 LIVI-RELAIS LOGISTIQUE</div>
+            <div style={{ fontSize: 10, fontWeight: 700, background: '#f59e0b', color: '#000', padding: '4px 8px', borderRadius: 8 }}>REVENU ACTIF</div>
+          </div>
+          <div style={{ display: 'flex', alignItems: 'flex-end', gap: 8 }}>
+            <div style={{ fontSize: 32, fontWeight: 900 }}>+42.500 F <span style={{ fontSize: 14, fontWeight: 400, opacity: 0.7 }}>/mois</span></div>
+          </div>
+          <p style={{ fontSize: 11, marginTop: 8, color: '#94a3b8' }}>Vous avez servi de point de distribution pour <b>12 boutiques</b> voisines ce mois-ci.</p>
+          <button style={{ width: '100%', marginTop: 16, background: 'rgba(255,255,255,0.1)', color: '#fff', border: '1px solid rgba(255,255,255,0.2)', padding: '12px', borderRadius: 12, fontSize: 11, fontWeight: 800 }}>Paramètres Relais / Stockage</button>
+      </div>
+
       {/* Flash Ads / Promotions du Jour (Revenue for Platform Owner) */}
       <div style={{ background: 'linear-gradient(90deg, #f59e0b 0%, #f97316 100%)', borderRadius: 16, padding: '12px 20px', marginBottom: 20, color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'space-between', boxShadow: '0 10px 25px rgba(245, 158, 11, 0.2)' }}>
          <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
@@ -109,6 +155,33 @@ export default function ClientPortal() {
         </div>
       </div>
 
+      {/* LiviGroupage - Opportunité B2B */}
+      <div style={{ background: '#fffbeb', borderRadius: 24, padding: '24px', border: '1px solid #fde68a', boxShadow: '0 4px 20px rgba(0,0,0,0.03)', marginBottom: 24 }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
+            <div style={{ fontSize: 13, fontWeight: 800, color: '#92400e', background: '#fef3c7', padding: '4px 10px', borderRadius: 12 }}>🛒 LIVI-GROUPAGE</div>
+            <span style={{ fontSize: 10, fontWeight: 700, color: '#d97706' }}>ÉCONOMISEZ JUSQU'À 20%</span>
+          </div>
+          
+          {groupageLoading ? (
+            <div style={{ textAlign: 'center', padding: '20px', color: '#d97706', fontSize: 12, fontWeight: 700 }}>⏳ IA analyse les offres...</div>
+          ) : (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+              {groupageOffers.map(offer => (
+                <div key={offer.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: '#fff', padding: 12, borderRadius: 16, border: '1px solid #fef3c7' }}>
+                  <div>
+                    <div style={{ fontSize: 13, fontWeight: 800 }}>{offer.name}</div>
+                    <div style={{ fontSize: 11, color: '#92400e' }}>Remise: <span style={{ fontWeight: 900 }}>-{offer.discount}</span> · {offer.deadline}</div>
+                  </div>
+                  <div style={{ textAlign: 'right' }}>
+                    <div style={{ fontSize: 10, fontWeight: 700, color: '#d97706' }}>{offer.current_orders}/{offer.min_orders} Membres</div>
+                    <button style={{ marginTop: 4, background: '#f59e0b', color: '#fff', border: 'none', padding: '4px 10px', borderRadius: 8, fontSize: 10, fontWeight: 900 }}>REJOINDRE</button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+      </div>
+
       <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
           {/* Action Button */}
           <div style={{ background: '#fff', borderRadius: 24, padding: 24, border: '1px solid #e2e8f0', boxShadow: '0 8px 30px rgba(0,0,0,0.05)' }}>
@@ -118,7 +191,7 @@ export default function ClientPortal() {
               disabled={isOrdering}
               style={{ width: '100%', background: '#0f172a', color: '#fff', border: 'none', padding: '18px', borderRadius: 16, fontSize: 15, fontWeight: 800, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10, cursor: isOrdering ? 'not-allowed' : 'pointer', opacity: isOrdering ? 0.7 : 1 }}>
               {isOrdering ? (
-                <><div className="animate-spin" style={{ width: 16, height: 16, border: '2px solid #fff', borderTopColor: 'transparent', borderRadius: '50%' }}></div> Traitement IA...</>
+                <><div style={{ width: 16, height: 16, border: '2px solid #fff', borderTopColor: 'transparent', borderRadius: '50%', animation: 'spin 1s linear infinite' }}></div> Traitement IA...</>
               ) : (
                 <><ShoppingCart size={18} /> Renouveler à l'Identique (1 Clic)</>
               )}
@@ -143,12 +216,12 @@ export default function ClientPortal() {
             <p style={{ fontSize: 13, color: '#64748b', marginBottom: 20 }}>Réglez via LiviWallet ou Mobile Money.</p>
             
             <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: 12 }}>
-              <button style={{ background: '#0f172a', color: '#f59e0b', border: 'none', padding: 18, borderRadius: 16, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 12, fontWeight: 800 }}>
+              <button style={{ background: '#0f172a', color: '#f59e0b', border: 'none', padding: 18, borderRadius: 16, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 12, fontWeight: 800, cursor: 'pointer' }}>
                  <Wallet size={20} /> LiviWallet - 0 F Frais
               </button>
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
-                <button style={{ background: '#4c6ef5', color: '#fff', border: 'none', padding: 14, borderRadius: 16, fontWeight: 800 }}>Wave</button>
-                <button style={{ background: '#ff9900', color: '#fff', border: 'none', padding: 14, borderRadius: 16, fontWeight: 800 }}>Orange Money</button>
+                <button style={{ background: '#4c6ef5', color: '#fff', border: 'none', padding: 14, borderRadius: 16, fontWeight: 800, cursor: 'pointer' }}>Wave</button>
+                <button style={{ background: '#ff9900', color: '#fff', border: 'none', padding: 14, borderRadius: 16, fontWeight: 800, cursor: 'pointer' }}>Orange Money</button>
               </div>
             </div>
           </div>

@@ -23,7 +23,7 @@ Dédié au marchand de proximité, grossiste régional, ou détaillant. L'interf
 *   **Commande "1 Clic" / SmartTag NFC** : Déclenchement d'une commande d'urgence si le rayon est vide (Alerte Batterie faible/Rupture).
 *   **LiviKredit (Buy Now, Pay Later B2B)** : Une notation (Scoring) financière automatique indique au commerçant sa limite de crédit avec le grossiste ("Payer à J+7"), ce qui le force à commander davantage.
 *   **Upsell Ciblé (Push Marketing)** : Mise en avant du stock invendu présent dans le camion passant à proximité.
-
+*   **LiviGroupage (Achat Collaboratif)** : Rejoindre des offres temporaires et massives avec d'autres boutiquiers pour obtenir des remises "Grossiste" (jusqu'à -20%).
 ---
 
 ## 🤖 L'Innovation Majeure : L'IA "Upselling Prédictif"
@@ -32,6 +32,22 @@ Le livreur devient un "Super-Commercial". Au moment d'arriver à la boutique, Li
 
 D'un seul clic *(Bouton "+ Ajouter 5 cartons")*, le système modifie la livraison, facture le supplément via LiviPay, et augmente le chiffre d'affaires quotidien de la tournée. L'inventaire de l'entrepôt est mis à jour depuis le camion.
 
+---
+
+## 🌍 Fonctionnalités B2B 2.0 (World-Class)
+Pour convaincre les acteurs les plus exigeants, LiviPro intègre des fonctionnalités de classe mondiale qui redéfinissent la confiance et la collaboration en Afrique :
+
+1. **LiviChain Traceability (Confiance Totale)** :
+   - **Certification** : Scan des prix et produits certifiés numériquement pour garantir l'origine et lutter contre la contrefaçon.
+   - **Smart Contracts** : Décaissements Tontines et paiements P2P verrouillés par la blockchain du réseau interne.
+2. **LiviRelay (Logistique 2.0 & Revenus Passifs)** :
+   - Transforme les supermarchés bien situés en "Hubs" intermédiaires. La boutique stocke temporairement des colis pour les détaillants voisins contre rétribution, optimisant le dernier kilomètre.
+3. **LiviVoice AI (Accessibilité Omniprésente)** :
+   - Les commerçants, souvent occupés ou peu à l'aise avec la saisie, passent commande ou interrogent les stocks directement à la voix. Assistant NLP intégré.
+4. **LiviSocial & Network Health (Transparence & Data)** :
+   - Un flux d'alerte logistique (embouteillages, arrivages au port) alimenté par la communauté. Au niveau global, le "Network Health Score" garantit à l'investisseur 98%+ de résilience.
+5. **LiviAI Assistant (Insights Prédictifs)** :
+   - Un widget IA permanent analyse discrètement les données et notifie le propriétaire en temps réel : opportunités de vente croisée, alertes sur les baisses de Karma, ou conseils de déstockage massif via **LiviGroupage**.
 ---
 
 ## 🛠️ Stack Technique

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import DocumentVault from "./DocumentVault";
 import LiviTrack from "./LiviTrack";
 import LiviChain from "./LiviChain";
@@ -29,8 +29,14 @@ import {
   TrendingUp,
   FileText,
   ShieldAlert,
-  Database
+  Database,
+  MessageSquare,
+  Globe,
+  Navigation,
+  Layers,
+  Heart
 } from "lucide-react";
+import { useSocialFeed, useMembers } from "./useLiviData";
 
 // --- DATA SIMULATION ---
 const USERS = [
@@ -66,6 +72,7 @@ const COMPLIANCE_DOCS = [
 
 const DARK_NAVY = "#0f172a";
 const GOLD = "#f59e0b";
+const VISION_GREEN = "#10b981";
 
 // --- UI COMPONENTS ---
 const Card = ({ children, style = {} }) => (
@@ -77,8 +84,10 @@ const Badge = ({ text, color, bg }) => (
 );
 
 export default function AdminPlatform() {
-  const [activeTab, setActiveTab] = useState("users"); // users | onboarding | security | settings
+  const [activeTab, setActiveTab] = useState("social"); // social | users | onboarding | security | settings
   const [onboardingRole, setOnboardingRole] = useState(null);
+  const { data: socialPosts, loading: socialLoading } = useSocialFeed();
+  const { data: members, loading: membersLoading } = useMembers();
 
   const renderUsers = () => (
     <div className="animate-fade-in" style={{ padding: 24 }}>
@@ -114,7 +123,7 @@ export default function AdminPlatform() {
 
   const renderOnboarding = () => (
     <div className="animate-fade-in" style={{ padding: 24 }}>
-       <button onClick={() => setActiveTab("users")} style={{ background: "none", border: "none", display: "flex", alignItems: "center", gap: 8, marginBottom: 24, fontWeight: 700, color: DARK_NAVY }}>
+       <button onClick={() => setActiveTab("social")} style={{ background: "none", border: "none", display: "flex", alignItems: "center", gap: 8, marginBottom: 24, fontWeight: 700, color: DARK_NAVY }}>
           <ArrowLeft size={20} /> Retour
        </button>
        <h2 style={{ fontSize: 24, fontWeight: 900, marginBottom: 10 }}>Inscription Associé</h2>
@@ -176,7 +185,6 @@ export default function AdminPlatform() {
             <div style={{ fontSize: 14, fontWeight: 700 }}>{alert.message}</div>
          </Card>
        ))}
-       
     </div>
   );
 
@@ -209,21 +217,6 @@ export default function AdminPlatform() {
           <div style={{ fontSize: 32, fontWeight: 900, color: GOLD }}>2,727,700 FCFA</div>
           <div style={{ fontSize: 12, opacity: 0.6, marginTop: 4 }}>Période: Mars 2026 (En cours)</div>
        </div>
-
-       <div style={{ marginTop: 24, padding: 24, background: "#fff", borderRadius: 24, border: "2px solid #f1f5f9" }}>
-          <div style={{ display: "flex", alignItems: "center", gap: 8, color: "#6366f1", fontWeight: 900, fontSize: 15, marginBottom: 12 }}>
-             <TrendingUp size={20} /> Market Momentum IA
-          </div>
-          <p style={{ fontSize: 13, color: "#64748b", lineHeight: 1.5 }}>
-             <b>Prédiction :</b> Volatilité du Riz Parfumé (+8%) prévue la semaine prochaine à Marché Sandaga. 
-             L'IA suggère d'augmenter les stocks grossistes de 15% pour capturer la marge.
-          </p>
-          <div style={{ marginTop: 16, height: 40, display: "flex", gap: 4, alignItems: "flex-end" }}>
-             {[30, 45, 25, 60, 80, 50, 90].map((h, i) => (
-               <div key={i} style={{ flex: 1, background: i === 6 ? GOLD : "#e2e8f0", height: `${h}%`, borderRadius: 4 }}></div>
-             ))}
-          </div>
-       </div>
     </div>
   );
 
@@ -244,27 +237,6 @@ export default function AdminPlatform() {
             </div>
          </Card>
        ))}
-
-       <h2 style={{ fontSize: 20, fontWeight: 900, marginTop: 40, marginBottom: 10 }}>Livreurs Indépendants</h2>
-       <p style={{ fontSize: 13, color: "#64748b", marginBottom: 20 }}>Gérez le marché des freelances payés à la commission.</p>
-
-       {INDEPENDENT_DRIVERS.map(driver => (
-         <Card key={driver.id} style={{ marginBottom: 12, display: "flex", alignItems: "center", gap: 14 }}>
-            <div style={{ background: "#f8fafc", width: 44, height: 44, borderRadius: 12, display: "flex", alignItems: "center", justifyContent: "center" }}>
-               <Truck size={20} color="#10b981" />
-            </div>
-            <div style={{ flex: 1 }}>
-               <div style={{ fontSize: 14, fontWeight: 800 }}>{driver.name}</div>
-               <div style={{ fontSize: 11, color: "#64748b" }}>Score: {driver.rating} ★ · Rémunération: {driver.commission}</div>
-            </div>
-            <Badge text={driver.status} color="#10b981" bg="#ecfdf5" />
-         </Card>
-       ))}
-
-       <div style={{ marginTop: 32, padding: 20, background: "#fef3c7", borderRadius: 20, display: "flex", gap: 12, border: "1px dashed #f59e0b" }}>
-          <Briefcase color="#f59e0b" size={20} />
-          <div style={{ fontSize: 12, color: "#b45309", fontWeight: 700 }}>Note: Les grossistes peuvent également affecter leurs propres livreurs fixes via leur portail.</div>
-       </div>
     </div>
   );
 
@@ -300,21 +272,59 @@ export default function AdminPlatform() {
                <div style={{ height: 4, flex: 1, background: doc.status === 'Valid' ? '#10b981' : '#e2e8f0', borderRadius: 2 }}></div>
             </div>
             <div style={{ fontSize: 9, color: '#94a3b8', marginTop: 4, fontWeight: 700 }}>WORKFLOW: ÉMIS -{'>'} VÉRIFIÉ -{'>'} ARCHIVÉ</div>
-
-            <div style={{ display: "flex", justifyContent: "space-between", marginTop: 16, alignItems: "center" }}>
-               <div style={{ fontSize: 12, fontWeight: 700, color: "#64748b" }}>Expire le : {doc.expiry}</div>
-               <button style={{ color: GOLD, background: "none", border: "none", fontSize: 12, fontWeight: 800, cursor: "pointer" }}>Détails Audit</button>
-            </div>
          </Card>
        ))}
+    </div>
+  );
 
-       <div style={{ marginTop: 32, padding: 24, background: "#fff", borderRadius: 24, border: "2px solid #f1f5f9", display: "flex", alignItems: "center", gap: 16 }}>
-          <ShieldAlert size={32} color="#ef4444" />
-          <div style={{ flex: 1 }}>
-             <div style={{ fontSize: 14, fontWeight: 900, color: DARK_NAVY }}>Alerte Flotte</div>
-             <div style={{ fontSize: 12, color: "#64748b", marginTop: 2 }}>2 livreurs roulent sans assurance valide. Risque bloquage logistique.</div>
+  const renderSocial = () => (
+    <div className="animate-fade-in" style={{ padding: 24 }}>
+       {/* Bannière Sponsor Ministère */}
+       <div style={{ background: 'linear-gradient(135deg, #1a5276 0%, #0f172a 100%)', borderRadius: 20, padding: '16px 20px', marginBottom: 24, color: '#fff', display: 'flex', alignItems: 'center', gap: 14 }}>
+          <div style={{ fontSize: 32 }}>🇸🇳</div>
+          <div>
+             <div style={{ fontSize: 10, fontWeight: 800, color: GOLD, textTransform: 'uppercase' }}>Sponsor Officiel</div>
+             <div style={{ fontSize: 13, fontWeight: 900 }}>Ministère du Commerce, de la Consommation et des PME</div>
+             <div style={{ fontSize: 10, opacity: 0.6, marginTop: 2 }}>République du Sénégal · Partenaire institutionnel LiviPro</div>
           </div>
        </div>
+
+       <h2 style={{ fontSize: 24, fontWeight: 900, marginBottom: 10 }}>Flux Communautaire</h2>
+       <p style={{ fontSize: 13, color: "#64748b", marginBottom: 24 }}>Alertes logistiques et opportunités partagées par le réseau.</p>
+       
+       {socialLoading ? (
+         <div style={{ textAlign: 'center', padding: '40px 0', color: '#94a3b8', fontSize: 13 }}>⏳ Chargement depuis Supabase...</div>
+       ) : (
+         socialPosts.map(post => (
+           <Card key={post.id} style={{ marginBottom: 16, borderLeft: post.author_name?.includes('Ministère') ? '4px solid #1a5276' : '4px solid transparent' }}>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12 }}>
+                 <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                    <div style={{ background: post.author_name?.includes('Ministère') ? '#1a5276' : GOLD, width: 32, height: 32, borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center", color: "#fff", fontWeight: 900, fontSize: 12 }}>
+                       {post.author_name?.includes('Ministère') ? '🇸🇳' : (post.author_name || 'L')[0]}
+                    </div>
+                    <div>
+                       <div style={{ fontSize: 13, fontWeight: 800 }}>{post.author_name}</div>
+                       {post.author_name?.includes('Ministère') && <div style={{ fontSize: 9, fontWeight: 800, color: '#1a5276' }}>✅ COMPTE OFFICIEL VÉRIFIÉ</div>}
+                    </div>
+                 </div>
+                 <div style={{ fontSize: 11, color: "#94a3b8" }}>{post.time}</div>
+              </div>
+              <p style={{ fontSize: 13, color: DARK_NAVY, lineHeight: 1.5, marginBottom: 16 }}>{post.text}</p>
+              <div style={{ display: "flex", gap: 16, borderTop: "1px solid #f1f5f9", paddingTop: 12 }}>
+                 <div style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 12, color: "#64748b", fontWeight: 700 }}>
+                    <Heart size={16} color="#ef4444" /> {post.likes}
+                 </div>
+                 <div style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 12, color: "#64748b", fontWeight: 700 }}>
+                    <MessageSquare size={16} /> Répondre
+                 </div>
+              </div>
+           </Card>
+         ))
+       )}
+       
+       <button style={{ width: "100%", background: "#fff", color: DARK_NAVY, border: "2px solid #f1f5f9", padding: 18, borderRadius: 18, fontWeight: 900, fontSize: 14, display: "flex", alignItems: "center", justifyContent: "center", gap: 8 }}>
+          <MessageSquare size={20} /> Diffuser une Alerte Réseau
+       </button>
     </div>
   );
 
@@ -328,32 +338,31 @@ export default function AdminPlatform() {
 
        {/* HEADER PLATFORM */}
        <div style={{ background: DARK_NAVY, color: "#fff", padding: "40px 24px 20px", borderRadius: "0 0 32px 32px" }}>
-          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 24 }}>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", marginBottom: 20 }}>
              <div>
                 <div style={{ fontSize: 12, fontWeight: 700, color: GOLD, textTransform: "uppercase" }}>Master Admin</div>
                 <div style={{ fontSize: 20, fontWeight: 900 }}>Console LiviPro</div>
              </div>
-             <div style={{ width: 44, height: 44, borderRadius: 14, background: "rgba(255,255,255,0.1)", display: "flex", alignItems: "center", justifyContent: "center" }}>
-                <Settings size={22} />
+             <div style={{ textAlign: "right" }}>
+                <div style={{ fontSize: 10, fontWeight: 800, color: VISION_GREEN }}>NETWORK HEALTH</div>
+                <div style={{ fontSize: 20, fontWeight: 900 }}>98.2%</div>
              </div>
           </div>
           
-             <div style={{ display: "flex", gap: 10, paddingBottom: 10, overflowX: "auto" }}>
+          <div style={{ display: "flex", gap: 10, paddingBottom: 10, overflowX: "auto" }}>
              {[
+               { id: "social", icon: <MessageSquare size={18} />, label: "Social" },
                { id: "users", icon: <Users size={18} />, label: "Membres" },
                { id: "stats", icon: <BarChart3 size={18} />, label: "Revenus" },
-               { id: "swarm", icon: <Layers size={18} />, label: "Swarm/Ants" },
-               { id: "relay", icon: <TrendingUp size={18} />, label: "Relais/Inter" },
-               { id: "members", icon: <Users size={18} />, label: "Annuaire" },
-               { id: "atlas", icon: <Globe size={18} />, label: "LiviAtlas/Map" },
                { id: "track", icon: <Navigation size={18} />, label: "Tracking" },
                { id: "chain", icon: <Globe size={18} />, label: "Web3/Chain" },
-               { id: "vault", icon: <Database size={18} />, label: "Vault" },
-               { id: "compliance", icon: <FileText size={18} />, label: "Documents" },
-               { id: "commissions", icon: <Percent size={18} />, label: "Paramètres" },
-               { id: "security", icon: <ShieldCheck size={18} />, label: "Sécurité" },
-// ... existing code
-               { id: "onboarding", icon: <UserPlus size={18} />, label: "Admin" },
+               { id: "relay", icon: <TrendingUp size={18} />, label: "Relais" },
+               { id: "swarm", icon: <Layers size={18} />, label: "Swarm" },
+               { id: "atlas", icon: <Globe size={18} />, label: "Map" },
+               { id: "compliance", icon: <FileText size={18} />, label: "Docs" },
+               { id: "commissions", icon: <Percent size={18} />, label: "Prix" },
+               { id: "security", icon: <ShieldCheck size={18} />, label: "Sec" },
+               { id: "onboarding", icon: <UserPlus size={18} />, label: "Inscrire" }
              ].map(tab => (
                <button key={tab.id} onClick={() => setActiveTab(tab.id)} style={{ flexShrink: 0, background: activeTab === tab.id ? GOLD : "rgba(255,255,255,0.1)", color: activeTab === tab.id ? DARK_NAVY : "#fff", border: "none", padding: "8px 16px", borderRadius: 12, fontSize: 12, fontWeight: 800, display: "flex", alignItems: "center", gap: 8 }}>
                   {tab.icon} {tab.label}
@@ -363,6 +372,7 @@ export default function AdminPlatform() {
        </div>
 
        <div style={{ paddingBottom: 100 }}>
+          {activeTab === "social" && renderSocial()}
           {activeTab === "users" && renderUsers()}
           {activeTab === "onboarding" && renderOnboarding()}
           {activeTab === "security" && renderSecurity()}
