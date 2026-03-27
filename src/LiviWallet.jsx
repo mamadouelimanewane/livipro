@@ -41,11 +41,11 @@ export default function LiviWallet({ owner = "Supermarché Al-Amine", balance = 
        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 12, marginBottom: 30 }}>
           <button onClick={() => setActiveView("topup")} style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 8, background: "#fff", border: "1px solid #f1f5f9", padding: 16, borderRadius: 20, cursor: "pointer" }}>
              <div style={{ background: "#f0fdf4", width: 44, height: 44, borderRadius: 14, display: "flex", alignItems: "center", justifyContent: "center", color: "#10b981" }}><ArrowUpRight size={22} /></div>
-             <span style={{ fontSize: 11, fontWeight: 800 }}>RECHARGER</span>
+             <span translate="no" style={{ fontSize: 11, fontWeight: 800 }}>RECHARGER</span>
           </button>
           <button onClick={() => setActiveView("pay")} style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 8, background: "#fff", border: "1px solid #f1f5f9", padding: 16, borderRadius: 20, cursor: "pointer" }}>
              <div style={{ background: "#eff6ff", width: 44, height: 44, borderRadius: 14, display: "flex", alignItems: "center", justifyContent: "center", color: "#3b82f6" }}><ArrowDownLeft size={22} /></div>
-             <span style={{ fontSize: 11, fontWeight: 800 }}>PAYER</span>
+             <span translate="no" style={{ fontSize: 11, fontWeight: 800 }}>PAYER</span>
           </button>
           <button onClick={() => setActiveView("history")} style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 8, background: "#fff", border: "1px solid #f1f5f9", padding: 16, borderRadius: 20, cursor: "pointer" }}>
              <div style={{ background: "#f8fafc", width: 44, height: 44, borderRadius: 14, display: "flex", alignItems: "center", justifyContent: "center", color: "#64748b" }}><RefreshCcw size={22} /></div>
@@ -138,11 +138,11 @@ export default function LiviWallet({ owner = "Supermarché Al-Amine", balance = 
               <div style={{ display: "flex", gap: 12, marginBottom: 20 }}>
                  <div onClick={() => setPayMethod("wave")} style={{ flex: 1, height: 70, borderRadius: 16, background: payMethod === "wave" ? WAVE_BLUE : "#f8fafc", color: payMethod === "wave" ? "#fff" : "#64748b", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 13, fontWeight: 900, cursor: "pointer", border: "2px solid #f1f5f9", gap: 10 }}>
                     <img src="/wave_logo.png" alt="Wave" style={{ height: 32, borderRadius: 8 }} />
-                    WAVE
+                    <span translate="no">WAVE</span>
                  </div>
                  <div onClick={() => setPayMethod("om")} style={{ flex: 1, height: 70, borderRadius: 16, background: payMethod === "om" ? OM_ORANGE : "#f8fafc", color: payMethod === "om" ? "#fff" : "#64748b", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 13, fontWeight: 900, cursor: "pointer", border: "2px solid #f1f5f9", gap: 10 }}>
                     <img src="/om_logo.png" alt="Orange Money" style={{ height: 32, borderRadius: 8 }} />
-                    ORANGE MONEY
+                    <span translate="no">ORANGE MONEY</span>
                  </div>
               </div>
               
