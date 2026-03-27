@@ -10,7 +10,8 @@ import {
   Star,
   Zap,
   Mic,
-  Volume2
+  Volume2,
+  Clock
 } from "lucide-react";
 import LiviVoice from "./LiviVoice";
 

@@ -22,6 +22,7 @@ import { PRODUCTS } from "./LiviData";
 
 const DARK_NAVY = "#0f172a";
 const GOLD = "#f59e0b";
+const VISION_GREEN = "#10b981";
 
 export default function SalesPortal() {
   const [view, setView] = useState("catalog"); // catalog | fleet | branches | directory
