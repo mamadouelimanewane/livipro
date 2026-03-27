@@ -1,4 +1,4 @@
-name: Build LiviPro APK
+name: Build LiviPro APK (Complete)
 on:
   push:
     branches: [ main ]
@@ -19,14 +19,10 @@ jobs:
           node-version: 20
           
       - name: Install dependencies
-        run: |
-          npm install
-          npm list vite
+        run: npm install --legacy-peer-deps
         
       - name: Build Web App
-        run: |
-          npm run build
-          ls -R dist || echo "Dist folder not found!"
+        run: npm run build
         
       - name: Setup Java
         uses: actions/setup-java@v4
@@ -38,17 +34,17 @@ jobs:
         uses: android-actions/setup-android@v3
         
       - name: Sync Capacitor
-        run: |
-          npx cap sync android --verbose
-        
+        run: npx cap sync android
+
       - name: Build Android APK
         run: |
           cd android
           chmod +x gradlew
-          ./gradlew assembleDebug --info
+          ./gradlew assembleDebug --no-daemon
           
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
-          name: livipro-debug-apk
+          name: LiviPro-B2B-Complete-APK
           path: android/app/build/outputs/apk/debug/app-debug.apk
+          retention-days: 30
