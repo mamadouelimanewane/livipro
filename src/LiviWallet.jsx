@@ -116,15 +116,15 @@ export default function LiviWallet({ owner = "Supermarché Al-Amine", balance = 
   const renderPay = () => {
     return (
       <div className="animate-fade-in">
-        <button onClick={() => setActiveView("home")} style={{ background: "none", border: "none", fontWeight: 800, color: DARK_NAVY, display: "flex", alignItems: "center", gap: 8, marginBottom: 24 }}>
-            <ArrowDownLeft size={20} style={{ transform: "rotate(45deg)" }} /> Annuler
-        </button>
-        <h2 style={{ fontSize: 24, fontWeight: 900, marginBottom: 8 }}>Payer un Fournisseur</h2>
-        
-        <div style={{ display: "flex", gap: 10, marginBottom: 24 }}>
-           <button onClick={() => setPayMode("scan")} style={{ flex: 1, padding: '10px', borderRadius: 12, background: payMode === "scan" ? DARK_NAVY : "#fff", color: payMode === "scan" ? "#fff" : "#64748b", border: "1px solid #f1f5f9", fontSize: 11, fontWeight: 800 }}>SCAN QR</button>
-           <button onClick={() => setPayMode("number")} style={{ flex: 1, padding: '10px', borderRadius: 12, background: payMode === "number" ? DARK_NAVY : "#fff", color: payMode === "number" ? "#fff" : "#64748b", border: "1px solid #f1f5f9", fontSize: 11, fontWeight: 800 }}>PAR NUMÉRO</button>
-        </div>
+       <button onClick={() => setActiveView("home")} style={{ background: "none", border: "none", fontWeight: 800, color: DARK_NAVY, display: "flex", alignItems: "center", gap: 8, marginBottom: 24, cursor: "pointer" }}>
+          <ArrowDownLeft size={20} style={{ transform: "rotate(45deg)" }} /> Retour
+       </button>
+       <h2 style={{ fontSize: 22, fontWeight: 900, marginBottom: 8 }}>Payer un Fournisseur</h2>
+       
+       <div style={{ display: "flex", gap: 10, marginBottom: 24 }}>
+          <button onClick={() => setPayMode("scan")} style={{ flex: 1, padding: '12px', borderRadius: 14, background: payMode === "scan" ? DARK_NAVY : "#fff", color: payMode === "scan" ? "#fff" : "#64748b", border: "1px solid #e2e8f0", fontSize: 11, fontWeight: 800, cursor: "pointer" }}>SCANNER QR</button>
+          <button onClick={() => setPayMode("number")} style={{ flex: 1, padding: '12px', borderRadius: 14, background: payMode === "number" ? DARK_NAVY : "#fff", color: payMode === "number" ? "#fff" : "#64748b", border: "1px solid #e2e8f0", fontSize: 11, fontWeight: 800, cursor: "pointer" }}>PAR NUMÉRO</button>
+       </div>
 
         {payMode === "scan" ? (
            <div style={{ width: "100%", height: 300, background: "#000", borderRadius: 32, display: "flex", alignItems: "center", justifyContent: "center", position: "relative", overflow: "hidden" }}>
@@ -135,8 +135,14 @@ export default function LiviWallet({ owner = "Supermarché Al-Amine", balance = 
         ) : (
            <div className="animate-slide-up">
               <div style={{ display: "flex", gap: 12, marginBottom: 20 }}>
-                 <div onClick={() => setPayMethod("wave")} style={{ flex: 1, height: 60, borderRadius: 16, background: payMethod === "wave" ? WAVE_BLUE : "#f8fafc", color: payMethod === "wave" ? "#fff" : "#64748b", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 14, fontWeight: 900, cursor: "pointer", border: "2px solid #f1f5f9" }}>🌊 WAVE</div>
-                 <div onClick={() => setPayMethod("om")} style={{ flex: 1, height: 60, borderRadius: 16, background: payMethod === "om" ? OM_ORANGE : "#f8fafc", color: payMethod === "om" ? "#fff" : "#64748b", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 14, fontWeight: 900, cursor: "pointer", border: "2px solid #f1f5f9" }}>🍊 ORANGE</div>
+                 <div onClick={() => setPayMethod("wave")} style={{ flex: 1, height: 70, borderRadius: 16, background: payMethod === "wave" ? WAVE_BLUE : "#f8fafc", color: payMethod === "wave" ? "#fff" : "#64748b", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 13, fontWeight: 900, cursor: "pointer", border: "2px solid #f1f5f9", gap: 10 }}>
+                    <img src="/wave_logo.png" alt="Wave" style={{ height: 32, borderRadius: 8 }} />
+                    WAVE
+                 </div>
+                 <div onClick={() => setPayMethod("om")} style={{ flex: 1, height: 70, borderRadius: 16, background: payMethod === "om" ? OM_ORANGE : "#f8fafc", color: payMethod === "om" ? "#fff" : "#64748b", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 13, fontWeight: 900, cursor: "pointer", border: "2px solid #f1f5f9", gap: 10 }}>
+                    <img src="/om_logo.png" alt="Orange Money" style={{ height: 32, borderRadius: 8 }} />
+                    ORANGE MONEY
+                 </div>
               </div>
               
               <div style={{ marginBottom: 20 }}>
