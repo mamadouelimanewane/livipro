@@ -17,7 +17,12 @@ import {
   Sparkles,
   Layers,
   Loader2,
-  Filter
+  Filter,
+  BarChart3,
+  Globe,
+  Navigation,
+  ShieldCheck,
+  Zap
 } from "lucide-react";
 import LiviFleetManager from "./LiviFleetManager";
 import LiviBranchManager from "./LiviBranchManager";
@@ -63,14 +68,14 @@ export default function SalesPortal() {
   );
 
   const handleAction = (name) => {
-    alert(`Action "${name}" : Vous n'avez pas les droits d'écriture en mode Démo.`);
+    alert(`Action "${name}" : Opération enregistrée sur le serveur (Simulé).`);
   }
 
   const handleCreateProduct = () => {
     setIsAdding(true);
     setTimeout(() => {
       setIsAdding(false);
-      alert("Nouveau produit ajouté au catalogue (Simulé) !");
+      alert("Nouveau produit ajouté au catalogue grossiste !");
     }, 1500);
   }
 
@@ -81,25 +86,25 @@ export default function SalesPortal() {
              <Building2 size={24} />
           </div>
           <div>
-             <div style={{ fontSize: 10, color: "#64748b", fontWeight: 800, textTransform: "uppercase" }}>IDENTIFICATION GROSSISTE</div>
-             <div style={{ fontSize: 16, fontWeight: 900 }}>Dakar Logistics Hub (Certifié Platinum)</div>
+             <div style={{ fontSize: 10, color: "#64748b", fontWeight: 800, textTransform: "uppercase" }}>HUB LOGISTIQUE</div>
+             <div style={{ fontSize: 16, fontWeight: 900 }}>Dakar Logistics Hub (Platinum)</div>
           </div>
       </div>
       <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: 24 }}>
          <Card style={{ background: DARK_NAVY, color: "#fff" }}>
-            <div style={{ fontSize: 12, color: GOLD, fontWeight: 800, marginBottom: 8, textTransform: "uppercase" }}>Valeur Générée (Période)</div>
-            <div style={{ fontSize: 32, fontWeight: 900 }}>45.2M FCFA</div>
-            <div style={{ fontSize: 11, color: VISION_GREEN, marginTop: 8, fontWeight: 700 }}>↑ +14.5% vs mois dernier</div>
+            <div style={{ fontSize: 12, color: GOLD, fontWeight: 800, marginBottom: 8, textTransform: "uppercase" }}>Chiffre d'Affaire Annuel</div>
+            <div style={{ fontSize: 32, fontWeight: 900 }}>452.8M FCFA</div>
+            <div style={{ fontSize: 11, color: VISION_GREEN, marginTop: 8, fontWeight: 700 }}>↑ +8.5% Objectifs</div>
          </Card>
          <Card>
-            <div style={{ fontSize: 12, color: "#64748b", fontWeight: 800, marginBottom: 8, textTransform: "uppercase" }}>Capacité Flotte</div>
-            <div style={{ fontSize: 32, fontWeight: 900 }}>82% <span style={{ fontSize: 14, fontWeight: 400, color: "#94a3b8" }}>Charge</span></div>
-            <div style={{ fontSize: 11, color: GOLD, marginTop: 8, fontWeight: 700 }}>5 Camions • 3 Motos • 2 Indépendants</div>
+            <div style={{ fontSize: 12, color: "#64748b", fontWeight: 800, marginBottom: 8, textTransform: "uppercase" }}>Performances Flotte</div>
+            <div style={{ fontSize: 32, fontWeight: 900 }}>96.2% <span style={{ fontSize: 14, fontWeight: 400, color: "#94a3b8" }}>Livraison</span></div>
+            <div style={{ fontSize: 11, color: VISION_GREEN, marginTop: 8, fontWeight: 700 }}>Délais optimisés par IA</div>
          </Card>
          <Card>
-            <div style={{ fontSize: 12, color: "#64748b", fontWeight: 800, marginBottom: 8, textTransform: "uppercase" }}>Alertes Stock</div>
-            <div style={{ fontSize: 32, fontWeight: 900, color: "#ef4444" }}>{products.filter(p => p.stock < 50).length} <span style={{ fontSize: 14, fontWeight: 400, color: "#94a3b8" }}>Critiques</span></div>
-            <div style={{ fontSize: 11, color: "#64748b", marginTop: 8, fontWeight: 700 }}>Rupture imminente : Riz, Huile</div>
+            <div style={{ fontSize: 12, color: "#64748b", fontWeight: 800, marginBottom: 8, textTransform: "uppercase" }}>Indice de Rupture</div>
+            <div style={{ fontSize: 32, fontWeight: 900, color: products.filter(p => p.stock < 50).length > 2 ? "#ef4444" : GOLD }}>{products.filter(p => p.stock < 50).length} <span style={{ fontSize: 14, fontWeight: 400, color: "#94a3b8" }}>Critiques</span></div>
+            <div style={{ fontSize: 11, color: "#64748b", marginTop: 8, fontWeight: 700 }}>Réapprovisionnement auto activé</div>
          </Card>
       </div>
     </div>
@@ -109,8 +114,8 @@ export default function SalesPortal() {
     <div className="animate-fade-in">
        <div style={{ display: "flex", flexDirection: window.innerWidth > 768 ? "row" : "column", justifyContent: "space-between", alignItems: window.innerWidth > 768 ? "center" : "flex-start", gap: 20, marginBottom: 24 }}>
           <div>
-            <h2 style={{ fontSize: 22, fontWeight: 900 }}>Inventaire & Tarification</h2>
-            <p style={{ fontSize: 13, color: "#64748b" }}>Gérez vos prix grossistes et vos niveaux de stock en temps réel.</p>
+            <h2 style={{ fontSize: 22, fontWeight: 900 }}>Inventaire & Tarification Grossiste</h2>
+            <p style={{ fontSize: 14, color: "#64748b" }}>Contrôlez vos stocks, vos prix B2B et vos marges en temps réel.</p>
           </div>
           <div style={{ display: "flex", gap: 12, width: window.innerWidth > 768 ? "auto" : "100%" }}>
               <div style={{ background: "#f1f5f9", borderRadius: 12, padding: "10px 16px", display: "flex", alignItems: "center", gap: 10, flex: 1 }}>
@@ -118,7 +123,7 @@ export default function SalesPortal() {
                 <input 
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  placeholder="Rechercher article..." 
+                  placeholder="Filtrer catalogues..." 
                   style={{ background: "none", border: "none", outline: "none", fontSize: 13, width: "100%" }} 
                 />
               </div>
@@ -127,50 +132,57 @@ export default function SalesPortal() {
                 disabled={isAdding}
                 style={{ background: GOLD, color: "#fff", border: "none", padding: "12px 24px", borderRadius: 14, fontWeight: 900, fontSize: 14, display: "flex", alignItems: "center", gap: 8, cursor: isAdding ? "wait" : "pointer" }}
               >
-                {isAdding ? <Loader2 className="animate-spin" size={20} /> : <Plus size={20} />} <span style={{ display: window.innerWidth > 600 ? "inline" : "none" }}>Nouveau</span>
+                {isAdding ? <Loader2 className="animate-spin" size={20} /> : <Plus size={20} />} <span style={{ display: window.innerWidth > 600 ? "inline" : "none" }}>Ajouter Article</span>
               </button>
           </div>
        </div>
 
        <div style={{ background: "#fff", borderRadius: 24, padding: window.innerWidth > 768 ? 32 : 16, border: "1px solid #e2e8f0", overflowX: "auto" }}>
-          <table style={{ width: "100%", borderCollapse: "collapse", minWidth: 800 }}>
+          <table style={{ width: "100%", borderCollapse: "collapse", minWidth: 850 }}>
              <thead>
                 <tr style={{ borderBottom: "2px solid #f8fafc", textAlign: "left" }}>
-                   <th style={{ padding: "16px", color: "#64748b", fontSize: 12, fontWeight: 800 }}>VISUEL</th>
-                   <th style={{ padding: "16px", color: "#64748b", fontSize: 12, fontWeight: 800 }}>DÉSIGNATION</th>
-                   <th style={{ padding: "16px", color: "#64748b", fontSize: 12, fontWeight: 800 }}>GROSSISTE ID</th>
-                   <th style={{ padding: "16px", color: "#64748b", fontSize: 12, fontWeight: 800 }}>STOCK DISPO</th>
-                   <th style={{ padding: "16px", color: "#64748b", fontSize: 12, fontWeight: 800 }}>PRIX B2B</th>
-                   <th style={{ padding: "16px", color: "#64748b", fontSize: 12, fontWeight: 800 }}>ACTIONS</th>
+                   <th style={{ padding: "16px", color: "#64748b", fontSize: 12, fontWeight: 800 }}>PRODUIT</th>
+                   <th style={{ padding: "16px", color: "#64748b", fontSize: 12, fontWeight: 800 }}>CATÉGORIE</th>
+                   <th style={{ padding: "16px", color: "#64748b", fontSize: 12, fontWeight: 800 }}>STOCKS RÉELS</th>
+                   <th style={{ padding: "16px", color: "#64748b", fontSize: 12, fontWeight: 800 }}>VALEUR B2B</th>
+                   <th style={{ padding: "16px", color: "#64748b", fontSize: 12, fontWeight: 800 }}>SCORE ROTATION</th>
+                   <th style={{ padding: "16px", color: "#64748b", fontSize: 12, fontWeight: 800, textAlign: "right" }}>ACTIONS</th>
                 </tr>
              </thead>
              <tbody>
                 {filteredProducts.length > 0 ? filteredProducts.map(p => (
                    <tr key={p.id} style={{ borderBottom: "1px solid #f8fafc" }}>
                       <td style={{ padding: "16px" }}>
-                         <div style={{ width: 48, height: 48, borderRadius: 12, background: "#f1f5f9", overflow: "hidden", display: "flex", alignItems: "center", justifyContent: "center" }}>
-                            {p.image ? <img src={p.image} alt={p.name} style={{ width: "100%", height: "100%", objectFit: "cover" }} /> : <Box size={20} color={GOLD} />}
-                         </div>
+                        <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
+                           <div style={{ width: 44, height: 44, borderRadius: 10, background: "#f1f5f9", overflow: "hidden", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                              {p.image ? <img src={p.image} alt={p.name} style={{ width: "100%", height: "100%", objectFit: "cover" }} /> : <Box size={18} color={GOLD} />}
+                           </div>
+                           <div>
+                              <div style={{ fontSize: 14, fontWeight: 800 }}>{p.name}</div>
+                              <div style={{ fontSize: 11, color: "#94a3b8" }}>ID: #{p.id.split('-')[0]}</div>
+                           </div>
+                        </div>
                       </td>
                       <td style={{ padding: "16px" }}>
-                         <div style={{ fontSize: 14, fontWeight: 800 }}>{p.name}</div>
-                         <div style={{ fontSize: 11, color: "#64748b" }}>{p.category}</div>
-                      </td>
-                      <td style={{ padding: "16px" }}>
-                         <div style={{ fontSize: 11, fontWeight: 700, color: "#64748b" }}>{p.wholesaler || "Dakar Hub"}</div>
+                         <span style={{ fontSize: 11, fontWeight: 800, color: "#64748b", background: "#f1f5f9", padding: "4px 10px", borderRadius: 8 }}>{p.category}</span>
                       </td>
                       <td style={{ padding: "16px" }}>
                          <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
                             <div style={{ width: 60, height: 6, background: "#e2e8f0", borderRadius: 3 }}>
                                <div style={{ width: `${Math.min(100, (p.stock/1000)*100)}%`, height: "100%", background: p.stock < 50 ? "#ef4444" : VISION_GREEN, borderRadius: 3 }} />
                             </div>
-                            <span style={{ fontSize: 14, fontWeight: 800, color: p.stock < 50 ? "#ef4444" : DARK_NAVY }}>{p.stock}</span>
+                            <span style={{ fontSize: 14, fontWeight: 800, color: p.stock < 50 ? "#ef4444" : DARK_NAVY }}>{p.stock} <span style={{ fontSize: 10, fontWeight: 400, color: "#94a3b8" }}>UN</span></span>
                          </div>
                       </td>
                       <td style={{ padding: "16px", fontSize: 16, fontWeight: 900 }}>{p.price.toLocaleString()} F</td>
                       <td style={{ padding: "16px" }}>
+                         <div style={{ display: "flex", alignItems: "center", gap: 6, color: VISION_GREEN, fontWeight: 800, fontSize: 13 }}>
+                            <TrendingDown size={14} style={{ transform: "rotate(180deg)" }} /> High
+                         </div>
+                      </td>
+                      <td style={{ padding: "16px", textAlign: "right" }}>
                          <button 
-                            onClick={() => handleAction(`Options ${p.name}`)}
+                            onClick={() => handleAction(`Modifier ${p.name}`)}
                             style={{ padding: 8, borderRadius: 10, background: "none", border: "1px solid #f1f5f9", color: "#64748b", cursor: "pointer" }}
                          >
                             <MoreVertical size={18} />
@@ -179,7 +191,7 @@ export default function SalesPortal() {
                    </tr>
                 )) : (
                   <tr>
-                    <td colSpan="6" style={{ padding: 40, textAlign: "center", color: "#94a3b8" }}>Aucun produit ne correspond à votre recherche.</td>
+                    <td colSpan="6" style={{ padding: 60, textAlign: "center", color: "#94a3b8" }}>Aucun article trouvé dans votre inventaire.</td>
                   </tr>
                 )}
              </tbody>
@@ -189,7 +201,7 @@ export default function SalesPortal() {
   );
 
   return (
-    <DashboardShell title="Hub Logistique & Ventes Grossiste" role="grossiste">
+    <DashboardShell title={view === 'catalog' ? 'Hub Logistique Grossiste' : view === 'fleet' ? 'Supervision de la Flotte' : view === 'directory' ? 'Annuaire Clients B2B' : view === 'groupage' ? 'Campagnes LiviGroupage' : 'Points Relais & Branches'} role="grossiste">
        <HeaderStats />
        
        <div style={{ display: "flex", gap: 10, marginBottom: 30, overflowX: "auto", paddingBottom: 10 }}>
@@ -224,31 +236,50 @@ export default function SalesPortal() {
         ))}
       </div>
 
-      <div style={{ background: "#fff", borderRadius: 28, padding: window.innerWidth > 768 ? 32 : 16, border: "1px solid #e2e8f0", boxShadow: "0 10px 40px rgba(0,0,0,0.02)" }}>
+      <div style={{ background: "#fff", borderRadius: 28, padding: window.innerWidth > 768 ? 32 : 20, border: "1px solid #e2e8f0", boxShadow: "0 20px 60px rgba(0,0,0,0.03)" }}>
         {view === "catalog" && renderInventoryTable()}
         {view === "groupage" && (
            <div className="animate-fade-in">
-              <h2 style={{ fontSize: 22, fontWeight: 900, marginBottom: 24 }}>Campagnes d'Achats Groupés</h2>
-              <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))", gap: 20 }}>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 32 }}>
+                 <div>
+                    <h2 style={{ fontSize: 22, fontWeight: 900 }}>Campagnes d'Achats Groupés</h2>
+                    <p style={{ fontSize: 14, color: "#64748b" }}>Optimisez vos volumes d'importation en regroupant les commandes des boutiques.</p>
+                 </div>
+                 <button onClick={() => handleAction("Nouvelle Campagne")} style={{ background: DARK_NAVY, color: "#fff", border: "none", padding: "12px 24px", borderRadius: 14, fontWeight: 800, cursor: "pointer" }}>Lance une Campagne</button>
+              </div>
+              <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(320px, 1fr))", gap: 24 }}>
                  {groupageOffers.map(offer => (
                    <Card key={offer.id} style={{ border: "1px solid #fde68a", position: "relative" }}>
-                      <div style={{ fontSize: 11, fontWeight: 800, color: "#92400e", background: "#fef3c7", padding: "4px 10px", borderRadius: 8, display: "inline-block", marginBottom: 12 }}>PROMO ACTIVE : -{offer.discount}</div>
-                      <div style={{ fontSize: 18, fontWeight: 900 }}>{offer.name}</div>
-                      <div style={{ marginTop: 20 }}>
+                      <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 16 }}>
+                         <div style={{ fontSize: 11, fontWeight: 800, color: "#92400e", background: "#fef3c7", padding: "4px 10px", borderRadius: 8 }}>Remise: -{offer.discount}</div>
+                         <div style={{ fontSize: 11, color: "#64748b", fontWeight: 700 }}>Fin: 05 Avril</div>
+                      </div>
+                      <div style={{ fontSize: 18, fontWeight: 900, marginBottom: 20 }}>{offer.name}</div>
+                      
+                      <div style={{ background: "#f8fafc", padding: 16, borderRadius: 12, marginBottom: 20 }}>
                         <div style={{ display: "flex", justifyContent: "space-between", fontSize: 12, fontWeight: 700, marginBottom: 8 }}>
-                           <span>Progression</span>
+                           <span>Seuil Critique</span>
                            <span>{offer.current_orders} / {offer.min_orders} boutiques</span>
                         </div>
-                        <div style={{ height: 8, background: "#f8fafc", borderRadius: 4 }}>
-                           <div style={{ width: `${(offer.current_orders/offer.min_orders)*100}%`, height: "100%", background: GOLD, borderRadius: 4 }} />
+                        <div style={{ height: 8, background: "#e2e8f0", borderRadius: 4 }}>
+                           <div style={{ width: `${(offer.current_orders/offer.min_orders)*100}%`, height: "100%", background: GOLD, borderRadius: 4 }}></div>
                         </div>
                       </div>
-                      <button 
-                        onClick={() => handleAction(`Gérer Campagne ${offer.name}`)}
-                        style={{ marginTop: 20, width: "100%", background: DARK_NAVY, color: "#fff", border: "none", padding: "12px", borderRadius: 12, fontSize: 12, fontWeight: 800, cursor: "pointer" }}
-                      >
-                        Gérer la Campagne
-                      </button>
+
+                      <div style={{ display: "flex", gap: 10 }}>
+                        <button 
+                          onClick={() => handleAction(`Edit ${offer.name}`)}
+                          style={{ flex: 1, background: "#fff", border: "1px solid #e2e8f0", padding: "10px", borderRadius: 10, fontSize: 12, fontWeight: 800, cursor: "pointer" }}
+                        >
+                          Modifier
+                        </button>
+                        <button 
+                          onClick={() => handleAction(`Publier ${offer.name}`)}
+                          style={{ flex: 1, background: DARK_NAVY, color: "#fff", border: "none", padding: "10px", borderRadius: 10, fontSize: 12, fontWeight: 800, cursor: "pointer" }}
+                        >
+                          Publier
+                        </button>
+                      </div>
                    </Card>
                  ))}
               </div>
