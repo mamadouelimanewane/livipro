@@ -27,8 +27,10 @@ const DARK_NAVY = "#0f172a";
 const GOLD = "#f59e0b";
 const VISION_GREEN = "#10b981";
 
+import DashboardShell from "./components/DashboardShell";
+
 export default function SalesPortal() {
-  const [view, setView] = useState("catalog"); // catalog | fleet | branches | directory | groupage
+  const [view, setView] = useState("catalog"); 
   const [activeCategory, setActiveCategory] = useState("Tous");
   const [searchTerm, setSearchTerm] = useState("");
 
@@ -40,203 +42,158 @@ export default function SalesPortal() {
     p.name.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  if (view === "fleet") return (
-    <div className="animate-fade-in" style={{ maxWidth: 480, margin: "0 auto", position: "relative" }}>
-      <button onClick={() => setView("catalog")} style={{ position: "absolute", top: 20, left: 20, zIndex: 10, background: "#fff", border: "none", width: 40, height: 40, borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center", boxShadow: "0 4px 10px rgba(0,0,0,0.1)", cursor: "pointer" }}>
-        <ArrowLeft size={20} />
-      </button>
-      <LiviFleetManager />
-    </div>
-  );
-
-  if (view === "branches") return (
-    <div className="animate-fade-in" style={{ maxWidth: 480, margin: "0 auto", position: "relative" }}>
-      <button onClick={() => setView("catalog")} style={{ position: "absolute", top: 20, left: 20, zIndex: 10, background: "#fff", border: "none", width: 40, height: 40, borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center", boxShadow: "0 4px 10px rgba(0,0,0,0.1)", cursor: "pointer" }}>
-        <ArrowLeft size={20} />
-      </button>
-      <LiviBranchManager />
-    </div>
-  );
-
-  if (view === "directory") return (
-    <div className="animate-fade-in" style={{ maxWidth: 480, margin: "0 auto", position: "relative" }}>
-      <button onClick={() => setView("catalog")} style={{ position: "absolute", top: 20, left: 20, zIndex: 10, background: "#fff", border: "none", width: 40, height: 40, borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center", boxShadow: "0 4px 10px rgba(0,0,0,0.1)", cursor: "pointer" }}>
-        <ArrowLeft size={20} />
-      </button>
-      <LiviDirectory />
-    </div>
-  );
-
-  if (view === "groupage") return (
-    <div className="animate-fade-in" style={{ maxWidth: 480, margin: "0 auto", background: "#f8fafc", minHeight: "100vh", padding: 24, position: "relative" }}>
-       <button onClick={() => setView("catalog")} style={{ position: "absolute", top: 20, left: 20, zIndex: 10, background: "#fff", border: "none", width: 40, height: 40, borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center", boxShadow: "0 4px 10px rgba(0,0,0,0.1)", cursor: "pointer" }}>
-        <ArrowLeft size={20} />
-      </button>
-      <div style={{ marginTop: 60 }}>
-        <h2 style={{ fontSize: 22, fontWeight: 900, marginBottom: 8 }}>LiviGroupage Manager</h2>
-        <p style={{ fontSize: 13, color: "#64748b", marginBottom: 24 }}>{"Cr\u00e9ez des offres d'achat group\u00e9 pour vos boutiques partenaires."}</p>
-        
-        {groupageLoading && (
-          <div style={{ textAlign: 'center', padding: 20, fontSize: 13, color: GOLD, fontWeight: 800, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}>
-            <Loader2 size={16} /> Chargement des offres...
+  const HeaderStats = () => (
+    <div style={{ marginBottom: 32 }}>
+      <div style={{ display: "flex", alignItems: "center", gap: 16, marginBottom: 24, padding: "16px 24px", background: "#fff", borderRadius: 20, border: "1px solid #e2e8f0", alignSelf: "flex-start", width: "fit-content" }}>
+          <div style={{ background: GOLD, width: 44, height: 44, borderRadius: 14, display: "flex", alignItems: "center", justifyContent: "center", color: "#fff" }}>
+             <Building2 size={24} />
           </div>
-        )}
-
-        {groupageOffers.map(offer => (
-          <div key={offer.id} style={{ background: "#fff", borderRadius: 24, padding: 20, marginBottom: 16, border: "2px solid #fde68a", position: "relative" }}>
-             <div style={{ position: "absolute", top: 12, right: 12, color: GOLD }}><Sparkles size={18} /></div>
-             <div style={{ fontSize: 11, fontWeight: 800, color: "#92400e", background: "#fef3c7", padding: "4px 10px", borderRadius: 8, display: "inline-block", marginBottom: 12 }}>PROMO ACTIVE : -{offer.discount}</div>
-             <div style={{ fontSize: 17, fontWeight: 900 }}>{offer.name}</div>
-             <div style={{ display: "flex", justifyContent: "space-between", marginTop: 16, alignItems: "center" }}>
-                <div>
-                   <div style={{ fontSize: 11, color: "#94a3b8" }}>{"ADH\u00c9SION"}</div>
-                   <div style={{ fontSize: 15, fontWeight: 800 }}>{offer.current_orders || offer.currentOrders} / {offer.min_orders || offer.minOrders} boutiques</div>
-                </div>
-                <button style={{ background: DARK_NAVY, color: "#fff", border: "none", padding: "8px 16px", borderRadius: 12, fontSize: 12, fontWeight: 800, cursor: 'pointer' }}>{"D\u00e9tails"}</button>
-             </div>
+          <div>
+             <div style={{ fontSize: 10, color: "#64748b", fontWeight: 800, textTransform: "uppercase" }}>IDENTIFICATION GROSSISTE</div>
+             <div style={{ fontSize: 16, fontWeight: 900 }}>Dakar Logistics Hub (Certifié Platinum)</div>
           </div>
-        ))}
-        
-        <button style={{ width: "100%", background: "linear-gradient(135deg, #f59e0b 0%, #d97706 100%)", color: "#fff", border: "none", padding: 18, borderRadius: 18, fontWeight: 900, fontSize: 14, display: "flex", alignItems: "center", justifyContent: "center", gap: 8, marginTop: 12, cursor: 'pointer' }}>
-           <Plus size={20} /> Nouvelle Campagne Groupage
-        </button>
+      </div>
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: 24 }}>
+         <Card style={{ background: DARK_NAVY, color: "#fff" }}>
+            <div style={{ fontSize: 12, color: GOLD, fontWeight: 800, marginBottom: 8, textTransform: "uppercase" }}>Valeur Générée (Période)</div>
+            <div style={{ fontSize: 32, fontWeight: 900 }}>45.2M FCFA</div>
+            <div style={{ fontSize: 11, color: VISION_GREEN, marginTop: 8, fontWeight: 700 }}>↑ +14.5% vs mois dernier</div>
+         </Card>
+         <Card>
+            <div style={{ fontSize: 12, color: "#64748b", fontWeight: 800, marginBottom: 8, textTransform: "uppercase" }}>Capacité Flotte</div>
+            <div style={{ fontSize: 32, fontWeight: 900 }}>82% <span style={{ fontSize: 14, fontWeight: 400, color: "#94a3b8" }}>Charge</span></div>
+            <div style={{ fontSize: 11, color: GOLD, marginTop: 8, fontWeight: 700 }}>5 Camions • 3 Motos • 2 Indépendants</div>
+         </Card>
+         <Card>
+            <div style={{ fontSize: 12, color: "#64748b", fontWeight: 800, marginBottom: 8, textTransform: "uppercase" }}>Alertes Stock</div>
+            <div style={{ fontSize: 32, fontWeight: 900, color: "#ef4444" }}>{products.filter(p => p.stock < 50).length} <span style={{ fontSize: 14, fontWeight: 400, color: "#94a3b8" }}>Critiques</span></div>
+            <div style={{ fontSize: 11, color: "#64748b", marginTop: 8, fontWeight: 700 }}>Rupture imminente : Riz, Huile</div>
+         </Card>
       </div>
     </div>
   );
 
-  return (
-    <div style={{ maxWidth: 480, margin: "0 auto", background: "#f8fafc", minHeight: "100vh", position: "relative", fontFamily: "'Inter', sans-serif" }}>
-       
-       <style>{`
-          @keyframes fade-in { from { opacity: 0; } to { opacity: 1; } }
-          .animate-fade-in { animation: fade-in 0.4s ease-out; }
-       `}</style>
-
-       {/* HEADER */}
-       <div style={{ background: DARK_NAVY, padding: "40px 24px 30px", borderRadius: "0 0 32px 32px", color: "#fff" }}>
-          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 24 }}>
-             <div>
-                <div style={{ fontSize: 12, fontWeight: 700, color: GOLD, textTransform: "uppercase" }}>Portail Grossiste</div>
-                <div style={{ fontSize: 24, fontWeight: 900 }}>Module Ventes</div>
-             </div>
-             <div style={{ background: "rgba(255,255,255,0.1)", padding: 10, borderRadius: 14 }}>
-                <ShoppingCart size={22} />
-             </div>
+  const renderInventoryTable = () => (
+    <div className="animate-fade-in">
+       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 24 }}>
+          <div>
+            <h2 style={{ fontSize: 22, fontWeight: 900 }}>Inventaire & Tarification</h2>
+            <p style={{ fontSize: 13, color: "#64748b" }}>Gérez vos prix grossistes et vos niveaux de stock en temps réel.</p>
           </div>
-
-          <div style={{ background: "rgba(255,255,255,0.1)", borderRadius: 16, padding: "10px 16px", display: "flex", alignItems: "center", gap: 10 }}>
-             <Search size={18} color="#94a3b8" />
-             <input 
-               value={searchTerm}
-               onChange={(e) => setSearchTerm(e.target.value)}
-               placeholder="Rechercher un produit ou prix..." 
-               style={{ flex: 1, border: "none", background: "none", outline: "none", fontSize: 14, color: "#fff" }} 
-             />
-          </div>
+          <button style={{ background: GOLD, color: "#fff", border: "none", padding: "12px 24px", borderRadius: 14, fontWeight: 900, fontSize: 14, display: "flex", alignItems: "center", gap: 8 }}>
+            <Plus size={20} /> Nouveau Produit
+          </button>
        </div>
 
-       {/* LIVE TRACKER MINI PREVIEW */}
-       <div style={{ padding: "24px 24px 0" }}>
-          <div style={{ background: "#fff", borderRadius: 24, padding: 16, border: "1px solid #e2e8f0", boxShadow: "0 4px 15px rgba(0,0,0,0.03)" }}>
-             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12 }}>
-                <div style={{ fontSize: 13, fontWeight: 900, display: "flex", alignItems: "center", gap: 6 }}>
-                   <MapPin size={16} color={GOLD} /> Live Flotte & Cash
-                </div>
-                <div style={{ fontSize: 10, fontWeight: 800, color: VISION_GREEN, background: "#ecfdf5", padding: "4px 8px", borderRadius: 8 }}>3 CAMIONS EN ROUTE</div>
-             </div>
-             <div style={{ borderRadius: 16, overflow: "hidden", height: 100 }}>
-                <MapView center={[14.6928, -17.4627]} zoom={12} height="100px" />
-             </div>
-          </div>
-       </div>
-
-       {/* CATEGORIES - dynamiques depuis les produits */}
-       <div style={{ padding: "24px 24px 0", display: "flex", gap: 12, overflowX: "auto", paddingBottom: 10 }}>
-          {["Tous", ...new Set(products.map(p => p.category))].map(cat => (
-            <button 
-              key={cat}
-              onClick={() => setActiveCategory(cat)}
-              style={{ 
-                flexShrink: 0, 
-                background: activeCategory === cat ? GOLD : "#fff", 
-                color: activeCategory === cat ? "#fff" : "#64748b",
-                border: "1px solid #f1f5f9",
-                padding: "8px 16px",
-                borderRadius: 12,
-                fontSize: 12,
-                fontWeight: 800,
-                cursor: 'pointer'
-              }}>
-              {cat}
-            </button>
-          ))}
-       </div>
-
-       {/* PRODUCTS LIST */}
-       <div className="animate-fade-in" style={{ padding: 24, paddingBottom: 100 }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
-            <div style={{ fontSize: 13, fontWeight: 700, color: "#94a3b8" }}>{"LISTE DES PRIX EXPOS\u00c9S"}</div>
-            <div style={{ fontSize: 10, fontWeight: 800, color: productsLoading ? GOLD : VISION_GREEN, background: productsLoading ? '#fef3c7' : '#ecfdf5', padding: '4px 10px', borderRadius: 8 }}>
-              {productsLoading ? '\u23f3 Sync...' : `\u2713 ${products.length} produits`}
-            </div>
-          </div>
-          
-          {filteredProducts.map(p => (
-            <div key={p.id} style={{ background: "#fff", borderRadius: 24, padding: 20, marginBottom: 16, border: "1px solid #f1f5f9", boxShadow: "0 4px 15px rgba(0,0,0,0.02)" }}>
-               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
-                  <div style={{ display: "flex", gap: 16, alignItems: "center" }}>
-                     <div style={{ background: "#f8fafc", width: 50, height: 50, borderRadius: 14, display: "flex", alignItems: "center", justifyContent: "center" }}>
-                        <Box size={24} color={GOLD} />
-                     </div>
-                     <div>
-                        <div style={{ fontSize: 15, fontWeight: 800 }}>{p.name}</div>
-                        <div style={{ fontSize: 12, color: "#94a3b8", marginTop: 2 }}>{"Cat\u00e9gorie"}: {p.category}</div>
-                     </div>
-                  </div>
-                  <MoreVertical size={18} color="#cbd5e1" />
-               </div>
-
-               <div style={{ display: "flex", justifyContent: "space-between", marginTop: 20, borderTop: "1px solid #f8fafc", paddingTop: 16, alignItems: "flex-end" }}>
-                  <div>
-                     <div style={{ fontSize: 11, fontWeight: 800, color: "#94a3b8", textTransform: "uppercase" }}>Stock Hub</div>
-                     <div style={{ fontSize: 14, fontWeight: 800, color: p.stock < 50 ? "#ef4444" : "#10b981", marginTop: 2 }}>
-                        {p.stock} {"Unit\u00e9s"} {p.stock < 50 && <span style={{ fontSize: 10, fontStyle: "italic" }}>(Bas)</span>}
-                     </div>
-                  </div>
-                  <div style={{ textAlign: "right" }}>
-                     {p.promo && <div style={{ fontSize: 10, color: "#ef4444", fontWeight: 800, textDecoration: "line-through", marginBottom: 2 }}>{(p.price * 1.1).toLocaleString()} F</div>}
-                     <div style={{ fontSize: 20, fontWeight: 900, color: DARK_NAVY }}>{p.price.toLocaleString()} F</div>
-                     <div style={{ fontSize: 9, fontWeight: 700, color: GOLD, background: "#fef3c7", padding: "2px 6px", borderRadius: 4, display: "inline-block", marginTop: 4 }}>PRIX GROSSISTE</div>
-                  </div>
-               </div>
-            </div>
-          ))}
-
-          <button style={{ width: "100%", background: GOLD, color: "#fff", border: "none", padding: 18, borderRadius: 18, fontWeight: 900, fontSize: 15, display: "flex", alignItems: "center", justifyContent: "center", gap: 10, boxShadow: "0 10px 25px rgba(245, 158, 11, 0.3)", cursor: 'pointer' }}>
-             <Plus size={20} /> Ajouter un Produit
-          </button>
-          
-          <div style={{ marginTop: 20, background: "#f0fdf4", padding: 16, borderRadius: 16, display: "flex", alignItems: "center", gap: 12, border: "1px dashed #10b981" }}>
-             <TrendingDown size={20} color={VISION_GREEN} />
-             <div style={{ fontSize: 11, color: VISION_GREEN, fontWeight: 700 }}>{"Param\u00e8tres : Vos prix sont synchronis\u00e9s avec 124 boutiques."}</div>
-          </div>
-       </div>
-
-       {/* FLOATING ACTION */}
-       <div style={{ position: "fixed", bottom: 20, right: 20, display: "flex", flexDirection: "column", gap: 12 }}>
-          <button onClick={() => setView("groupage")} style={{ width: 60, height: 60, borderRadius: 30, background: "linear-gradient(135deg, #f59e0b 0%, #d97706 100%)", color: "#fff", border: "none", display: "flex", alignItems: "center", justifyContent: "center", boxShadow: "0 10px 30px rgba(245,158,11,0.3)", cursor: "pointer" }}>
-             <Layers size={24} />
-          </button>
-          <button onClick={() => setView("directory")} style={{ width: 60, height: 60, borderRadius: 30, background: "#fff", color: VISION_GREEN, border: "2px solid #ecfdf5", display: "flex", alignItems: "center", justifyContent: "center", boxShadow: "0 10px 30px rgba(0,0,0,0.1)", cursor: "pointer" }}>
-             <Users size={24} />
-          </button>
-          <button onClick={() => setView("branches")} style={{ width: 60, height: 60, borderRadius: 30, background: "#fff", color: DARK_NAVY, border: "2px solid #f1f5f9", display: "flex", alignItems: "center", justifyContent: "center", boxShadow: "0 10px 30px rgba(0,0,0,0.1)", cursor: "pointer" }}>
-             <Building2 size={24} />
-          </button>
-          <button onClick={() => setView("fleet")} style={{ width: 60, height: 60, borderRadius: 30, background: DARK_NAVY, color: "#f59e0b", border: "none", display: "flex", alignItems: "center", justifyContent: "center", boxShadow: "0 10px 30px rgba(15,23,42,0.3)", cursor: "pointer" }}>
-             <Truck size={24} />
-          </button>
+       <div style={{ background: "#fff", borderRadius: 24, padding: 32, border: "1px solid #e2e8f0" }}>
+          <table style={{ width: "100%", borderCollapse: "collapse" }}>
+             <thead>
+                <tr style={{ borderBottom: "2px solid #f8fafc", textAlign: "left" }}>
+                   <th style={{ padding: "16px", color: "#64748b", fontSize: 12, fontWeight: 800 }}>VISUEL</th>
+                   <th style={{ padding: "16px", color: "#64748b", fontSize: 12, fontWeight: 800 }}>DÉSIGNATION</th>
+                   <th style={{ padding: "16px", color: "#64748b", fontSize: 12, fontWeight: 800 }}>GROSSISTE ID</th>
+                   <th style={{ padding: "16px", color: "#64748b", fontSize: 12, fontWeight: 800 }}>STOCK DISPO</th>
+                   <th style={{ padding: "16px", color: "#64748b", fontSize: 12, fontWeight: 800 }}>PRIX B2B</th>
+                   <th style={{ padding: "16px", color: "#64748b", fontSize: 12, fontWeight: 800 }}>ACTIONS</th>
+                </tr>
+             </thead>
+             <tbody>
+                {filteredProducts.map(p => (
+                   <tr key={p.id} style={{ borderBottom: "1px solid #f8fafc" }}>
+                      <td style={{ padding: "16px" }}>
+                         <div style={{ width: 48, height: 48, borderRadius: 12, background: "#f1f5f9", overflow: "hidden", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                            {p.image ? <img src={p.image} alt={p.name} style={{ width: "100%", height: "100%", objectFit: "cover" }} /> : <Box size={20} color={GOLD} />}
+                         </div>
+                      </td>
+                      <td style={{ padding: "16px" }}>
+                         <div style={{ fontSize: 14, fontWeight: 800 }}>{p.name}</div>
+                         <div style={{ fontSize: 11, color: "#64748b" }}>{p.category}</div>
+                      </td>
+                      <td style={{ padding: "16px" }}>
+                         <div style={{ fontSize: 11, fontWeight: 700, color: "#64748b" }}>{p.wholesaler || "Dakar Hub"}</div>
+                      </td>
+                      <td style={{ padding: "16px" }}>
+                         <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                            <div style={{ width: 60, height: 6, background: "#e2e8f0", borderRadius: 3 }}>
+                               <div style={{ width: `${Math.min(100, (p.stock/1000)*100)}%`, height: "100%", background: p.stock < 50 ? "#ef4444" : VISION_GREEN, borderRadius: 3 }} />
+                            </div>
+                            <span style={{ fontSize: 14, fontWeight: 800, color: p.stock < 50 ? "#ef4444" : DARK_NAVY }}>{p.stock}</span>
+                         </div>
+                      </td>
+                      <td style={{ padding: "16px", fontSize: 16, fontWeight: 900 }}>{p.price.toLocaleString()} F</td>
+                      <td style={{ padding: "16px" }}>
+                         <button style={{ padding: 8, borderRadius: 10, background: "none", border: "1px solid #f1f5f9", color: "#64748b" }}><MoreVertical size={18} /></button>
+                      </td>
+                   </tr>
+                ))}
+             </tbody>
+          </table>
        </div>
     </div>
+  );
+
+  return (
+    <DashboardShell title="Hub Logistique & Ventes Grossiste" role="grossiste">
+       <HeaderStats />
+       
+       <div style={{ display: "flex", gap: 10, marginBottom: 30, overflowX: "auto", paddingBottom: 10 }}>
+        {[
+          { id: "catalog", label: "Stocks & Prix", icon: <Package size={16} /> },
+          { id: "fleet", label: "Suivi Flotte", icon: <Truck size={16} /> },
+          { id: "directory", label: "Portefeuille Clients", icon: <Users size={16} /> },
+          { id: "groupage", label: "LiviGroupage", icon: <Layers size={16} /> },
+          { id: "branches", label: "Relais & Points", icon: <Building2 size={16} /> }
+        ].map(tab => (
+          <button 
+            key={tab.id} 
+            onClick={() => setView(tab.id)} 
+            style={{ 
+              background: view === tab.id ? DARK_NAVY : "#fff", 
+              color: view === tab.id ? "#fff" : "#64748b",
+              border: "1px solid #e2e8f0",
+              padding: "10px 20px",
+              borderRadius: 12,
+              fontSize: 13,
+              fontWeight: 800,
+              display: "flex",
+              alignItems: "center",
+              gap: 8,
+              boxShadow: view === tab.id ? "0 4px 15px rgba(0,0,0,0.1)" : "none"
+            }}
+          >
+            {tab.icon} {tab.label}
+          </button>
+        ))}
+      </div>
+
+      <div style={{ background: "#fff", borderRadius: 28, padding: 32, border: "1px solid #e2e8f0", boxShadow: "0 10px 40px rgba(0,0,0,0.02)" }}>
+        {view === "catalog" && renderInventoryTable()}
+        {view === "groupage" && (
+           <div className="animate-fade-in">
+              <h2 style={{ fontSize: 22, fontWeight: 900, marginBottom: 24 }}>Campagnes d'Achats Groupés</h2>
+              <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))", gap: 20 }}>
+                 {groupageOffers.map(offer => (
+                   <Card key={offer.id} style={{ border: "1px solid #fde68a" }}>
+                      <div style={{ fontSize: 11, fontWeight: 800, color: "#92400e", background: "#fef3c7", padding: "4px 10px", borderRadius: 8, display: "inline-block", marginBottom: 12 }}>PROMO ACTIVE : -{offer.discount}</div>
+                      <div style={{ fontSize: 18, fontWeight: 900 }}>{offer.name}</div>
+                      <div style={{ marginTop: 20 }}>
+                        <div style={{ display: "flex", justifyContent: "space-between", fontSize: 12, fontWeight: 700, marginBottom: 8 }}>
+                           <span>Progression</span>
+                           <span>{offer.current_orders} / {offer.min_orders} boutiques</span>
+                        </div>
+                        <div style={{ height: 8, background: "#f8fafc", borderRadius: 4 }}>
+                           <div style={{ width: `${(offer.current_orders/offer.min_orders)*100}%`, height: "100%", background: GOLD, borderRadius: 4 }} />
+                        </div>
+                      </div>
+                   </Card>
+                 ))}
+              </div>
+           </div>
+        )}
+        {view === "fleet" && <LiviFleetManager />}
+        {view === "branches" && <LiviBranchManager />}
+        {view === "directory" && <LiviDirectory />}
+      </div>
+    </DashboardShell>
   );
 }

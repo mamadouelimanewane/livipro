@@ -2,8 +2,9 @@ import { useState, useEffect } from 'react'
 import LiviSearch from './LiviSearch'
 import LiviDirectory from './LiviDirectory'
 import LiviVoice from './LiviVoice'
-import { BellRing, PackageSearch, BatteryCharging, ShoppingCart, CheckCircle2, ChevronRight, Zap, Wallet, Search, ArrowLeft, Users, Mic, Heart, Star } from 'lucide-react'
+import { BellRing, PackageSearch, BatteryCharging, ShoppingCart, CheckCircle2, ChevronRight, Zap, Wallet, Search, ArrowLeft, Users, Mic, Heart, Star, Truck, MoreVertical, Box, Layers } from 'lucide-react'
 import { useGroupageOffers, useMembers } from './useLiviData'
+import DashboardShell from "./components/DashboardShell";
 
 // Simulation des données client (Boutiquier) - À terme via useAuth
 const BOUTIQUE = {
@@ -18,8 +19,12 @@ const VISION_GREEN = "#10b981";
 const GOLD = "#f59e0b";
 const DARK_NAVY = "#0f172a";
 
+const Card = ({ children, style = {} }) => (
+  <div style={{ background: "#fff", borderRadius: 20, padding: 20, border: "1px solid #f1f5f9", boxShadow: "0 4px 15px rgba(0,0,0,0.02)", ...style }}>{children}</div>
+);
+
 export default function ClientPortal() {
-  const [view, setView] = useState("dashboard"); // dashboard | search | directory | voice
+  const [activeTab, setActiveTab] = useState("dashboard"); // dashboard | shop | orders | wallet
   const [isOrdering, setIsOrdering] = useState(false)
   const [isVoiceActive, setIsVoiceActive] = useState(false)
   
@@ -35,197 +40,161 @@ export default function ClientPortal() {
 
   const handleVoiceResult = (result) => {
     console.log("Résultat vocal :", result);
-    setView("search");
-    // On pourrait injecter le résultat dans la recherche ici si on passait des props à LiviSearch
+    setActiveTab("shop");
   };
 
-  if (view === "search") return (
-    <div className="animate-fade-in" style={{ maxWidth: 480, margin: "0 auto", position: "relative" }}>
-      <button onClick={() => setView("dashboard")} style={{ position: "absolute", top: 20, left: 20, zIndex: 10, background: "#fff", border: "none", width: 40, height: 40, borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center", boxShadow: "0 4px 10px rgba(0,0,0,0.1)", cursor: "pointer" }}>
-        <ArrowLeft size={20} />
-      </button>
-      <LiviSearch />
-    </div>
-  );
-
-  if (view === "directory") return (
-    <div className="animate-fade-in" style={{ maxWidth: 480, margin: "0 auto", position: "relative" }}>
-      <button onClick={() => setView("dashboard")} style={{ position: "absolute", top: 20, left: 20, zIndex: 10, background: "#fff", border: "none", width: 40, height: 40, borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center", boxShadow: "0 4px 10px rgba(0,0,0,0.1)", cursor: "pointer" }}>
-        <ArrowLeft size={20} />
-      </button>
-      <LiviDirectory />
+  const HeaderStats = () => (
+    <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))", gap: 24, marginBottom: 32 }}>
+       <Card style={{ background: DARK_NAVY, color: "#fff" }}>
+          <div style={{ fontSize: 12, color: GOLD, fontWeight: 800, marginBottom: 8 }}>Ventes Boutique (7j)</div>
+          <div style={{ fontSize: 32, fontWeight: 900 }}>1.280.000 F</div>
+          <div style={{ fontSize: 11, color: VISION_GREEN, marginTop: 8, fontWeight: 700 }}>Marge Estimeé: +14%</div>
+       </Card>
+       <Card>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <div>
+              <div style={{ fontSize: 12, color: "#64748b", fontWeight: 800 }}>KARMA SCORE</div>
+              <div style={{ fontSize: 32, fontWeight: 900, color: VISION_GREEN }}>{BOUTIQUE.karma}</div>
+            </div>
+            <div style={{ width: 50, height: 50, borderRadius: "50%", background: "#ecfdf5", display: "flex", alignItems: "center", justifyContent: "center", border: `3px solid ${VISION_GREEN}` }}>
+               <Star size={24} color={VISION_GREEN} fill={VISION_GREEN} />
+            </div>
+          </div>
+       </Card>
+       <Card>
+          <div style={{ fontSize: 12, color: "#64748b", fontWeight: 800, marginBottom: 8 }}>CAPACITÉ CRÉDIT</div>
+          <div style={{ fontSize: 32, fontWeight: 900 }}>{BOUTIQUE.creditLimit}</div>
+          <div style={{ fontSize: 11, color: GOLD, marginTop: 8, fontWeight: 700 }}>Taux préférentiel: 1.5%</div>
+       </Card>
     </div>
   );
 
   return (
-    <div style={{ maxWidth: 480, margin: '0 auto', background: '#f8fafc', minHeight: '100vh', padding: '20px', paddingBottom: 100, fontFamily: "'Inter', sans-serif", position: 'relative' }}>
-      
-      <style>{`
-        @keyframes fade-in { from { opacity: 0; } to { opacity: 1; } }
-        .animate-fade-in { animation: fade-in 0.4s ease-out; }
-        @keyframes pulse { 0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.4); } 70% { transform: scale(1.05); box-shadow: 0 0 0 10px rgba(16, 185, 129, 0); } 100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); } }
-        .pulse-btn { animation: pulse 2s infinite; }
-      `}</style>
+    <DashboardShell title="Cockpit Boutique Partenaire" role="boutique">
+       <HeaderStats />
 
-      {/* LiviVoice - Floating Mic Button */}
-      <button 
+       <button 
         onClick={() => setIsVoiceActive(true)}
-        style={{ position: 'fixed', bottom: 100, left: 20, zIndex: 1000, background: VISION_GREEN, color: '#fff', border: 'none', width: 60, height: 60, borderRadius: '50%', boxShadow: '0 8px 30px rgba(0,0,0,0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', transition: 'all 0.3s ease' }}
+        style={{ position: 'fixed', bottom: 40, right: 40, zIndex: 1000, background: VISION_GREEN, color: '#fff', border: 'none', width: 64, height: 64, borderRadius: '50%', boxShadow: '0 10px 40px rgba(16, 185, 129, 0.4)', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}
         className="pulse-btn"
       >
-        <Mic size={28} />
+        <Mic size={30} />
       </button>
 
       {isVoiceActive && <LiviVoice onClose={() => setIsVoiceActive(false)} onResult={handleVoiceResult} />}
 
-      {/* LiviRelay - New B2B Commission Feature */}
-      <div style={{ background: 'linear-gradient(135deg, #0f172a 0%, #334155 100%)', borderRadius: 24, padding: '24px', color: '#fff', marginBottom: 24, boxShadow: '0 8px 25px rgba(0,0,0,0.1)', position: 'relative', overflow: 'hidden' }}>
-          <div style={{ position: 'absolute', right: -20, top: -20, opacity: 0.1 }}><Users size={120} /></div>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
-            <div style={{ fontSize: 13, fontWeight: 800, color: '#f59e0b' }}>🔵 LIVI-RELAIS LOGISTIQUE</div>
-            <div style={{ fontSize: 10, fontWeight: 700, background: '#f59e0b', color: '#000', padding: '4px 8px', borderRadius: 8 }}>REVENU ACTIF</div>
-          </div>
-          <div style={{ display: 'flex', alignItems: 'flex-end', gap: 8 }}>
-            <div style={{ fontSize: 32, fontWeight: 900 }}>+42.500 F <span style={{ fontSize: 14, fontWeight: 400, opacity: 0.7 }}>/mois</span></div>
-          </div>
-          <p style={{ fontSize: 11, marginTop: 8, color: '#94a3b8' }}>Vous avez servi de point de distribution pour <b>12 boutiques</b> voisines ce mois-ci.</p>
-          <button style={{ width: '100%', marginTop: 16, background: 'rgba(255,255,255,0.1)', color: '#fff', border: '1px solid rgba(255,255,255,0.2)', padding: '12px', borderRadius: 12, fontSize: 11, fontWeight: 800 }}>Paramètres Relais / Stockage</button>
-      </div>
+      <style>{`
+        @keyframes pulse { 0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.4); } 70% { transform: scale(1.05); box-shadow: 0 0 0 10px rgba(16, 185, 129, 0); } 100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); } }
+        .pulse-btn { animation: pulse 2s infinite; }
+      `}</style>
 
-      {/* Flash Ads / Promotions du Jour (Revenue for Platform Owner) */}
-      <div style={{ background: 'linear-gradient(90deg, #f59e0b 0%, #f97316 100%)', borderRadius: 16, padding: '12px 20px', marginBottom: 20, color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'space-between', boxShadow: '0 10px 25px rgba(245, 158, 11, 0.2)' }}>
-         <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-            <Zap size={20} fill="#fff" />
-            <div style={{ fontSize: 13, fontWeight: 800 }}>FLASH PROMO : -20% sur l'Huile Dinor (Port de Dakar)</div>
-         </div>
-         <div style={{ fontSize: 9, background: 'rgba(0,0,0,0.2)', padding: '2px 6px', borderRadius: 4 }}>SPONSORISÉ</div>
-      </div>
-
-      {/* Header */}
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24 }}>
-        <div>
-          <div style={{ fontSize: 13, color: '#64748b', fontWeight: 600 }}>Bienvenue chez LiviDash</div>
-          <div style={{ fontSize: 22, fontWeight: 900, color: '#0f172a' }}>{BOUTIQUE.name}</div>
-        </div>
-        <div style={{ position: 'relative' }}>
-          <BellRing size={24} color="#0f172a" />
-          <div style={{ position: 'absolute', top: -4, right: -4, width: 10, height: 10, background: '#ef4444', borderRadius: '50%', border: '2px solid #fff' }}></div>
-        </div>
-      </div>
-      
-      {/* LiviSearch AI Entry Point */}
-      <div onClick={() => setView("search")} style={{ background: '#fff', borderRadius: 20, padding: '16px 20px', marginBottom: 24, display: 'flex', alignItems: 'center', gap: 12, border: '1px solid #e2e8f0', boxShadow: '0 4px 15px rgba(0,0,0,0.03)', cursor: 'pointer' }}>
-         <Search size={20} color="#f59e0b" />
-         <div style={{ flex: 1, color: '#94a3b8', fontSize: 14, fontWeight: 700 }}>Chercher & Comparer les Prix (IA)</div>
-         <div style={{ background: '#fef3c7', padding: '4px 8px', borderRadius: 8, fontSize: 10, color: '#b45309', fontWeight: 900 }}>SCAN B2B</div>
-      </div>
-
-      <div onClick={() => setView("directory")} style={{ background: '#fff', borderRadius: 20, padding: '16px 20px', marginBottom: 24, display: 'flex', alignItems: 'center', gap: 12, border: '1px solid #e2e8f0', boxShadow: '0 4px 15px rgba(0,0,0,0.03)', cursor: 'pointer' }}>
-         <Users size={20} color={VISION_GREEN} />
-         <div style={{ flex: 1, color: '#94a3b8', fontSize: 14, fontWeight: 700 }}>Annuaire du Réseau (Networking)</div>
-         <div style={{ background: '#ecfdf5', padding: '4px 8px', borderRadius: 8, fontSize: 10, color: '#065f46', fontWeight: 900 }}>MEMBRES</div>
-      </div>
-
-      {/* Karma Score Card */}
-      <div style={{ background: '#fff', borderRadius: 24, padding: '24px', border: '1px solid #e2e8f0', boxShadow: '0 4px 20px rgba(0,0,0,0.03)', marginBottom: 24 }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            <div>
-              <div style={{ fontSize: 12, fontWeight: 700, color: '#10b981', background: '#ecfdf5', padding: '4px 10px', borderRadius: 12, display: 'inline-block' }}>KARMA LOGISTIQUE</div>
-              <div style={{ fontSize: 42, fontWeight: 900, color: '#0f172a', margin: '8px 0' }}>{BOUTIQUE.karma} <span style={{ fontSize: 16, color: '#94a3b8' }}>/ 1000</span></div>
-            </div>
-            <div style={{ width: 64, height: 64, borderRadius: '50%', background: '#f8fafc', border: '5px solid #10b981', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 20, fontWeight: 900, color: '#10b981' }}>
-              A+
-            </div>
-          </div>
-          <div style={{ fontSize: 13, color: '#64748b', marginTop: 12, lineHeight: 1.4 }}>
-            Excellent ! Votre ponctualité vous octroie un taux préférentiel de <b>1.8%</b> sur vos prochains crédits.
-          </div>
-      </div>
-
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, marginBottom: 24 }}>
-        <div style={{ background: '#fff', borderRadius: 20, padding: 20, border: '1px solid #f1f5f9' }}>
-          <div style={{ color: '#6366f1', marginBottom: 12 }}><BatteryCharging size={24} /></div>
-          <div style={{ fontSize: 13, color: '#94a3b8', fontWeight: 600 }}>Limite de Crédit</div>
-          <div style={{ fontSize: 16, fontWeight: 800, color: '#0f172a' }}>{BOUTIQUE.creditLimit}</div>
-        </div>
-        <div style={{ background: '#fff', borderRadius: 20, padding: 20, border: '1px solid #f1f5f9' }}>
-          <div style={{ color: '#10b981', marginBottom: 12 }}><Zap size={24} /></div>
-          <div style={{ fontSize: 13, color: '#94a3b8', fontWeight: 600 }}>Flash Réappro</div>
-          <div style={{ fontSize: 16, fontWeight: 800, color: '#0f172a' }}>J+1 Garanti</div>
-        </div>
-      </div>
-
-      {/* LiviGroupage - Opportunité B2B */}
-      <div style={{ background: '#fffbeb', borderRadius: 24, padding: '24px', border: '1px solid #fde68a', boxShadow: '0 4px 20px rgba(0,0,0,0.03)', marginBottom: 24 }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
-            <div style={{ fontSize: 13, fontWeight: 800, color: '#92400e', background: '#fef3c7', padding: '4px 10px', borderRadius: 12 }}>🛒 LIVI-GROUPAGE</div>
-            <span style={{ fontSize: 10, fontWeight: 700, color: '#d97706' }}>ÉCONOMISEZ JUSQU'À 20%</span>
-          </div>
-          
-          {groupageLoading ? (
-            <div style={{ textAlign: 'center', padding: '20px', color: '#d97706', fontSize: 12, fontWeight: 700 }}>⏳ IA analyse les offres...</div>
-          ) : (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-              {groupageOffers.map(offer => (
-                <div key={offer.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: '#fff', padding: 12, borderRadius: 16, border: '1px solid #fef3c7' }}>
-                  <div>
-                    <div style={{ fontSize: 13, fontWeight: 800 }}>{offer.name}</div>
-                    <div style={{ fontSize: 11, color: '#92400e' }}>Remise: <span style={{ fontWeight: 900 }}>-{offer.discount}</span> · {offer.deadline}</div>
-                  </div>
-                  <div style={{ textAlign: 'right' }}>
-                    <div style={{ fontSize: 10, fontWeight: 700, color: '#d97706' }}>{offer.current_orders}/{offer.min_orders} Membres</div>
-                    <button style={{ marginTop: 4, background: '#f59e0b', color: '#fff', border: 'none', padding: '4px 10px', borderRadius: 8, fontSize: 10, fontWeight: 900 }}>REJOINDRE</button>
-                  </div>
+      <div style={{ display: "grid", gridTemplateColumns: "2fr 1fr", gap: 32 }}>
+         <div style={{ display: "flex", flexDirection: "column", gap: 32 }}>
+            <Card style={{ padding: 32, borderRadius: 28 }}>
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 24 }}>
+                   <h3 style={{ fontSize: 20, fontWeight: 900 }}>Ravitaillement Intelligent (IA)</h3>
+                   <div style={{ background: "#f1f5f9", borderRadius: 12, padding: "8px 16px", display: "flex", alignItems: "center", gap: 10 }}>
+                      <Search size={18} color="#94a3b8" />
+                      <input placeholder="Chercher un produit..." style={{ background: "none", border: "none", outline: "none", fontSize: 14 }} />
+                   </div>
                 </div>
-              ))}
+                
+                <div style={{ background: "#fffbeb", border: "1px dashed #f59e0b", padding: 20, borderRadius: 20, marginBottom: 24, display: "flex", alignItems: "center", gap: 20 }}>
+                   <Zap color={GOLD} size={32} />
+                   <div>
+                      <div style={{ fontWeight: 800 }}>Commande Automatisée Suggérée</div>
+                      <div style={{ fontSize: 13, color: "#92400e" }}>Basé sur votre historique, nous suggérons un réapprovisionnement de 10 sacs de Riz et 5 bidons d'Huile.</div>
+                   </div>
+                   <button onClick={handleOrder} style={{ marginLeft: "auto", background: DARK_NAVY, color: "#fff", border: "none", padding: "12px 24px", borderRadius: 12, fontWeight: 900 }}>Commander</button>
+                </div>
+
+                <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))", gap: 16 }}>
+                   {["Riz Senegalais", "Huile Dinor", "Sucre en Poudre", "Lait Nido", "Oignons Locaux"].map((p, idx) => (
+                      <div key={idx} style={{ background: "#f8fafc", padding: 16, borderRadius: 16, textAlign: "center", border: "1px solid #f1f5f9" }}>
+                         <div style={{ width: 44, height: 44, background: "#fff", borderRadius: 12, margin: "0 auto 12px", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                            <ShoppingCart size={20} color={GOLD} />
+                         </div>
+                         <div style={{ fontSize: 13, fontWeight: 800 }}>{p}</div>
+                         <div style={{ fontSize: 11, color: "#64748b", marginTop: 4 }}>Dernier achat: J-2</div>
+                      </div>
+                   ))}
+                </div>
+            </Card>
+
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 24 }}>
+               <Card style={{ borderLeft: `5px solid ${GOLD}` }}>
+                  <h4 style={{ fontSize: 16, fontWeight: 900, marginBottom: 16 }}>Opportunités LiviGroupage</h4>
+                  {groupageLoading ? (
+                    <div style={{ fontSize: 12 }}>Chargement...</div>
+                  ) : (
+                    groupageOffers.slice(0, 2).map(offer => (
+                      <div key={offer.id} style={{ marginBottom: 16, padding: 12, background: "#fffbeb", borderRadius: 14 }}>
+                         <div style={{ fontSize: 13, fontWeight: 800 }}>{offer.name} <span style={{ color: "#d97706" }}>-{offer.discount}</span></div>
+                         <div style={{ fontSize: 10, color: "#92400e", marginTop: 4 }}>{offer.current_orders}/{offer.min_orders} réservations</div>
+                      </div>
+                    ))
+                  )}
+                  <button style={{ width: "100%", background: "none", border: `2px solid #e2e8f0`, padding: 12, borderRadius: 12, fontSize: 13, fontWeight: 800 }}>Voir toutes les campagnes</button>
+               </Card>
+
+               <Card style={{ borderLeft: `5px solid ${VISION_GREEN}` }}>
+                  <h4 style={{ fontSize: 16, fontWeight: 900, marginBottom: 16 }}>Revenus Livi-Relais</h4>
+                  <div style={{ fontSize: 24, fontWeight: 900, color: VISION_GREEN }}>+42.500 F</div>
+                  <div style={{ fontSize: 11, color: "#64748b", marginTop: 4, lineHeight: 1.4 }}>Vous servez actuellement de point de dépôt pour 12 clients du quartier.</div>
+                  <button style={{ width: "100%", marginTop: 20, background: VISION_GREEN, color: "#fff", border: "none", padding: 12, borderRadius: 12, fontSize: 13, fontWeight: 800 }}>Historique Colis</button>
+               </Card>
             </div>
-          )}
+         </div>
+
+         <div style={{ display: "flex", flexDirection: "column", gap: 32 }}>
+            <Card style={{ background: `linear-gradient(135deg, ${DARK_NAVY} 0%, #1e293b 100%)`, color: "#fff", padding: 24 }}>
+               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 24 }}>
+                  <div>
+                    <div style={{ fontSize: 11, color: GOLD, fontWeight: 800, textTransform: "uppercase" }}>Portefeuille LiviWallet</div>
+                    <div style={{ fontSize: 28, fontWeight: 900, marginTop: 4 }}>{BOUTIQUE.balance}</div>
+                  </div>
+                  <Wallet size={32} color={GOLD} />
+               </div>
+               <p style={{ fontSize: 11, opacity: 0.7, marginBottom: 20 }}>Transactions sécurisées via infrastructure LiviPro Blockchain.</p>
+               <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
+                  <button style={{ background: "rgba(255,255,255,0.1)", border: "none", color: "#fff", padding: 12, borderRadius: 10, fontSize: 11, fontWeight: 800 }}>Approvisionner</button>
+                  <button style={{ background: GOLD, border: "none", color: DARK_NAVY, padding: 12, borderRadius: 10, fontSize: 11, fontWeight: 900 }}>Payer Facture</button>
+               </div>
+            </Card>
+
+            <Card style={{ padding: 24 }}>
+               <h4 style={{ fontSize: 15, fontWeight: 900, marginBottom: 20 }}>Statut Livrable</h4>
+               <div style={{ display: "flex", gap: 16, alignItems: "center", padding: 16, background: "#f8fafc", borderRadius: 16 }}>
+                  <div style={{ background: VISION_GREEN, width: 40, height: 40, borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center", color: "#fff" }}>
+                     <Truck size={20} />
+                  </div>
+                  <div>
+                     <div style={{ fontSize: 13, fontWeight: 800 }}>En route</div>
+                     <div style={{ fontSize: 11, color: "#64748b" }}>Arrivée prévue: 14:30</div>
+                  </div>
+               </div>
+               <div style={{ marginTop: 24, fontSize: 11, color: "#94a3b8" }}>
+                  <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 8 }}>
+                     <span>Commandé</span>
+                     <span>Expédié</span>
+                     <span>Livré</span>
+                  </div>
+                  <div style={{ height: 4, background: "#e2e8f0", borderRadius: 2, display: "flex", gap: 4 }}>
+                     <div style={{ height: "100%", flex: 1, background: VISION_GREEN }}></div>
+                     <div style={{ height: "100%", flex: 1, background: VISION_GREEN }}></div>
+                     <div style={{ height: "100%", flex: 1, background: "#e2e8f0" }}></div>
+                  </div>
+               </div>
+            </Card>
+
+            <Card style={{ textAlign: "center", padding: 24 }}>
+               <BatteryCharging size={32} color="#6366f1" style={{ margin: "0 auto 12px" }} />
+               <div style={{ fontSize: 13, fontWeight: 800 }}>Tontine & Capitalisation</div>
+               <p style={{ fontSize: 11, color: "#64748b", marginTop: 8 }}>{BOUTIQUE.tontineStatus}</p>
+               <button style={{ width: "100%", marginTop: 16, background: "#f1f5f9", border: "none", color: DARK_NAVY, padding: 10, borderRadius: 10, fontSize: 11, fontWeight: 800 }}>Détails Cycles</button>
+            </Card>
+         </div>
       </div>
-
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
-          {/* Action Button */}
-          <div style={{ background: '#fff', borderRadius: 24, padding: 24, border: '1px solid #e2e8f0', boxShadow: '0 8px 30px rgba(0,0,0,0.05)' }}>
-            <h3 style={{ fontSize: 18, fontWeight: 900, marginBottom: 12 }}>📦 Commandes & Réassort</h3>
-            <button 
-              onClick={handleOrder}
-              disabled={isOrdering}
-              style={{ width: '100%', background: '#0f172a', color: '#fff', border: 'none', padding: '18px', borderRadius: 16, fontSize: 15, fontWeight: 800, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10, cursor: isOrdering ? 'not-allowed' : 'pointer', opacity: isOrdering ? 0.7 : 1 }}>
-              {isOrdering ? (
-                <><div style={{ width: 16, height: 16, border: '2px solid #fff', borderTopColor: 'transparent', borderRadius: '50%', animation: 'spin 1s linear infinite' }}></div> Traitement IA...</>
-              ) : (
-                <><ShoppingCart size={18} /> Renouveler à l'Identique (1 Clic)</>
-              )}
-            </button>
-          </div>
-
-          <div style={{ background: 'linear-gradient(135deg, #1e293b 0%, #0f172a 100%)', borderRadius: 20, padding: 20, color: '#fff', position: 'relative', overflow: 'hidden' }}>
-            <div style={{ position: 'absolute', top: -30, right: -20, opacity: 0.1 }}><PackageSearch size={140} /></div>
-            <div style={{ fontSize: 12, color: '#94a3b8', fontWeight: 600 }}>Cagnotte Banque Associés (J+7)</div>
-            <div style={{ fontSize: 28, fontWeight: 900, marginTop: 4 }}>{BOUTIQUE.balance} <span style={{ fontSize: 14, fontWeight: 400, opacity: 0.8 }}>disponibles</span></div>
-            <div style={{ marginTop: 12, display: 'flex', justifyContent: 'space-between' }}>
-              <div style={{ fontSize: 12, color: '#10b981', display: 'flex', alignItems: 'center', gap: 6 }}>
-                <CheckCircle2 size={14} /> Score IA: A+
-              </div>
-              <div style={{ fontSize: 12, color: '#f59e0b', fontWeight: 700 }}>{BOUTIQUE.tontineStatus}</div>
-            </div>
-          </div>
-
-          {/* Section de Paiement Multi-Canal */}
-          <div style={{ background: '#fff', borderRadius: 24, padding: 24, border: '1px solid #e2e8f0', boxShadow: '0 8px 30px rgba(0,0,0,0.05)' }}>
-            <h3 style={{ fontSize: 18, fontWeight: 900, marginBottom: 12 }}>💳 Paiement des Factures</h3>
-            <p style={{ fontSize: 13, color: '#64748b', marginBottom: 20 }}>Réglez via LiviWallet ou Mobile Money.</p>
-            
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: 12 }}>
-              <button style={{ background: '#0f172a', color: '#f59e0b', border: 'none', padding: 18, borderRadius: 16, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 12, fontWeight: 800, cursor: 'pointer' }}>
-                 <Wallet size={20} /> LiviWallet - 0 F Frais
-              </button>
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
-                <button style={{ background: '#4c6ef5', color: '#fff', border: 'none', padding: 14, borderRadius: 16, fontWeight: 800, cursor: 'pointer' }}>Wave</button>
-                <button style={{ background: '#ff9900', color: '#fff', border: 'none', padding: 14, borderRadius: 16, fontWeight: 800, cursor: 'pointer' }}>Orange Money</button>
-              </div>
-            </div>
-          </div>
-      </div>
-    </div>
-  )
+    </DashboardShell>
+  );
 }
