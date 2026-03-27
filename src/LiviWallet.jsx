@@ -111,26 +111,60 @@ export default function LiviWallet({ owner = "Supermarché Al-Amine", balance = 
     </div>
   );
 
-  const renderPay = () => (
-    <div className="animate-fade-in">
-       <button onClick={() => setActiveView("home")} style={{ background: "none", border: "none", fontWeight: 800, color: DARK_NAVY, display: "flex", alignItems: "center", gap: 8, marginBottom: 24 }}>
-          <ArrowDownLeft size={20} style={{ transform: "rotate(45deg)" }} /> Annuler
-       </button>
-       <h2 style={{ fontSize: 24, fontWeight: 900, marginBottom: 8 }}>Payer un Fournisseur</h2>
-       <p style={{ fontSize: 13, color: "#64748b", marginBottom: 32 }}>Scannez le code QR du grossiste pour valider le paiement.</p>
-       
-       <div style={{ width: "100%", height: 300, background: "#000", borderRadius: 32, display: "flex", alignItems: "center", justifyContent: "center", position: "relative", overflow: "hidden" }}>
-          <div style={{ width: 200, height: 200, border: "2px solid #fff", borderRadius: 20, position: "relative" }}>
-             <div style={{ position: "absolute", top: 0, left: "50%", transform: "translateX(-50%)", width: "100%", height: 2, background: GOLD, boxShadow: `0 0 10px ${GOLD}`, animation: "scan 2s infinite" }}></div>
-          </div>
-          <div style={{ position: "absolute", bottom: 20, color: "#fff", fontSize: 12, fontWeight: 700 }}>Alignez le QR code dans le cadre</div>
-       </div>
+  const renderPay = () => {
+    const [payMode, setPayMode] = useState("scan"); // scan | number
+    const [payMethod, setPayMethod] = useState("wave"); // wave | om
 
-       <style>{`
-          @keyframes scan { 0% { top: 0; } 50% { top: 100%; } 100% { top: 0; } }
-       `}</style>
-    </div>
-  );
+    return (
+      <div className="animate-fade-in">
+        <button onClick={() => setActiveView("home")} style={{ background: "none", border: "none", fontWeight: 800, color: DARK_NAVY, display: "flex", alignItems: "center", gap: 8, marginBottom: 24 }}>
+            <ArrowDownLeft size={20} style={{ transform: "rotate(45deg)" }} /> Annuler
+        </button>
+        <h2 style={{ fontSize: 24, fontWeight: 900, marginBottom: 8 }}>Payer un Fournisseur</h2>
+        
+        <div style={{ display: "flex", gap: 10, marginBottom: 24 }}>
+           <button onClick={() => setPayMode("scan")} style={{ flex: 1, padding: '10px', borderRadius: 12, background: payMode === "scan" ? DARK_NAVY : "#fff", color: payMode === "scan" ? "#fff" : "#64748b", border: "1px solid #f1f5f9", fontSize: 11, fontWeight: 800 }}>SCAN QR</button>
+           <button onClick={() => setPayMode("number")} style={{ flex: 1, padding: '10px', borderRadius: 12, background: payMode === "number" ? DARK_NAVY : "#fff", color: payMode === "number" ? "#fff" : "#64748b", border: "1px solid #f1f5f9", fontSize: 11, fontWeight: 800 }}>PAR NUMÉRO</button>
+        </div>
+
+        {payMode === "scan" ? (
+           <div style={{ width: "100%", height: 300, background: "#000", borderRadius: 32, display: "flex", alignItems: "center", justifyContent: "center", position: "relative", overflow: "hidden" }}>
+              <div style={{ width: 200, height: 200, border: "2px solid #fff", borderRadius: 20, position: "relative" }}>
+                 <div style={{ position: "absolute", top: 0, left: "50%", transform: "translateX(-50%)", width: "100%", height: 2, background: GOLD, boxShadow: `0 0 10px ${GOLD}`, animation: "scan 2s infinite" }}></div>
+              </div>
+           </div>
+        ) : (
+           <div className="animate-slide-up">
+              <div style={{ display: "flex", gap: 12, marginBottom: 20 }}>
+                 <div onClick={() => setPayMethod("wave")} style={{ flex: 1, height: 60, borderRadius: 16, background: payMethod === "wave" ? WAVE_BLUE : "#f8fafc", color: payMethod === "wave" ? "#fff" : "#64748b", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 14, fontWeight: 900, cursor: "pointer", border: "2px solid #f1f5f9" }}>🌊 WAVE</div>
+                 <div onClick={() => setPayMethod("om")} style={{ flex: 1, height: 60, borderRadius: 16, background: payMethod === "om" ? OM_ORANGE : "#f8fafc", color: payMethod === "om" ? "#fff" : "#64748b", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 14, fontWeight: 900, cursor: "pointer", border: "2px solid #f1f5f9" }}>🍊 ORANGE</div>
+              </div>
+              
+              <div style={{ marginBottom: 20 }}>
+                 <div style={{ fontSize: 11, fontWeight: 800, marginBottom: 8, color: "#64748b" }}>NUMÉRO DU DESTINATAIRE</div>
+                 <div style={{ position: "relative" }}>
+                    <div style={{ position: "absolute", left: 16, top: "50%", transform: "translateY(-50%)", color: "#94a3b8" }}><Phone size={20} /></div>
+                    <input type="tel" placeholder="+221 ..." style={{ width: "100%", padding: "16px 16px 16px 48px", borderRadius: 16, border: "2px solid #f1f5f9", fontSize: 16, fontWeight: 700, outline: "none" }} />
+                 </div>
+              </div>
+
+              <div style={{ marginBottom: 30 }}>
+                 <div style={{ fontSize: 11, fontWeight: 800, marginBottom: 8, color: "#64748b" }}>MONTANT (FCFA)</div>
+                 <input type="number" defaultValue="25000" style={{ width: "100%", padding: "20px", borderRadius: 16, border: "2px solid #f1f5f9", fontSize: 24, fontWeight: 900, textAlign: "center", color: DARK_NAVY }} />
+              </div>
+
+              <button style={{ width: "100%", background: payMethod === "wave" ? WAVE_BLUE : OM_ORANGE, color: "#fff", border: "none", padding: 20, borderRadius: 20, fontSize: 16, fontWeight: 900, display: "flex", alignItems: "center", justifyContent: "center", gap: 10 }}>
+                 Confirmer le Paiement <ArrowRight size={20} />
+              </button>
+           </div>
+        )}
+
+        <style>{`
+            @keyframes scan { 0% { top: 0; } 50% { top: 100%; } 100% { top: 0; } }
+        `}</style>
+      </div>
+    );
+  };
 
   const renderHistory = () => (
     <div className="animate-fade-in">
