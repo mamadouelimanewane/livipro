@@ -67,13 +67,24 @@ const Badge = ({ text, color, bg }) => (
 );
 
 export default function AdminPlatform() {
-  const [activeTab, setActiveTab] = useState("users");
+  const [activeTab, setActiveTab] = useState("social");
+  const [isApproving, setIsApproving] = useState(null)
+  const [searchTerm, setSearchTerm] = useState("")
+  
   const { data: socialPosts, loading: socialLoading } = useSocialFeed();
   const { data: members, loading: membersLoading } = useMembers();
 
   const handleApprove = (id) => {
-    alert(`Partenaire approuvé ! Son accès au réseau LiviPro est désormais actif.`);
+    setIsApproving(id)
+    setTimeout(() => {
+      setIsApproving(null)
+      alert(`Partenaire ${id} approuvé ! Son accès au réseau LiviPro est désormais actif.`);
+    }, 1200);
   };
+
+  const handleAction = (name) => {
+    alert(`Action "${name}" : Fonctionnalité en cours de déploiement.`);
+  }
 
   const StatsHeader = () => (
     <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))", gap: 20, marginBottom: 30 }}>
@@ -94,79 +105,108 @@ export default function AdminPlatform() {
     </div>
   );
 
-  const renderUsers = () => (
-    <div className="animate-fade-in">
-       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 30 }}>
-          <div>
-            <h2 style={{ fontSize: 24, fontWeight: 900 }}>Validation & Annuaire Partenaires</h2>
-            <p style={{ fontSize: 13, color: "#64748b" }}>Gérez les entrées au réseau et la conformité KYC.</p>
-          </div>
-          <button style={{ background: DARK_NAVY, color: "#fff", border: "none", padding: "12px 24px", borderRadius: 14, fontSize: 13, fontWeight: 800, display: "flex", alignItems: "center", gap: 8 }}>
-            <UserPlus size={18} /> Inscription Manuelle
-          </button>
-       </div>
+  const renderUsers = () => {
+    const pendingUsers = USERS.filter(u => u.status === "Pending" && u.name.toLowerCase().includes(searchTerm.toLowerCase()));
+    const activeUsers = USERS.filter(u => u.status === "Active" && u.name.toLowerCase().includes(searchTerm.toLowerCase()));
 
-       {/* PENDING APPROVAL SECTION */}
-       <div style={{ marginBottom: 40 }}>
-          <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 20 }}>
-             <ShieldAlert size={20} color={GOLD} />
-             <h3 style={{ fontSize: 16, fontWeight: 800 }}>En attente de validation</h3>
-          </div>
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(400px, 1fr))", gap: 20 }}>
-             {USERS.filter(u => u.status === "Pending").map(user => (
-                <Card key={user.id} style={{ border: `1px solid ${GOLD}40`, background: `${GOLD}05` }}>
-                   <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
-                      <div style={{ display: "flex", gap: 16 }}>
-                         <div style={{ background: "#fff", width: 50, height: 50, borderRadius: 14, display: "flex", alignItems: "center", justifyContent: "center", border: "1px solid #e2e8f0" }}>
-                            {user.role === "Boutique" ? <Store size={22} color="#6366f1" /> : user.role === "Wholesaler" ? <Building size={22} color={GOLD} /> : <Truck size={22} color={VISION_GREEN} />}
-                         </div>
-                         <div>
-                            <div style={{ fontSize: 15, fontWeight: 800 }}>{user.name}</div>
-                            <div style={{ fontSize: 12, color: "#64748b" }}>{user.role} • {user.city}</div>
-                            <div style={{ fontSize: 11, color: "#94a3b8", marginTop: 4 }}>Inscrit le {user.date}</div>
-                         </div>
-                      </div>
-                      <div style={{ textAlign: "right" }}>
-                         <Badge text={user.kyc} color="#92400e" bg="#fef3c7" />
-                      </div>
-                   </div>
-                   <div style={{ display: "flex", gap: 10, marginTop: 20, paddingTop: 16, borderTop: "1px solid #f1f5f9" }}>
-                      <button style={{ flex: 1, background: "#f8fafc", color: DARK_NAVY, border: "1px solid #e2e8f0", padding: "10px", borderRadius: 10, fontSize: 12, fontWeight: 800 }}>Vérifier KYC</button>
-                      <button 
-                        onClick={() => handleApprove(user.id)}
-                        style={{ flex: 1, background: VISION_GREEN, color: "#fff", border: "none", padding: "10px", borderRadius: 10, fontSize: 12, fontWeight: 800 }}
-                      >
-                        Approuver
-                      </button>
-                   </div>
-                </Card>
-             ))}
-          </div>
-       </div>
+    return (
+      <div className="animate-fade-in">
+        <div style={{ display: "flex", flexDirection: window.innerWidth > 768 ? "row" : "column", justifyContent: "space-between", alignItems: window.innerWidth > 768 ? "center" : "flex-start", gap: 20, marginBottom: 30 }}>
+            <div>
+              <h2 style={{ fontSize: 24, fontWeight: 900 }}>Validation & Annuaire Partenaires</h2>
+              <p style={{ fontSize: 13, color: "#64748b" }}>Gérez les entrées au réseau et la conformité KYC.</p>
+            </div>
+            <div style={{ display: "flex", gap: 12, width: window.innerWidth > 768 ? "auto" : "100%" }}>
+              <div style={{ background: "#f1f5f9", borderRadius: 12, padding: "10px 16px", display: "flex", alignItems: "center", gap: 10, flex: 1 }}>
+                <Search size={18} color="#94a3b8" />
+                <input 
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  placeholder="Filtrer..." 
+                  style={{ background: "none", border: "none", outline: "none", fontSize: 13, width: "100%" }} 
+                />
+              </div>
+              <button 
+                onClick={() => handleAction("Inscription Manuelle")}
+                style={{ background: DARK_NAVY, color: "#fff", border: "none", padding: "12px 24px", borderRadius: 14, fontSize: 13, fontWeight: 800, display: "flex", alignItems: "center", gap: 8, cursor: "pointer" }}
+              >
+                <UserPlus size={18} /> <span style={{ display: window.innerWidth > 600 ? "inline" : "none" }}>Inscription</span>
+              </button>
+            </div>
+        </div>
 
-       <h3 style={{ fontSize: 16, fontWeight: 800, marginBottom: 20 }}>Membres Actifs</h3>
-       <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))", gap: 16 }}>
-         {USERS.filter(u => u.status === "Active").map(user => (
-           <Card key={user.id} style={{ display: "flex", alignItems: "center", gap: 14 }}>
-              <div style={{ background: "#f8fafc", width: 44, height: 44, borderRadius: 12, display: "flex", alignItems: "center", justifyContent: "center" }}>
-                 {user.role === "Wholesaler" ? <Building size={20} color={GOLD} /> : user.role === "Boutique" ? <Store size={20} color="#6366f1" /> : <Truck size={20} color="#10b981" />}
-              </div>
-              <div style={{ flex: 1 }}>
-                 <div style={{ fontSize: 14, fontWeight: 800 }}>{user.name}</div>
-                 <div style={{ fontSize: 11, color: "#64748b" }}>{user.role} • {user.city}</div>
-              </div>
-              <div style={{ textAlign: "right" }}>
-                 <Badge text="Actif" color={VISION_GREEN} bg="#ecfdf5" />
-              </div>
-           </Card>
-         ))}
-       </div>
-    </div>
-  );
+        {/* PENDING APPROVAL SECTION */}
+        {pendingUsers.length > 0 && (
+          <div style={{ marginBottom: 40 }}>
+            <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 20 }}>
+                <ShieldAlert size={20} color={GOLD} />
+                <h3 style={{ fontSize: 16, fontWeight: 800 }}>En attente de validation</h3>
+            </div>
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(380px, 1fr))", gap: 20 }}>
+                {pendingUsers.map(user => (
+                  <Card key={user.id} style={{ border: `1px solid ${GOLD}40`, background: `${GOLD}05` }}>
+                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
+                        <div style={{ display: "flex", gap: 16 }}>
+                          <div style={{ background: "#fff", width: 50, height: 50, borderRadius: 14, display: "flex", alignItems: "center", justifyContent: "center", border: "1px solid #e2e8f0" }}>
+                              {user.role === "Boutique" ? <Store size={22} color="#6366f1" /> : user.role === "Wholesaler" ? <Building size={22} color={GOLD} /> : <Truck size={22} color={VISION_GREEN} />}
+                          </div>
+                          <div>
+                              <div style={{ fontSize: 15, fontWeight: 800 }}>{user.name}</div>
+                              <div style={{ fontSize: 12, color: "#64748b" }}>{user.role} • {user.city}</div>
+                              <div style={{ fontSize: 11, color: "#94a3b8", marginTop: 4 }}>Inscrit le {user.date}</div>
+                          </div>
+                        </div>
+                        <div style={{ textAlign: "right" }}>
+                          <Badge text={user.kyc} color="#92400e" bg="#fef3c7" />
+                        </div>
+                    </div>
+                    <div style={{ display: "flex", gap: 10, marginTop: 20, paddingTop: 16, borderTop: "1px solid #f1f5f9" }}>
+                        <button 
+                          onClick={() => handleAction(`Vérifier KYC ${user.name}`)}
+                          style={{ flex: 1, background: "#f8fafc", color: DARK_NAVY, border: "1px solid #e2e8f0", padding: "10px", borderRadius: 10, fontSize: 12, fontWeight: 800, cursor: "pointer" }}
+                        >
+                          Vérifier KYC
+                        </button>
+                        <button 
+                          onClick={() => handleApprove(user.id)}
+                          disabled={isApproving === user.id}
+                          style={{ flex: 1, background: VISION_GREEN, color: "#fff", border: "none", padding: "10px", borderRadius: 10, fontSize: 12, fontWeight: 800, cursor: isApproving === user.id ? "wait" : "pointer" }}
+                        >
+                          {isApproving === user.id ? "Validation..." : "Approuver"}
+                        </button>
+                    </div>
+                  </Card>
+                ))}
+            </div>
+          </div>
+        )}
+
+        <h3 style={{ fontSize: 16, fontWeight: 800, marginBottom: 20 }}>Membres Actifs</h3>
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))", gap: 16 }}>
+          {activeUsers.length > 0 ? activeUsers.map(user => (
+            <Card key={user.id} style={{ display: "flex", alignItems: "center", gap: 14 }}>
+               <div style={{ background: "#f8fafc", width: 44, height: 44, borderRadius: 12, display: "flex", alignItems: "center", justifyContent: "center" }}>
+                  {user.role === "Wholesaler" ? <Building size={20} color={GOLD} /> : user.role === "Boutique" ? <Store size={20} color="#6366f1" /> : <Truck size={20} color="#10b981" />}
+               </div>
+               <div style={{ flex: 1 }}>
+                  <div style={{ fontSize: 14, fontWeight: 800 }}>{user.name}</div>
+                  <div style={{ fontSize: 11, color: "#64748b" }}>{user.role} • {user.city}</div>
+               </div>
+               <div style={{ textAlign: "right" }}>
+                  <Badge text="Actif" color={VISION_GREEN} bg="#ecfdf5" />
+               </div>
+            </Card>
+          )) : (
+            <div style={{ gridColumn: "1 / -1", textAlign: "center", padding: 40, color: "#94a3b8" }}>Aucun partenaire trouvé.</div>
+          )}
+        </div>
+      </div>
+    );
+  }
 
   const renderSocial = () => (
     <div className="animate-fade-in">
-      <div style={{ background: 'linear-gradient(135deg, #1a5276 0%, #0f172a 100%)', borderRadius: 24, padding: '24px 30px', marginBottom: 30, color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+      <div style={{ background: 'linear-gradient(135deg, #1a5276 0%, #0f172a 100%)', borderRadius: 24, padding: '24px 30px', marginBottom: 30, color: '#fff', display: 'flex', flexDirection: window.innerWidth > 768 ? "row" : "column", alignItems: 'center', justifyContent: 'space-between', gap: 20 }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 20 }}>
           <div style={{ fontSize: 40 }}>🇸🇳</div>
           <div>
@@ -175,7 +215,12 @@ export default function AdminPlatform() {
             <div style={{ fontSize: 12, opacity: 0.6, marginTop: 4 }}>Surveillance du marché et régulation de la chaîne d'approvisionnement en temps réel.</div>
           </div>
         </div>
-        <button style={{ background: GOLD, border: 'none', color: '#fff', padding: '12px 24px', borderRadius: 12, fontWeight: 900 }}>Admin Console</button>
+        <button 
+          onClick={() => handleAction("Admin Console Ministry")}
+          style={{ background: GOLD, border: 'none', color: '#fff', padding: '12px 24px', borderRadius: 12, fontWeight: 900, cursor: "pointer", whiteSpace: "nowrap" }}
+        >
+          Console Gouv
+        </button>
       </div>
 
       <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(350px, 1fr))", gap: 20 }}>
@@ -194,11 +239,22 @@ export default function AdminPlatform() {
                       <div style={{ fontSize: 11, color: "#94a3b8" }}>{post.time}</div>
                     </div>
                   </div>
+                  <button style={{ background: "none", border: "none", color: "#64748b", cursor: "pointer" }}><MoreVertical size={18} /></button>
                </div>
                <p style={{ fontSize: 14, color: DARK_NAVY, lineHeight: 1.6, marginBottom: 20 }}>{post.text}</p>
                <div style={{ display: "flex", gap: 20, borderTop: "1px solid #f1f5f9", paddingTop: 16 }}>
-                  <div style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 12, color: "#ef4444", fontWeight: 800 }}><Heart size={16} fill="#ef4444" /> {post.likes}</div>
-                  <div style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 12, color: "#64748b", fontWeight: 800 }}><MessageSquare size={16} /> RÉPONDRE</div>
+                  <div 
+                    onClick={() => alert("Like ajouté !")}
+                    style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 12, color: "#ef4444", fontWeight: 800, cursor: "pointer" }}
+                  >
+                    <Heart size={16} fill="#ef4444" /> {post.likes}
+                  </div>
+                  <div 
+                    onClick={() => handleAction("Commenter")}
+                    style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 12, color: "#64748b", fontWeight: 800, cursor: "pointer" }}
+                  >
+                    <MessageSquare size={16} /> RÉPONDRE
+                  </div>
                </div>
             </Card>
           ))
@@ -234,7 +290,9 @@ export default function AdminPlatform() {
               display: "flex",
               alignItems: "center",
               gap: 8,
-              boxShadow: activeTab === tab.id ? "0 4px 15px rgba(0,0,0,0.1)" : "none"
+              cursor: "pointer",
+              boxShadow: activeTab === tab.id ? "0 4px 15px rgba(0,0,0,0.1)" : "none",
+              whiteSpace: "nowrap"
             }}
           >
             {tab.icon} {tab.label}
@@ -242,7 +300,7 @@ export default function AdminPlatform() {
         ))}
       </div>
 
-      <div style={{ background: "#fff", borderRadius: 28, padding: 32, border: "1px solid #e2e8f0", boxShadow: "0 10px 40px rgba(0,0,0,0.02)" }}>
+      <div style={{ background: "#fff", borderRadius: 28, padding: window.innerWidth > 768 ? 32 : 20, border: "1px solid #e2e8f0", boxShadow: "0 10px 40px rgba(0,0,0,0.02)" }}>
         {activeTab === "social" && renderSocial()}
         {activeTab === "users" && renderUsers()}
         {activeTab === "compliance" && <DocumentVault />}
@@ -256,6 +314,20 @@ export default function AdminPlatform() {
                             <Badge text={alert.level} color="#fff" bg="#ef4444" />
                         </div>
                         <p style={{ fontSize: 13, color: "#64748b", marginTop: 8 }}>{alert.message}</p>
+                        <div style={{ display: "flex", gap: 10, marginTop: 16 }}>
+                          <button 
+                            onClick={() => handleAction("Investigation Sécurité")}
+                            style={{ background: "#f8fafc", border: "1px solid #e2e8f0", padding: "8px 16px", borderRadius: 8, fontSize: 11, fontWeight: 800, cursor: "pointer" }}
+                          >
+                            Enquêter
+                          </button>
+                          <button 
+                            onClick={() => handleAction("Réinitialisation Sécurité")}
+                            style={{ background: "#ef444415", border: "none", color: "#ef4444", padding: "8px 16px", borderRadius: 8, fontSize: 11, fontWeight: 800, cursor: "pointer" }}
+                          >
+                            Réinitialiser
+                          </button>
+                        </div>
                     </Card>
                 ))}
             </div>

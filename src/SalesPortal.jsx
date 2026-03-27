@@ -15,7 +15,8 @@ import {
   MapPin,
   Sparkles,
   Layers,
-  Loader2
+  Loader2,
+  Filter
 } from "lucide-react";
 import LiviFleetManager from "./LiviFleetManager";
 import LiviBranchManager from "./LiviBranchManager";
@@ -29,10 +30,15 @@ const VISION_GREEN = "#10b981";
 
 import DashboardShell from "./components/DashboardShell";
 
+const Card = ({ children, style = {} }) => (
+  <div style={{ background: "#fff", borderRadius: 20, padding: 20, border: "1px solid #f1f5f9", boxShadow: "0 4px 15px rgba(0,0,0,0.02)", ...style }}>{children}</div>
+);
+
 export default function SalesPortal() {
   const [view, setView] = useState("catalog"); 
   const [activeCategory, setActiveCategory] = useState("Tous");
   const [searchTerm, setSearchTerm] = useState("");
+  const [isAdding, setIsAdding] = useState(false);
 
   const { data: products, loading: productsLoading } = useProducts();
   const { data: groupageOffers, loading: groupageLoading } = useGroupageOffers();
@@ -41,6 +47,18 @@ export default function SalesPortal() {
     (activeCategory === "Tous" || p.category === activeCategory) &&
     p.name.toLowerCase().includes(searchTerm.toLowerCase())
   );
+
+  const handleAction = (name) => {
+    alert(`Action "${name}" : Vous n'avez pas les droits d'écriture en mode Démo.`);
+  }
+
+  const handleCreateProduct = () => {
+    setIsAdding(true);
+    setTimeout(() => {
+      setIsAdding(false);
+      alert("Nouveau produit ajouté au catalogue (Simulé) !");
+    }, 1500);
+  }
 
   const HeaderStats = () => (
     <div style={{ marginBottom: 32 }}>
@@ -75,18 +93,33 @@ export default function SalesPortal() {
 
   const renderInventoryTable = () => (
     <div className="animate-fade-in">
-       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 24 }}>
+       <div style={{ display: "flex", flexDirection: window.innerWidth > 768 ? "row" : "column", justifyContent: "space-between", alignItems: window.innerWidth > 768 ? "center" : "flex-start", gap: 20, marginBottom: 24 }}>
           <div>
             <h2 style={{ fontSize: 22, fontWeight: 900 }}>Inventaire & Tarification</h2>
             <p style={{ fontSize: 13, color: "#64748b" }}>Gérez vos prix grossistes et vos niveaux de stock en temps réel.</p>
           </div>
-          <button style={{ background: GOLD, color: "#fff", border: "none", padding: "12px 24px", borderRadius: 14, fontWeight: 900, fontSize: 14, display: "flex", alignItems: "center", gap: 8 }}>
-            <Plus size={20} /> Nouveau Produit
-          </button>
+          <div style={{ display: "flex", gap: 12, width: window.innerWidth > 768 ? "auto" : "100%" }}>
+              <div style={{ background: "#f1f5f9", borderRadius: 12, padding: "10px 16px", display: "flex", alignItems: "center", gap: 10, flex: 1 }}>
+                <Search size={18} color="#94a3b8" />
+                <input 
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  placeholder="Rechercher article..." 
+                  style={{ background: "none", border: "none", outline: "none", fontSize: 13, width: "100%" }} 
+                />
+              </div>
+              <button 
+                onClick={handleCreateProduct}
+                disabled={isAdding}
+                style={{ background: GOLD, color: "#fff", border: "none", padding: "12px 24px", borderRadius: 14, fontWeight: 900, fontSize: 14, display: "flex", alignItems: "center", gap: 8, cursor: isAdding ? "wait" : "pointer" }}
+              >
+                {isAdding ? <Loader2 className="animate-spin" size={20} /> : <Plus size={20} />} <span style={{ display: window.innerWidth > 600 ? "inline" : "none" }}>Nouveau</span>
+              </button>
+          </div>
        </div>
 
-       <div style={{ background: "#fff", borderRadius: 24, padding: 32, border: "1px solid #e2e8f0" }}>
-          <table style={{ width: "100%", borderCollapse: "collapse" }}>
+       <div style={{ background: "#fff", borderRadius: 24, padding: window.innerWidth > 768 ? 32 : 16, border: "1px solid #e2e8f0", overflowX: "auto" }}>
+          <table style={{ width: "100%", borderCollapse: "collapse", minWidth: 800 }}>
              <thead>
                 <tr style={{ borderBottom: "2px solid #f8fafc", textAlign: "left" }}>
                    <th style={{ padding: "16px", color: "#64748b", fontSize: 12, fontWeight: 800 }}>VISUEL</th>
@@ -98,7 +131,7 @@ export default function SalesPortal() {
                 </tr>
              </thead>
              <tbody>
-                {filteredProducts.map(p => (
+                {filteredProducts.length > 0 ? filteredProducts.map(p => (
                    <tr key={p.id} style={{ borderBottom: "1px solid #f8fafc" }}>
                       <td style={{ padding: "16px" }}>
                          <div style={{ width: 48, height: 48, borderRadius: 12, background: "#f1f5f9", overflow: "hidden", display: "flex", alignItems: "center", justifyContent: "center" }}>
@@ -122,10 +155,19 @@ export default function SalesPortal() {
                       </td>
                       <td style={{ padding: "16px", fontSize: 16, fontWeight: 900 }}>{p.price.toLocaleString()} F</td>
                       <td style={{ padding: "16px" }}>
-                         <button style={{ padding: 8, borderRadius: 10, background: "none", border: "1px solid #f1f5f9", color: "#64748b" }}><MoreVertical size={18} /></button>
+                         <button 
+                            onClick={() => handleAction(`Options ${p.name}`)}
+                            style={{ padding: 8, borderRadius: 10, background: "none", border: "1px solid #f1f5f9", color: "#64748b", cursor: "pointer" }}
+                         >
+                            <MoreVertical size={18} />
+                         </button>
                       </td>
                    </tr>
-                ))}
+                )) : (
+                  <tr>
+                    <td colSpan="6" style={{ padding: 40, textAlign: "center", color: "#94a3b8" }}>Aucun produit ne correspond à votre recherche.</td>
+                  </tr>
+                )}
              </tbody>
           </table>
        </div>
@@ -158,7 +200,9 @@ export default function SalesPortal() {
               display: "flex",
               alignItems: "center",
               gap: 8,
-              boxShadow: view === tab.id ? "0 4px 15px rgba(0,0,0,0.1)" : "none"
+              cursor: "pointer",
+              boxShadow: view === tab.id ? "0 4px 15px rgba(0,0,0,0.1)" : "none",
+              whiteSpace: "nowrap"
             }}
           >
             {tab.icon} {tab.label}
@@ -166,14 +210,14 @@ export default function SalesPortal() {
         ))}
       </div>
 
-      <div style={{ background: "#fff", borderRadius: 28, padding: 32, border: "1px solid #e2e8f0", boxShadow: "0 10px 40px rgba(0,0,0,0.02)" }}>
+      <div style={{ background: "#fff", borderRadius: 28, padding: window.innerWidth > 768 ? 32 : 16, border: "1px solid #e2e8f0", boxShadow: "0 10px 40px rgba(0,0,0,0.02)" }}>
         {view === "catalog" && renderInventoryTable()}
         {view === "groupage" && (
            <div className="animate-fade-in">
               <h2 style={{ fontSize: 22, fontWeight: 900, marginBottom: 24 }}>Campagnes d'Achats Groupés</h2>
               <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))", gap: 20 }}>
                  {groupageOffers.map(offer => (
-                   <Card key={offer.id} style={{ border: "1px solid #fde68a" }}>
+                   <Card key={offer.id} style={{ border: "1px solid #fde68a", position: "relative" }}>
                       <div style={{ fontSize: 11, fontWeight: 800, color: "#92400e", background: "#fef3c7", padding: "4px 10px", borderRadius: 8, display: "inline-block", marginBottom: 12 }}>PROMO ACTIVE : -{offer.discount}</div>
                       <div style={{ fontSize: 18, fontWeight: 900 }}>{offer.name}</div>
                       <div style={{ marginTop: 20 }}>
@@ -185,6 +229,12 @@ export default function SalesPortal() {
                            <div style={{ width: `${(offer.current_orders/offer.min_orders)*100}%`, height: "100%", background: GOLD, borderRadius: 4 }} />
                         </div>
                       </div>
+                      <button 
+                        onClick={() => handleAction(`Gérer Campagne ${offer.name}`)}
+                        style={{ marginTop: 20, width: "100%", background: DARK_NAVY, color: "#fff", border: "none", padding: "12px", borderRadius: 12, fontSize: 12, fontWeight: 800, cursor: "pointer" }}
+                      >
+                        Gérer la Campagne
+                      </button>
                    </Card>
                  ))}
               </div>

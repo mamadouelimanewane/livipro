@@ -27,8 +27,15 @@ export default function ClientPortal() {
   const [activeTab, setActiveTab] = useState("dashboard"); // dashboard | shop | orders | wallet
   const [isOrdering, setIsOrdering] = useState(false)
   const [isVoiceActive, setIsVoiceActive] = useState(false)
+  const [searchTerm, setSearchTerm] = useState("")
+  const [activeAction, setActiveAction] = useState(null)
   
   const { data: groupageOffers, loading: groupageLoading } = useGroupageOffers();
+
+  // Liste des produits filtrés pour la démo
+  const products = ["Riz Senegalais", "Huile Dinor", "Sucre en Poudre", "Lait Nido", "Oignons Locaux"].filter(p => 
+    p.toLowerCase().includes(searchTerm.toLowerCase())
+  );
 
   const handleOrder = () => {
     setIsOrdering(true)
@@ -38,9 +45,18 @@ export default function ClientPortal() {
     }, 1500)
   }
 
+  const handleDummyAction = (actionName) => {
+    setActiveAction(actionName)
+    setTimeout(() => {
+      setActiveAction(null)
+      alert(`Fonctionnalité "${actionName}" bientôt disponible dans la version bêta.`);
+    }, 600)
+  }
+
   const handleVoiceResult = (result) => {
-    console.log("Résultat vocal :", result);
-    setActiveTab("shop");
+    setSearchTerm(result);
+    alert(`Recherche vocale : "${result}"`);
+    setIsVoiceActive(false);
   };
 
   const HeaderStats = () => (
@@ -88,60 +104,99 @@ export default function ClientPortal() {
         .pulse-btn { animation: pulse 2s infinite; }
       `}</style>
 
-      <div style={{ display: "grid", gridTemplateColumns: "2fr 1fr", gap: 32 }}>
+      <div style={{ display: "grid", gridTemplateColumns: window.innerWidth > 1024 ? "2fr 1fr" : "1fr", gap: 32 }}>
          <div style={{ display: "flex", flexDirection: "column", gap: 32 }}>
             <Card style={{ padding: 32, borderRadius: 28 }}>
-                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 24 }}>
+                <div style={{ display: "flex", flexDirection: window.innerWidth > 600 ? "row" : "column", justifyContent: "space-between", alignItems: window.innerWidth > 600 ? "center" : "flex-start", gap: 16, marginBottom: 24 }}>
                    <h3 style={{ fontSize: 20, fontWeight: 900 }}>Ravitaillement Intelligent (IA)</h3>
-                   <div style={{ background: "#f1f5f9", borderRadius: 12, padding: "8px 16px", display: "flex", alignItems: "center", gap: 10 }}>
+                   <div style={{ background: "#f1f5f9", borderRadius: 12, padding: "8px 16px", display: "flex", alignItems: "center", gap: 10, width: window.innerWidth > 600 ? "auto" : "100%" }}>
                       <Search size={18} color="#94a3b8" />
-                      <input placeholder="Chercher un produit..." style={{ background: "none", border: "none", outline: "none", fontSize: 14 }} />
+                      <input 
+                        value={searchTerm}
+                        onChange={(e) => setSearchTerm(e.target.value)}
+                        placeholder="Chercher un produit..." 
+                        style={{ background: "none", border: "none", outline: "none", fontSize: 14, width: "100%" }} 
+                      />
                    </div>
                 </div>
                 
-                <div style={{ background: "#fffbeb", border: "1px dashed #f59e0b", padding: 20, borderRadius: 20, marginBottom: 24, display: "flex", alignItems: "center", gap: 20 }}>
+                <div style={{ background: "#fffbeb", border: "1px dashed #f59e0b", padding: 20, borderRadius: 20, marginBottom: 24, display: "flex", flexDirection: window.innerWidth > 600 ? "row" : "column", alignItems: "center", gap: 20 }}>
                    <Zap color={GOLD} size={32} />
-                   <div>
+                   <div style={{ flex: 1 }}>
                       <div style={{ fontWeight: 800 }}>Commande Automatisée Suggérée</div>
                       <div style={{ fontSize: 13, color: "#92400e" }}>Basé sur votre historique, nous suggérons un réapprovisionnement de 10 sacs de Riz et 5 bidons d'Huile.</div>
                    </div>
-                   <button onClick={handleOrder} style={{ marginLeft: "auto", background: DARK_NAVY, color: "#fff", border: "none", padding: "12px 24px", borderRadius: 12, fontWeight: 900 }}>Commander</button>
+                   <button 
+                    onClick={handleOrder} 
+                    disabled={isOrdering}
+                    style={{ background: DARK_NAVY, color: "#fff", border: "none", padding: "12px 24px", borderRadius: 12, fontWeight: 900, cursor: isOrdering ? "wait" : "pointer", minWidth: 140 }}
+                   >
+                     {isOrdering ? "Envoi..." : "Tout Commander"}
+                   </button>
                 </div>
 
-                <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))", gap: 16 }}>
-                   {["Riz Senegalais", "Huile Dinor", "Sucre en Poudre", "Lait Nido", "Oignons Locaux"].map((p, idx) => (
+                <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(160px, 1fr))", gap: 16 }}>
+                   {products.length > 0 ? (
+                     products.map((p, idx) => (
                       <div key={idx} style={{ background: "#f8fafc", padding: 16, borderRadius: 16, textAlign: "center", border: "1px solid #f1f5f9" }}>
                          <div style={{ width: 44, height: 44, background: "#fff", borderRadius: 12, margin: "0 auto 12px", display: "flex", alignItems: "center", justifyContent: "center" }}>
                             <ShoppingCart size={20} color={GOLD} />
                          </div>
                          <div style={{ fontSize: 13, fontWeight: 800 }}>{p}</div>
                          <div style={{ fontSize: 11, color: "#64748b", marginTop: 4 }}>Dernier achat: J-2</div>
+                         <button 
+                            onClick={() => handleDummyAction(`Commander ${p}`)}
+                            style={{ marginTop: 12, width: "100%", background: "#fff", border: "1px solid #e2e8f0", padding: "6px", borderRadius: 8, fontSize: 11, fontWeight: 800, cursor: "pointer" }}
+                         >
+                            Commander
+                         </button>
                       </div>
-                   ))}
+                    ))
+                   ) : (
+                     <div style={{ gridColumn: "1 / -1", padding: 40, textAlign: "center", color: "#64748b" }}>Aucun produit trouvé pour "{searchTerm}"</div>
+                   )}
                 </div>
             </Card>
 
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 24 }}>
+            <div style={{ display: "grid", gridTemplateColumns: window.innerWidth > 768 ? "1fr 1fr" : "1fr", gap: 24 }}>
                <Card style={{ borderLeft: `5px solid ${GOLD}` }}>
                   <h4 style={{ fontSize: 16, fontWeight: 900, marginBottom: 16 }}>Opportunités LiviGroupage</h4>
                   {groupageLoading ? (
                     <div style={{ fontSize: 12 }}>Chargement...</div>
                   ) : (
                     groupageOffers.slice(0, 2).map(offer => (
-                      <div key={offer.id} style={{ marginBottom: 16, padding: 12, background: "#fffbeb", borderRadius: 14 }}>
-                         <div style={{ fontSize: 13, fontWeight: 800 }}>{offer.name} <span style={{ color: "#d97706" }}>-{offer.discount}</span></div>
-                         <div style={{ fontSize: 10, color: "#92400e", marginTop: 4 }}>{offer.current_orders}/{offer.min_orders} réservations</div>
+                      <div key={offer.id} style={{ marginBottom: 16, padding: 12, background: "#fffbeb", borderRadius: 14, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                         <div>
+                            <div style={{ fontSize: 13, fontWeight: 800 }}>{offer.name} <span style={{ color: "#d97706" }}>-{offer.discount}</span></div>
+                            <div style={{ fontSize: 10, color: "#92400e", marginTop: 4 }}>{offer.current_orders}/{offer.min_orders} réservations</div>
+                         </div>
+                         <button 
+                            onClick={() => handleDummyAction(`Réserver Groupage ${offer.name}`)}
+                            style={{ background: GOLD, color: "#fff", border: "none", padding: "6px 12px", borderRadius: 8, fontSize: 10, fontWeight: 800, cursor: "pointer" }}
+                         >
+                            Réserver
+                         </button>
                       </div>
                     ))
                   )}
-                  <button style={{ width: "100%", background: "none", border: `2px solid #e2e8f0`, padding: 12, borderRadius: 12, fontSize: 13, fontWeight: 800 }}>Voir toutes les campagnes</button>
+                  <button 
+                    onClick={() => handleDummyAction("LiviGroupage")}
+                    style={{ width: "100%", background: "none", border: `2px solid #e2e8f0`, padding: 12, borderRadius: 12, fontSize: 13, fontWeight: 800, cursor: "pointer" }}
+                  >
+                    Voir toutes les campagnes
+                  </button>
                </Card>
 
                <Card style={{ borderLeft: `5px solid ${VISION_GREEN}` }}>
                   <h4 style={{ fontSize: 16, fontWeight: 900, marginBottom: 16 }}>Revenus Livi-Relais</h4>
                   <div style={{ fontSize: 24, fontWeight: 900, color: VISION_GREEN }}>+42.500 F</div>
                   <div style={{ fontSize: 11, color: "#64748b", marginTop: 4, lineHeight: 1.4 }}>Vous servez actuellement de point de dépôt pour 12 clients du quartier.</div>
-                  <button style={{ width: "100%", marginTop: 20, background: VISION_GREEN, color: "#fff", border: "none", padding: 12, borderRadius: 12, fontSize: 13, fontWeight: 800 }}>Historique Colis</button>
+                  <button 
+                    onClick={() => handleDummyAction("Livi-Relais")}
+                    style={{ width: "100%", marginTop: 20, background: VISION_GREEN, color: "#fff", border: "none", padding: 12, borderRadius: 12, fontSize: 13, fontWeight: 800, cursor: "pointer" }}
+                  >
+                    Historique Colis
+                  </button>
                </Card>
             </div>
          </div>
@@ -150,15 +205,25 @@ export default function ClientPortal() {
             <Card style={{ background: `linear-gradient(135deg, ${DARK_NAVY} 0%, #1e293b 100%)`, color: "#fff", padding: 24 }}>
                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 24 }}>
                   <div>
-                    <div style={{ fontSize: 11, color: GOLD, fontWeight: 800, textTransform: "uppercase" }}>Portefeuille LiviWallet</div>
-                    <div style={{ fontSize: 28, fontWeight: 900, marginTop: 4 }}>{BOUTIQUE.balance}</div>
+                     <div style={{ fontSize: 11, color: GOLD, fontWeight: 800, textTransform: "uppercase" }}>Portefeuille LiviWallet</div>
+                     <div style={{ fontSize: 28, fontWeight: 900, marginTop: 4 }}>{BOUTIQUE.balance}</div>
                   </div>
                   <Wallet size={32} color={GOLD} />
                </div>
                <p style={{ fontSize: 11, opacity: 0.7, marginBottom: 20 }}>Transactions sécurisées via infrastructure LiviPro Blockchain.</p>
                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
-                  <button style={{ background: "rgba(255,255,255,0.1)", border: "none", color: "#fff", padding: 12, borderRadius: 10, fontSize: 11, fontWeight: 800 }}>Approvisionner</button>
-                  <button style={{ background: GOLD, border: "none", color: DARK_NAVY, padding: 12, borderRadius: 10, fontSize: 11, fontWeight: 900 }}>Payer Facture</button>
+                  <button 
+                    onClick={() => handleDummyAction("Approvisionner Wallet")}
+                    style={{ background: "rgba(255,255,255,0.1)", border: "none", color: "#fff", padding: 12, borderRadius: 10, fontSize: 11, fontWeight: 800, cursor: "pointer" }}
+                  >
+                    Approvisionner
+                  </button>
+                  <button 
+                    onClick={() => handleDummyAction("Payer Facture")}
+                    style={{ background: GOLD, border: "none", color: DARK_NAVY, padding: 12, borderRadius: 10, fontSize: 11, fontWeight: 900, cursor: "pointer" }}
+                  >
+                    Payer Facture
+                  </button>
                </div>
             </Card>
 
@@ -191,7 +256,12 @@ export default function ClientPortal() {
                <BatteryCharging size={32} color="#6366f1" style={{ margin: "0 auto 12px" }} />
                <div style={{ fontSize: 13, fontWeight: 800 }}>Tontine & Capitalisation</div>
                <p style={{ fontSize: 11, color: "#64748b", marginTop: 8 }}>{BOUTIQUE.tontineStatus}</p>
-               <button style={{ width: "100%", marginTop: 16, background: "#f1f5f9", border: "none", color: DARK_NAVY, padding: 10, borderRadius: 10, fontSize: 11, fontWeight: 800 }}>Détails Cycles</button>
+               <button 
+                onClick={() => handleDummyAction("Tontine details")}
+                style={{ width: "100%", marginTop: 16, background: "#f1f5f9", border: "none", color: DARK_NAVY, padding: 10, borderRadius: 10, fontSize: 11, fontWeight: 800, cursor: "pointer" }}
+               >
+                 Détails Cycles
+               </button>
             </Card>
          </div>
       </div>
