@@ -38,6 +38,7 @@ import {
 } from "lucide-react";
 import { useSocialFeed, useMembers } from "./useLiviData";
 import DashboardShell from "./components/DashboardShell";
+import { useSearchParams } from "react-router-dom";
 
 // --- DATA SIMULATION ---
 const USERS = [
@@ -67,10 +68,23 @@ const Badge = ({ text, color, bg }) => (
 );
 
 export default function AdminPlatform() {
-  const [activeTab, setActiveTab] = useState("social");
+  const [searchParams, setSearchParams] = useSearchParams();
+  const [activeTab, setActiveTab] = useState(searchParams.get("view") || "social");
   const [isApproving, setIsApproving] = useState(null)
   const [searchTerm, setSearchTerm] = useState("")
-  
+
+  useEffect(() => {
+    const view = searchParams.get("view");
+    if (view && view !== activeTab) {
+      setActiveTab(view);
+    }
+  }, [searchParams]);
+
+  const handleTabChange = (id) => {
+    setActiveTab(id);
+    setSearchParams({ view: id });
+  };
+
   const { data: socialPosts, loading: socialLoading } = useSocialFeed();
   const { data: members, loading: membersLoading } = useMembers();
 
@@ -278,7 +292,7 @@ export default function AdminPlatform() {
         ].map(tab => (
           <button 
             key={tab.id} 
-            onClick={() => setActiveTab(tab.id)} 
+            onClick={() => handleTabChange(tab.id)} 
             style={{ 
               background: activeTab === tab.id ? DARK_NAVY : "#fff", 
               color: activeTab === tab.id ? "#fff" : "#64748b",

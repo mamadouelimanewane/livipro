@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useSearchParams } from "react-router-dom";
 import { 
   Package, 
   Search, 
@@ -35,10 +36,23 @@ const Card = ({ children, style = {} }) => (
 );
 
 export default function SalesPortal() {
-  const [view, setView] = useState("catalog"); 
+  const [searchParams, setSearchParams] = useSearchParams();
+  const [view, setView] = useState(searchParams.get("view") || "catalog"); 
   const [activeCategory, setActiveCategory] = useState("Tous");
   const [searchTerm, setSearchTerm] = useState("");
   const [isAdding, setIsAdding] = useState(false);
+
+  useEffect(() => {
+    const v = searchParams.get("view");
+    if (v && v !== view) {
+      setView(v);
+    }
+  }, [searchParams]);
+
+  const handleViewChange = (newView) => {
+    setView(newView);
+    setSearchParams({ view: newView });
+  };
 
   const { data: products, loading: productsLoading } = useProducts();
   const { data: groupageOffers, loading: groupageLoading } = useGroupageOffers();
@@ -188,7 +202,7 @@ export default function SalesPortal() {
         ].map(tab => (
           <button 
             key={tab.id} 
-            onClick={() => setView(tab.id)} 
+            onClick={() => handleViewChange(tab.id)} 
             style={{ 
               background: view === tab.id ? DARK_NAVY : "#fff", 
               color: view === tab.id ? "#fff" : "#64748b",

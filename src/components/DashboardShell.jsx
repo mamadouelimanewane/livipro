@@ -43,18 +43,18 @@ export default function DashboardShell({ children, title, role = "admin" }) {
 
   const menuItems = {
     admin: [
-      { id: "dashboard", label: "Tableau de Bord", icon: <LayoutDashboard size={20} />, path: "/admin" },
-      { id: "members", label: "Gestion Partenaires", icon: <Users size={20} />, path: "/admin" },
-      { id: "network", label: "État du Réseau", icon: <ShieldCheck size={20} />, path: "/admin" },
-      { id: "revenues", label: "Flux Financiers", icon: <BarChart3 size={20} />, path: "/admin" },
-      { id: "settings", label: "Paramètres API", icon: <Settings size={20} />, path: "/admin" },
+      { id: "social", label: "Flux Réseau", icon: <LayoutDashboard size={20} />, path: "/admin?view=social" },
+      { id: "users", label: "Gestion Partenaires", icon: <Users size={20} />, path: "/admin?view=users" },
+      { id: "compliance", label: "Documents & KYC", icon: <ShieldCheck size={20} />, path: "/admin?view=compliance" },
+      { id: "security", label: "Cyber-Sécurité", icon: <BarChart3 size={20} />, path: "/admin?view=security" },
+      { id: "track", label: "Atlas Tracking", icon: <Settings size={20} />, path: "/admin?view=track" },
     ],
     grossiste: [
-      { id: "dashboard", label: "LiviHub Grossiste", icon: <Building2 size={20} />, path: "/sales" },
-      { id: "inventory", label: "Gestion de Stocks", icon: <Package size={20} />, path: "/sales" },
-      { id: "fleet", label: "Gestion Flotte", icon: <Truck size={20} />, path: "/sales" },
-      { id: "clients", label: "Portefeuille Clients", icon: <Users size={20} />, path: "/sales" },
-      { id: "settings", label: "Configuration Prix", icon: <Settings size={20} />, path: "/sales" },
+      { id: "catalog", label: "Stocks & Prix", icon: <Building2 size={20} />, path: "/sales?view=catalog" },
+      { id: "fleet", label: "Gestion Flotte", icon: <Truck size={20} />, path: "/sales?view=fleet" },
+      { id: "directory", label: "Portefeuille Clients", icon: <Users size={20} />, path: "/sales?view=directory" },
+      { id: "groupage", label: "LiviGroupage", icon: <Package size={20} />, path: "/sales?view=groupage" },
+      { id: "branches", label: "Relais & Points", icon: <Settings size={20} />, path: "/sales?view=branches" },
     ],
     boutique: [
       { id: "dashboard", label: "Mon Portail Boutique", icon: <Store size={20} />, path: "/boutique" },
@@ -63,6 +63,11 @@ export default function DashboardShell({ children, title, role = "admin" }) {
       { id: "credit", label: "Score de Crédit", icon: <ShieldCheck size={20} />, path: "/boutique" },
       { id: "settings", label: "Paramètres Shop", icon: <Settings size={20} />, path: "/boutique" },
     ]
+  };
+
+  const handleLogout = () => {
+    alert("Déconnexion réussie. À bientôt sur LiviPro !");
+    window.location.href = "/";
   };
 
   const currentMenu = menuItems[role] || menuItems.admin;
@@ -128,7 +133,10 @@ export default function DashboardShell({ children, title, role = "admin" }) {
               <div style={{ fontSize: 10, color: VISION_GREEN, fontWeight: 700 }}>VERIFIED OWNER</div>
             </div>
           </div>
-          <button style={{ width: "100%", background: "rgba(239, 68, 68, 0.1)", color: "#ef4444", border: "none", padding: "12px", borderRadius: 12, fontSize: 13, fontWeight: 800, display: "flex", alignItems: "center", justifyContent: "center", gap: 8 }}>
+          <button 
+            onClick={handleLogout}
+            style={{ width: "100%", background: "rgba(239, 68, 68, 0.1)", color: "#ef4444", border: "none", padding: "12px", borderRadius: 12, fontSize: 13, fontWeight: 800, display: "flex", alignItems: "center", justifyContent: "center", gap: 8, cursor: "pointer" }}
+          >
             <LogOut size={18} /> {isSidebarOpen && "Déconnexion"}
           </button>
         </div>
