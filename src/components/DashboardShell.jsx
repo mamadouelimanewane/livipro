@@ -57,11 +57,11 @@ export default function DashboardShell({ children, title, role = "admin" }) {
       { id: "branches", label: "Relais & Points", icon: <Settings size={20} />, path: "/sales?view=branches" },
     ],
     boutique: [
-      { id: "dashboard", label: "Mon Portail Boutique", icon: <Store size={20} />, path: "/boutique" },
-      { id: "orders", label: "Mes Ravitaillements", icon: <Package size={20} />, path: "/boutique" },
-      { id: "wallet", label: "LiviWallet B2B", icon: <Wallet size={20} />, path: "/wallet" },
-      { id: "credit", label: "Score de Crédit", icon: <ShieldCheck size={20} />, path: "/boutique" },
-      { id: "settings", label: "Paramètres Shop", icon: <Settings size={20} />, path: "/boutique" },
+      { id: "dashboard", label: "Mon Portail Boutique", icon: <Store size={20} />, path: "/boutique?view=dashboard" },
+      { id: "orders", label: "Mes Ravitaillements", icon: <Package size={20} />, path: "/boutique?view=orders" },
+      { id: "wallet", label: "LiviWallet B2B", icon: <Wallet size={20} />, path: "/boutique?view=wallet" },
+      { id: "credit", label: "Score de Crédit", icon: <ShieldCheck size={20} />, path: "/boutique?view=credit" },
+      { id: "settings", label: "Paramètres Shop", icon: <Settings size={20} />, path: "/boutique?view=settings" },
     ]
   };
 

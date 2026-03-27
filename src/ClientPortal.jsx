@@ -5,6 +5,7 @@ import LiviVoice from './LiviVoice'
 import { BellRing, PackageSearch, BatteryCharging, ShoppingCart, CheckCircle2, ChevronRight, Zap, Wallet, Search, ArrowLeft, Users, Mic, Heart, Star, Truck, MoreVertical, Box, Layers } from 'lucide-react'
 import { useGroupageOffers, useMembers } from './useLiviData'
 import DashboardShell from "./components/DashboardShell";
+import { useSearchParams } from "react-router-dom";
 
 // Simulation des données client (Boutiquier) - À terme via useAuth
 const BOUTIQUE = {
@@ -24,8 +25,21 @@ const Card = ({ children, style = {} }) => (
 );
 
 export default function ClientPortal() {
-  const [activeTab, setActiveTab] = useState("dashboard"); // dashboard | shop | orders | wallet
+  const [searchParams, setSearchParams] = useSearchParams();
+  const [activeTab, setActiveTab] = useState(searchParams.get("view") || "dashboard"); 
   const [isOrdering, setIsOrdering] = useState(false)
+
+  useEffect(() => {
+    const v = searchParams.get("view");
+    if (v && v !== activeTab) {
+      setActiveTab(v);
+    }
+  }, [searchParams]);
+
+  const handleTabChange = (newView) => {
+    setActiveTab(newView);
+    setSearchParams({ view: newView });
+  };
   const [isVoiceActive, setIsVoiceActive] = useState(false)
   const [searchTerm, setSearchTerm] = useState("")
   const [activeAction, setActiveAction] = useState(null)
