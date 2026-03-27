@@ -23,414 +23,398 @@ import {
   Zap,
   Lock,
   Database,
-  ArrowRight
+  ArrowRight,
+  UserPlus,
+  Target,
+  UserCircle,
+  Calendar,
+  LayoutDashboard
 } from "lucide-react";
+import DashboardShell from "./components/DashboardShell";
+import { useSearchParams } from "react-router-dom";
 
 // --- SIMULATION DATA ---
 const PARTNERS = [
   { id: "g1", name: "Dakar Logistics Hub (DLH)", type: "Wholesaler", contribution: "75,000,000 FCFA", shares: "65%", score: 98, status: "Founder" },
   { id: "b1", name: "Supermarché Al-Amine", type: "Boutique", contribution: "2,500,000 FCFA", shares: "2.1%", score: 95, status: "Advisory" },
   { id: "b2", name: "Boutique Serigne Saliou", type: "Boutique", contribution: "1,200,000 FCFA", shares: "1.0%", score: 72, status: "Member" },
-  { id: "g2", name: "COFISAC Senegal", type: "Wholesaler", contribution: "15,000,000 FCFA", shares: "13%", score: 91, status: "Partner" },
 ];
 
-const SECURE_CHUNKS = [
-  { id: "DOC-9821", name: "Facture Grossiste #122", status: "Clôturé", date: "24/03/2026", hash: "SHA-256: 4f8x...99q" },
-  { id: "DOC-9822", name: "Bon de Livraison #441", status: "En Transit", date: "25/03/2026", hash: "SHA-256: 2a1z...77p" },
-  { id: "DOC-9823", name: "Ordre de Virement OM", status: "Signé (IA)", date: "26/03/2026", hash: "SHA-256: 9c0v...11x" },
+const TONTINES = [
+  { id: "t1", name: "Cercle des Boutiquiers - Casamance", members: 12, cycle: "Mensuel", amount: "100.000 F", nextPayout: "01 Avril", totalPool: "1.200.000 F", status: "Actif" },
+  { id: "t2", name: "LiviGroupage Importation Riz", members: 42, cycle: "Trimestriel", amount: "500.000 F", nextPayout: "15 Mai", totalPool: "21.000.000 F", status: "En cours" }
 ];
 
 const RESOLUTIONS = [
-  { id: "r1", title: "Allocation Dividendes Flotte", description: "Distribuer 1,200,000 FCFA de profits générés par les camions TRN-X1 et TRN-X2 aux co-actionnaires Boutiques.", votesFor: "88%", votesAgainst: "2%", status: "Open", deadline: "Demain, 18h" },
-  { id: "r2", title: "Baisse Taux Prêt Boutique", description: "Réduire le taux d'intérêt de 5% à 4.2% pour les boutiques ayant un score > 90.", votesFor: "95%", votesAgainst: "2%", status: "Approved", deadline: "Clôturé" },
-];
-
-const FLEET_STAKES = [
-  { id: "TRN-X1", name: "Le Distributeur Rapide", stake: "5%", earnings: "45,000 FCFA / mois", fuelEfficiency: "98%", status: "En Route" },
-  { id: "TRN-X2", name: "Le Frigo Solaire", stake: "2%", earnings: "18,500 FCFA / mois", fuelEfficiency: "92%", status: "Déchargement" },
-];
-
-const WHOLESALER_CATALOG = [
-  { id: "p1", name: "Lait Nido (Carton 12)", price: 45000, stock: 450, promo: false },
-  { id: "p2", name: "Huile Dinor 5L (Carton)", price: 38500, stock: 120, promo: true },
-  { id: "p3", name: "Riz Parfumé (Sac 50kg)", price: 21500, stock: 800, promo: false },
-  { id: "p4", name: "Sucre St Louis (Fardeau)", price: 21000, stock: 0, promo: false },
-];
-
-const LOAN_HISTORY = [
-  { id: "l1", applicant: "Supermarché Al-Amine", amount: "750,000 FCFA", status: "Paid", date: "Janvier 2026", aiScore: "A+", guarantee: "15 Cartons Lait + Hypothèque Stock" },
-  { id: "l2", applicant: "Boutique Ndiaye", amount: "300,000 FCFA", status: "Active", date: "Mars 2026", aiScore: "B", guarantee: "Avance Tontine" },
+  { id: "r1", title: "Allocation Dividendes Flotte Q1", description: "Distribuer 4.5M FCFA de profits générés par les camions TRN-X1 aux co-actionnaires Boutiques.", votesFor: "88%", votesAgainst: "2%", status: "Open", deadline: "Demain, 18h" },
+  { id: "r2", title: "Baisse Taux Prêt Boutique", description: "Réduire le taux d'intérêt de 1.2% à 0.8% pour les boutiques ayant un score Karma > 950.", votesFor: "95%", votesAgainst: "2%", status: "Approved", deadline: "Clôturé" },
 ];
 
 const GOLD_COLOR = "#f59e0b";
 const NAVY_DARK = "#0f172a";
 const EMERALD = "#10b981";
 
-// --- SHARED COMPONENTS ---
 const Card = ({ children, style = {}, onClick }) => (
-  <div onClick={onClick} style={{ background: "#fff", borderRadius: 20, padding: 20, boxShadow: "0 4px 20px rgba(0,0,0,0.05)", border: "1px solid #f1f5f9", cursor: onClick ? "pointer" : "default", ...style }}>{children}</div>
+  <div onClick={onClick} style={{ background: "#fff", borderRadius: 24, padding: 24, boxShadow: "0 10px 40px rgba(0,0,0,0.03)", border: "1px solid #f1f5f9", cursor: onClick ? "pointer" : "default", position: "relative", overflow: "hidden", ...style }}>{children}</div>
 );
 
 const Badge = ({ children, color = "#64748b", bg = "#f1f5f9" }) => (
-  <span style={{ padding: "4px 10px", borderRadius: 12, fontSize: 11, fontWeight: 800, color, background: bg, textTransform: "uppercase" }}>{children}</span>
+  <span style={{ padding: "4px 12px", borderRadius: 12, fontSize: 10, fontWeight: 900, color, background: bg, textTransform: "uppercase", letterSpacing: 0.5 }}>{children}</span>
 );
 
 export default function AssociatesBank() {
-  const [view, setView] = useState("dashboard"); // dashboard | tontine | assembly | loans | fleet | catalog
-  const [loanStep, setLoanStep] = useState("apply"); // apply | analyzing | result
+  const [searchParams, setSearchParams] = useSearchParams();
+  const [view, setView] = useState(searchParams.get("view") || "dashboard"); 
+  const [loanStep, setLoanStep] = useState(searchParams.get("loanStep") || "apply"); // apply | analyzing | result | closed
   const [activeResolution, setActiveResolution] = useState(null);
-  const [karmaRating, setKarmaRating] = useState(942); // Score de Karma Logistique
+  const [isProcessing, setIsProcessing] = useState(false);
 
-  // Simulation Logic
+  useEffect(() => {
+    const v = searchParams.get("view");
+    if (v && v !== view) setView(v);
+    const ls = searchParams.get("loanStep");
+    if (ls && ls !== loanStep) setLoanStep(ls);
+  }, [searchParams]);
+
+  const handleNav = (v, params = {}) => {
+    setView(v);
+    setSearchParams({ view: v, ...params });
+  };
+
+  const handleAction = (msg) => {
+    alert(`Action: ${msg} enregistrée.`);
+  }
+
   const triggerAiAudit = () => {
     setLoanStep("analyzing");
+    setSearchParams({ view: "loans", loanStep: "analyzing" });
     setTimeout(() => {
       setLoanStep("result");
+      setSearchParams({ view: "loans", loanStep: "result" });
     }, 2500);
   };
 
+  const closeLoanDossier = () => {
+    setIsProcessing(true);
+    setTimeout(() => {
+      setIsProcessing(false);
+      setLoanStep("closed");
+      setSearchParams({ view: "loans", loanStep: "closed" });
+      alert("Félicitations ! Votre dossier de prêt est désormais CLÔTURÉ. Votre Karma Logistique a augmenté de +45 pts.");
+    }, 1500);
+  };
+
+  const handleVote = (res) => {
+    alert(`Votre vote pour "${res}" a été enregistré sur la LiviChain.`);
+  }
+
   const renderDashboard = () => (
     <div className="animate-fade-in">
-      {/* HEADER SECTION */}
-      <div style={{ background: "linear-gradient(135deg, #0f172a 0%, #1e293b 100%)", padding: "40px 20px 60px", color: "#fff", borderRadius: "0 0 32px 32px", position: "relative", overflow: "hidden" }}>
-        <div style={{ position: "absolute", right: -20, bottom: -20, opacity: 0.1 }}><Building2 size={180} /></div>
-        <div style={{ position: "relative", zIndex: 1 }}>
-          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 30 }}>
-            <div>
-              <div style={{ fontSize: 13, color: GOLD_COLOR, fontWeight: 700, textTransform: "uppercase", letterSpacing: 1.5 }}>LiviPro Ecosystem</div>
-              <div style={{ fontSize: 28, fontWeight: 900 }}>Banque des Associés</div>
-            </div>
-            <div style={{ padding: 10, background: "rgba(255,255,255,0.1)", borderRadius: 16 }}><ShieldCheck size={28} color={GOLD_COLOR} /></div>
+       {/* STATS HEADER */}
+       <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: 24, marginBottom: 32 }}>
+          <Card style={{ background: NAVY_DARK, color: "#fff" }}>
+             <div style={{ fontSize: 11, color: GOLD_COLOR, fontWeight: 800, textTransform: "uppercase", marginBottom: 8 }}>Trésorerie du Cercle Associé</div>
+             <div style={{ fontSize: 32, fontWeight: 900 }}>845.280.000 F</div>
+             <div style={{ fontSize: 11, color: EMERALD, marginTop: 10, fontWeight: 700 }}>↑ +4.2M F ce jour (Cotisations)</div>
+          </Card>
+          <Card>
+             <div style={{ fontSize: 11, color: "#64748b", fontWeight: 800, textTransform: "uppercase", marginBottom: 8 }}>Taux Co-actionnaire Moyen</div>
+             <div style={{ fontSize: 32, fontWeight: 900, color: EMERALD }}>0.8% <span style={{ fontSize: 14, color: "#94a3b8", fontWeight: 500 }}>/ an</span></div>
+             <div style={{ fontSize: 11, color: GOLD_COLOR, marginTop: 10, fontWeight: 700 }}>Contre 12-15% en banque classique</div>
+          </Card>
+          <Card>
+             <div style={{ fontSize: 11, color: "#64748b", fontWeight: 800, textTransform: "uppercase", marginBottom: 8 }}>Membres Actifs</div>
+             <div style={{ fontSize: 32, fontWeight: 900 }}>4,284</div>
+             <div style={{ fontSize: 11, color: "#6366f1", marginTop: 10, fontWeight: 700 }}>98% Taux de remboursement</div>
+          </Card>
+       </div>
+
+       <div style={{ display: "grid", gridTemplateColumns: window.innerWidth > 1024 ? "2fr 1fr" : "1fr", gap: 32 }}>
+          <div style={{ display: "flex", flexDirection: "column", gap: 32 }}>
+             {/* TONTINE HUB */}
+             <Card>
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 24 }}>
+                   <h3 style={{ fontSize: 18, fontWeight: 900 }}>Tontines & Fonds de Solidarité</h3>
+                   <button onClick={() => handleNav("tontine")} style={{ background: "none", border: "none", color: NAVY_DARK, fontSize: 13, fontWeight: 800, cursor: "pointer", textDecoration: "underline" }}>Toutes les tontines</button>
+                </div>
+                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}>
+                   {TONTINES.map(ton => (
+                     <div key={ton.id} style={{ background: "#f8fafc", padding: 20, borderRadius: 20, border: "1px solid #f1f5f9" }}>
+                        <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 16 }}>
+                           <Badge color="#6366f1" bg="#eef2ff">{ton.cycle}</Badge>
+                           <div style={{ fontSize: 11, fontWeight: 800, color: EMERALD }}>{ton.members} Membres</div>
+                        </div>
+                        <div style={{ fontSize: 15, fontWeight: 900, marginBottom: 4 }}>{ton.name}</div>
+                        <div style={{ fontSize: 12, color: "#64748b", marginBottom: 20 }}>Part: <span style={{ fontWeight: 800, color: NAVY_DARK }}>{ton.amount}</span></div>
+                        <div style={{ background: "#fff", padding: 12, borderRadius: 14, border: "1px solid #e2e8f0" }}>
+                           <div style={{ fontSize: 10, color: "#94a3b8", fontWeight: 700 }}>POOL TOTAL</div>
+                           <div style={{ fontSize: 18, fontWeight: 900, color: NAVY_DARK }}>{ton.totalPool}</div>
+                        </div>
+                        <button 
+                          onClick={() => handleAction(`Participer à ${ton.name}`)}
+                          style={{ width: "100%", marginTop: 16, background: NAVY_DARK, color: "#fff", border: "none", padding: 12, borderRadius: 12, fontSize: 12, fontWeight: 800, cursor: "pointer" }}
+                        >
+                          Verser ma part
+                        </button>
+                     </div>
+                   ))}
+                </div>
+             </Card>
+
+             {/* GOVERNANCE SECTION */}
+             <Card>
+                <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 24 }}>
+                   <Gavel size={24} color={GOLD_COLOR} />
+                   <h3 style={{ fontSize: 18, fontWeight: 900 }}>Gouvernance & Démocratie</h3>
+                </div>
+                {RESOLUTIONS.map(res => (
+                  <div key={res.id} style={{ marginBottom: 20, padding: 20, background: "#f8fafc", borderRadius: 20, border: "1px solid #f1f5f9" }}>
+                     <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 8 }}>
+                        <Badge color={res.status === "Approved" ? EMERALD : GOLD_COLOR} bg={res.status === "Approved" ? "#ecfdf5" : "#fffbeb"}>{res.status}</Badge>
+                        <span style={{ fontSize: 11, color: "#94a3b8" }}>{res.deadline}</span>
+                     </div>
+                     <div style={{ fontSize: 16, fontWeight: 900, marginBottom: 8 }}>{res.title}</div>
+                     <p style={{ fontSize: 13, color: "#64748b", lineHeight: 1.5, marginBottom: 20 }}>{res.description}</p>
+                     <div style={{ display: "flex", gap: 12 }}>
+                        <button onClick={() => handleVote(res.title)} style={{ flex: 1, background: EMERALD, color: "#fff", border: "none", padding: 12, borderRadius: 12, fontSize: 12, fontWeight: 900, cursor: "pointer" }}>Voter OUI</button>
+                        <button onClick={() => handleVote(res.title)} style={{ flex: 1, background: "#fff", border: "1px solid #e2e8f0", padding: 12, borderRadius: 12, fontSize: 12, fontWeight: 900, cursor: "pointer" }}>Voter NON</button>
+                     </div>
+                  </div>
+                ))}
+             </Card>
           </div>
-          
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 20 }}>
-            <div>
-              <div style={{ fontSize: 11, color: "#94a3b8", fontWeight: 700, textTransform: "uppercase" }}>Capital Social Commun</div>
-              <div style={{ fontSize: 24, fontWeight: 900, marginTop: 4 }}>142,500,000 <span style={{ fontSize: 14, fontWeight: 400 }}>F</span></div>
-            </div>
-            <div style={{ textAlign: "right" }}>
-              <div style={{ fontSize: 11, color: "#94a3b8", fontWeight: 700, textTransform: "uppercase" }}>Associés Actifs</div>
-              <div style={{ fontSize: 24, fontWeight: 900, marginTop: 4 }}>124 <span style={{ fontSize: 14, fontWeight: 400 }}>Part.</span></div>
-            </div>
+
+          <div style={{ display: "flex", flexDirection: "column", gap: 32 }}>
+             {/* LOAN QUICK ACCESS */}
+             <Card style={{ background: `linear-gradient(135deg, ${NAVY_DARK} 0%, #1e293b 100%)`, color: "#fff" }}>
+                <HandCoins size={32} color={GOLD_COLOR} style={{ marginBottom: 20 }} />
+                <h4 style={{ fontSize: 18, fontWeight: 900, marginBottom: 12 }}>Besoin de financement ?</h4>
+                <p style={{ fontSize: 12, opacity: 0.8, lineHeight: 1.6, marginBottom: 24 }}>Obtenez un prêt IA basé sur votre score Karma Logistique en moins de 30 secondes.</p>
+                <button 
+                  onClick={() => handleNav("loans")}
+                  style={{ width: "100%", background: GOLD_COLOR, color: NAVY_DARK, border: "none", padding: 14, borderRadius: 14, fontWeight: 900, fontSize: 13, cursor: "pointer" }}
+                >
+                  Postuler maintenant
+                </button>
+             </Card>
+
+             <Card>
+                <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 20 }}>
+                   <History size={18} color="#64748b" />
+                   <h4 style={{ fontSize: 15, fontWeight: 900 }}>Flux Blockchain LiviPro</h4>
+                </div>
+                {[1, 2, 3].map(i => (
+                  <div key={i} style={{ display: "flex", gap: 12, padding: "12px 0", borderBottom: i < 3 ? "1px solid #f1f5f9" : "none" }}>
+                     <div style={{ width: 8, height: 8, borderRadius: "50%", background: EMERALD, marginTop: 6 }}></div>
+                     <div>
+                        <div style={{ fontSize: 12, fontWeight: 700 }}>Dépôt Tontine #TX-982{i}</div>
+                        <div style={{ fontSize: 10, color: "#94a3b8" }}>Confirmé · Il y a {i*5} mins</div>
+                     </div>
+                  </div>
+                ))}
+             </Card>
           </div>
-        </div>
-      </div>
+       </div>
+    </div>
+  );
 
-      <div style={{ padding: "0 20px", marginTop: 24, marginBottom: 24 }}>
-         <BankPerformance />
-      </div>
+  const renderLoans = () => (
+    <div className="animate-fade-in">
+       <div style={{ marginBottom: 32 }}>
+          <h2 style={{ fontSize: 28, fontWeight: 900 }}>Banque Associée : Prêts IA</h2>
+          <p style={{ fontSize: 15, color: "#64748b" }}>Transparence totale, taux préférentiels et audit algorithmique.</p>
+       </div>
 
-      {/* QUICK ACTIONS */}
-      <div style={{ padding: "0 20px", marginTop: -32, display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 12 }}>
-         {[
-           { id: "loans", icon: <HandCoins size={22} />, label: "Prêts IA", color: "#f59e0b" },
-           { id: "assembly", icon: <Gavel size={22} />, label: "Karma", color: "#ec4899" },
-           { id: "fleet", icon: <Truck size={22} />, label: "Flotte", color: "#6366f1" }
-         ].map(action => (
-           <div key={action.id} onClick={() => setView(action.id)} style={{ cursor: "pointer", background: "#fff", borderRadius: 18, height: 80, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", boxShadow: "0 10px 25px rgba(0,0,0,0.05)", border: "1px solid #f1f5f9" }}>
-              <div style={{ color: action.color, marginBottom: 6 }}>{action.icon}</div>
-              <div style={{ fontSize: 11, fontWeight: 800, color: "#1e293b" }}>{action.label}</div>
-           </div>
-         ))}
-      </div>
-
-      {/* MAIN CONTENT */}
-      <div style={{ padding: 24 }}>
-        <h3 style={{ fontSize: 17, fontWeight: 900, color: "#0f172a", marginBottom: 16 }}>Actualités de l'Assemblée</h3>
-        <Card onClick={() => setView("assembly")} style={{ borderLeft: `4px solid ${GOLD_COLOR}`, background: "#fffbeb" }}>
-           <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 8 }}>
-             <Badge color="#b45309" bg="#fef3c7">Résolution en cours</Badge>
-             <span style={{ fontSize: 12, color: "#92400E", fontWeight: 700 }}>24h restantes</span>
-           </div>
-           <div style={{ fontSize: 16, fontWeight: 800, color: "#92400E", marginBottom: 6 }}>{RESOLUTIONS[0].title}</div>
-           <p style={{ fontSize: 13, color: "#b45309", opacity: 0.8, lineHeight: 1.4 }}>{RESOLUTIONS[0].description}</p>
-           <div style={{ marginTop: 16, display: "flex", alignItems: "center", gap: 8 }}>
-             <div style={{ flex: 1, height: 6, background: "#fef3c7", borderRadius: 3, border: "1px solid #fde68a" }}>
-                <div style={{ height: "100%", width: "75%", background: "#b45309", borderRadius: 3 }}></div>
+       {loanStep === "apply" && (
+          <Card style={{ maxWidth: 600, margin: "0 auto" }}>
+             <h3 style={{ fontSize: 20, fontWeight: 900, marginBottom: 24, textAlign: "center" }}>Demander un Financement</h3>
+             <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
+                <div>
+                   <label style={{ fontSize: 12, fontWeight: 800, color: "#64748b", textTransform: "uppercase" }}>Montant souhaité</label>
+                   <input type="text" placeholder="Ex: 500,000 FCFA" style={{ width: "100%", marginTop: 8, padding: 16, borderRadius: 16, border: "1px solid #e2e8f0", fontSize: 16, fontWeight: 800, outline: "none" }} />
+                </div>
+                <div style={{ background: "#f8fafc", padding: 20, borderRadius: 20, border: "1px solid #e2e8f0" }}>
+                   <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 12 }}>
+                      <span style={{ fontSize: 13, fontWeight: 700 }}>Score Karma Requis</span>
+                      <span style={{ fontSize: 13, fontWeight: 900, color: EMERALD }}>750+</span>
+                   </div>
+                   <div style={{ display: "flex", justifyContent: "space-between" }}>
+                      <span style={{ fontSize: 13, fontWeight: 700 }}>Votre Karma actuel</span>
+                      <span style={{ fontSize: 13, fontWeight: 900, color: EMERALD }}>942</span>
+                   </div>
+                </div>
+                <button 
+                  onClick={triggerAiAudit}
+                  style={{ width: "100%", background: NAVY_DARK, color: "#fff", border: "none", padding: 18, borderRadius: 18, fontSize: 15, fontWeight: 900, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", gap: 12 }}
+                >
+                  Lancer l'Audit IA <Cpu size={20} color={GOLD_COLOR} />
+                </button>
              </div>
-             <span style={{ fontSize: 12, fontWeight: 800, color: "#b45309" }}>75% OUI</span>
-           </div>
-        </Card>
+          </Card>
+       )}
 
-        {/* TOP PARTNERS */}
-        <div style={{ marginTop: 32 }}>
-          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }}>
-            <h3 style={{ fontSize: 17, fontWeight: 900, color: "#0f172a" }}>Associés Leaders</h3>
-            <span style={{ fontSize: 12, color: GOLD_COLOR, fontWeight: 700 }}>Voir tout</span>
-          </div>
-          {PARTNERS.slice(0, 3).map(partner => (
-            <div key={partner.id} style={{ display: "flex", alignItems: "center", background: "#fff", padding: 12, borderRadius: 16, marginBottom: 10, border: "1px solid #f1f5f9" }}>
-              <div style={{ width: 44, height: 44, background: "#f8fafc", borderRadius: 12, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 20 }}>
-                {partner.type === "Wholesaler" ? "🏢" : "🏪"}
-              </div>
-              <div style={{ flex: 1, marginLeft: 12 }}>
-                <div style={{ fontSize: 14, fontWeight: 800, color: "#1e293b" }}>{partner.name}</div>
-                <div style={{ fontSize: 12, color: "#64748b" }}>Part: {partner.shares} · {partner.contribution}</div>
-              </div>
-              <div style={{ textAlign: "right" }}>
-                <div style={{ fontSize: 14, fontWeight: 900, color: partner.score > 90 ? EMERALD : "#f59e0b" }}>{partner.score}%</div>
-                <div style={{ fontSize: 10, color: "#94a3b8", fontWeight: 700 }}>Score IA</div>
-              </div>
+       {loanStep === "analyzing" && (
+         <div style={{ textAlign: "center", padding: 60 }}>
+            <div style={{ position: "relative", width: 120, height: 120, margin: "0 auto 30px" }}>
+               <div style={{ position: "absolute", width: "100%", height: "100%", border: "4px solid #f1f5f9", borderRadius: "50%" }}></div>
+               <div style={{ position: "absolute", width: "100%", height: "100%", border: `4px solid ${GOLD_COLOR}`, borderRadius: "50%", borderTopColor: "transparent" }} className="animate-spin"></div>
+               <Cpu size={40} color={GOLD_COLOR} style={{ position: "absolute", top: "50%", left: "50%", transform: "translate(-50%, -50%)" }} />
             </div>
-          ))}
-        </div>
-      </div>
-    </div>
-  );
-
-  const renderLoansPage = () => (
-    <div className="animate-fade-in" style={{ paddingBottom: 100 }}>
-       <div style={{ padding: 24, paddingBottom: 0, display: "flex", alignItems: "center", gap: 12, marginBottom: 12 }}>
-          <button onClick={() => setView("dashboard")} style={{ background: "none", border: "none" }}><ArrowLeft size={24} /></button>
-          <h2 style={{ fontSize: 22, fontWeight: 900 }}>Prêts IA Boutiques</h2>
-       </div>
-
-       <div style={{ padding: "0 24px", color: "#64748b", fontSize: 13, marginBottom: 20 }}>Gérez le cycle de vie des crédits accordés aux partenaires boutiques du réseau. Dossiers analysés par l'algorithme IA.</div>
-       
-       <LoanManager />
-    </div>
-  );
-
-  const renderAssembly = () => (
-    <div className="animate-fade-in" style={{ padding: 24, paddingBottom: 100 }}>
-       <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 24 }}>
-          <button onClick={() => setView("dashboard")} style={{ background: "none", border: "none" }}><ArrowLeft size={24} /></button>
-          <h2 style={{ fontSize: 22, fontWeight: 900 }}>Gouvernance & Karma</h2>
-       </div>
-
-       {/* LOGISTICS KARMA CARD */}
-       <div style={{ background: "linear-gradient(135deg, #ec4899 0%, #be185d 100%)", borderRadius: 24, padding: 24, color: "#fff", marginBottom: 24, position: "relative", overflow: "hidden" }}>
-          <div style={{ position: "absolute", top: -10, right: -10, opacity: 0.1 }}><Sparkles size={120} /></div>
-          <div style={{ fontSize: 13, fontWeight: 700, textTransform: "uppercase", opacity: 0.9 }}>Votre Score Karma Logistique</div>
-          <div style={{ display: "flex", alignItems: "flex-end", gap: 8, marginTop: 4 }}>
-            <div style={{ fontSize: 42, fontWeight: 900 }}>{karmaRating}</div>
-            <div style={{ fontSize: 14, fontWeight: 700, color: "#fbcfe8", marginBottom: 8 }}>/ 1000 Pts</div>
-          </div>
-          <div style={{ marginTop: 16, background: "rgba(0,0,0,0.2)", padding: '12px 16px', borderRadius: 12, display: "flex", justifyContent: "space-between" }}>
-             <div><div style={{ fontSize: 10, color: "#fbcfe8" }}>POIDS DE VOTE</div><div style={{ fontSize: 15, fontWeight: 900 }}>x1.42</div></div>
-             <div style={{ textAlign: "right" }}><div style={{ fontSize: 10, color: "#fbcfe8" }}>TAUX PRÊT IA</div><div style={{ fontSize: 15, fontWeight: 900 }}>3.8%</div></div>
-          </div>
-       </div>
-
-       <h3 style={{ fontSize: 17, fontWeight: 900, marginBottom: 16 }}>Résolutions des Associés</h3>
-       {RESOLUTIONS.map(res => (
-         <Card key={res.id} style={{ marginBottom: 16 }}>
-            <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 12 }}>
-               <Badge color={res.status === "Open" ? "#b45309" : EMERALD} bg={res.status === "Open" ? "#fef3c7" : "#ecfdf5"}>{res.status}</Badge>
-               <span style={{ fontSize: 11, color: "#64748b", fontWeight: 700 }}>Expire le {res.deadline}</span>
-            </div>
-            <div style={{ fontSize: 16, fontWeight: 800, marginBottom: 8 }}>{res.title}</div>
-            <p style={{ fontSize: 13, color: "#64748b", lineHeight: 1.5, marginBottom: 20 }}>{res.description}</p>
-            
-            {res.status === "Open" ? (
-              <div style={{ display: "flex", gap: 12 }}>
-                <button style={{ flex: 1, background: "#ecfdf5", color: EMERALD, border: "2px solid #10b981", padding: 12, borderRadius: 12, fontWeight: 800 }}>VOTER OUI</button>
-                <button style={{ flex: 1, background: "#fff", color: "#ef4444", border: "2px solid #ef4444", padding: 12, borderRadius: 12, fontWeight: 800 }}>NON</button>
-              </div>
-            ) : (
-              <div style={{ background: "#f8fafc", padding: 12, borderRadius: 12, display: "flex", justifyContent: "space-between" }}>
-                 <div style={{ fontSize: 13, fontWeight: 700 }}>Résultat: <span style={{ color: EMERALD }}>Adoptée</span></div>
-                 <div style={{ fontSize: 13, fontWeight: 700 }}>OUI: 95%</div>
-              </div>
-            )}
-         </Card>
-       ))}
-    </div>
-  );
-
-  const renderFleetPage = () => (
-    <div className="animate-fade-in" style={{ padding: 24, paddingBottom: 100 }}>
-       <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 24 }}>
-          <button onClick={() => setView("dashboard")} style={{ background: "none", border: "none" }}><ArrowLeft size={24} /></button>
-          <h2 style={{ fontSize: 22, fontWeight: 900 }}>Co-Actionnariat Flotte</h2>
-       </div>
-
-       <div style={{ background: "#fff", borderRadius: 24, padding: 24, border: "1px solid #f1f5f9", marginBottom: 24, borderTop: `8px solid #6366f1` }}>
-         <div style={{ fontSize: 12, fontWeight: 700, color: "#64748b", textTransform: "uppercase" }}>Partage de Profits Mensuel</div>
-         <div style={{ fontSize: 28, fontWeight: 900, color: "#6366f1", marginTop: 4 }}>63.500 <span style={{ fontSize: 14 }}>FCFA</span></div>
-         <div style={{ marginTop: 12, background: "#f0f9ff", padding: 12, borderRadius: 12, color: "#0369a1", fontSize: 12, fontWeight: 700, display: "flex", gap: 8 }}>
-            <TrendingUp size={16} /> +12% vs le mois dernier (Efficience Gazole)
+            <h3 style={{ fontSize: 22, fontWeight: 900 }}>Audit LiviAI en cours...</h3>
+            <p style={{ fontSize: 15, color: "#64748b", marginTop: 12 }}>Vérification de l'historique logistique, de la ponctualité LiviCash et des stocks...</p>
          </div>
-       </div>
+       )}
 
-       <h3 style={{ fontSize: 17, fontWeight: 900, marginBottom: 16 }}>Vos Camions (Micro-Parts)</h3>
-       {FLEET_STAKES.map(truck => (
-         <Card key={truck.id} style={{ marginBottom: 16 }}>
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 12 }}>
-               <div>
-                  <div style={{ fontSize: 15, fontWeight: 800 }}>{truck.name}</div>
-                  <div style={{ fontSize: 12, color: "#64748b" }}>ID: {truck.id} · Part: {truck.stake}</div>
+       {loanStep === "result" && (
+         <div className="animate-fade-in" style={{ maxWidth: 700, margin: "0 auto" }}>
+            <Card style={{ borderTop: `8px solid ${EMERALD}`, textAlign: "center", padding: 40 }}>
+               <div style={{ background: "#ecfdf5", width: 80, height: 80, borderRadius: "50%", margin: "0 auto 24px", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                  <CheckCircle2 size={48} color={EMERALD} />
                </div>
-               <Badge color={EMERALD} bg="#ecfdf5">{truck.status}</Badge>
-            </div>
-            
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12, background: "#f8fafc", padding: 12, borderRadius: 12, marginBottom: 12 }}>
-               <div><div style={{ fontSize: 10, color: "#94a3b8" }}>DIVIDENDES</div><div style={{ fontSize: 14, fontWeight: 800 }}>{truck.earnings}</div></div>
-               <div><div style={{ fontSize: 10, color: "#94a3b8" }}>ÉGO-SCORE</div><div style={{ fontSize: 14, fontWeight: 800, color: EMERALD }}>{truck.fuelEfficiency}</div></div>
-            </div>
-            
-            <button style={{ width: "100%", background: "#f1f5f9", border: "none", padding: 10, borderRadius: 10, fontSize: 12, fontWeight: 800, color: "#6366f1" }}>Voir Historique GPS du profit</button>
-         </Card>
-       ))}
-
-       <div style={{ marginTop: 24, padding: 20, background: "linear-gradient(135deg, #1e293b 0%, #0f172a 100%)", borderRadius: 20, color: "#fff", textAlign: "center" }}>
-          <div style={{ fontSize: 15, fontWeight: 800, marginBottom: 8 }}>Investir dans un nouveau camion ?</div>
-          <p style={{ fontSize: 12, opacity: 0.7, marginBottom: 16 }}>Participez à la levée de fonds "LiviPro North-Route 2026"</p>
-          <button style={{ width: "100%", background: GOLD_COLOR, color: "#fff", border: "none", padding: 12, borderRadius: 12, fontWeight: 900 }}>Prise de parts à partir de 50.000 F</button>
-       </div>
-    </div>
-  );
-
-  const renderCatalogPage = () => (
-    <div className="animate-fade-in" style={{ padding: 24, paddingBottom: 100 }}>
-       <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 24 }}>
-          <button onClick={() => setView("dashboard")} style={{ background: "none", border: "none" }}><ArrowLeft size={24} /></button>
-          <h2 style={{ fontSize: 22, fontWeight: 900 }}>Catalogue de Vente</h2>
-       </div>
-
-       <div style={{ background: "#fff", borderRadius: 24, padding: 24, border: "1px solid #f1f5f9", marginBottom: 24 }}>
-         <div style={{ fontSize: 13, fontWeight: 700, color: "#64748b" }}>EXPOSITION DE PRIX</div>
-         <p style={{ fontSize: 13, color: "#64748b", marginTop: 4 }}>Fixez les prix applicables à l'ensemble du réseau de boutiques LiviPro.</p>
-       </div>
-
-       {WHOLESALER_CATALOG.map(item => (
-         <Card key={item.id} style={{ marginBottom: 16 }}>
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-               <div>
-                  <div style={{ fontSize: 15, fontWeight: 800 }}>{item.name}</div>
-                  <div style={{ fontSize: 12, color: "#94a3b8" }}>Stock Entrepôt: {item.stock} CTN</div>
-               </div>
-               <div style={{ textAlign: "right" }}>
-                  <div style={{ fontSize: 18, fontWeight: 900, color: GOLD_COLOR }}>{item.price.toLocaleString()} F</div>
-                  <div style={{ fontSize: 10, color: "#10b981", fontWeight: 700 }}>Prix Associé</div>
-               </div>
-            </div>
-            
-            <div style={{ marginTop: 16, display: "flex", gap: 10 }}>
-               <button style={{ flex: 1, background: "#f8fafc", border: "1px solid #e2e8f0", padding: 10, borderRadius: 10, fontSize: 12, fontWeight: 700 }}>Modifier Prix</button>
-               <button style={{ background: item.promo ? "#fee2e2" : "#f1f5f9", color: item.promo ? "#ef4444" : "#64748b", border: "none", padding: "10px 16px", borderRadius: 10, fontSize: 12, fontWeight: 700 }}>
-                  {item.promo ? "En Promo" : "Activer Promo"}
-               </button>
-            </div>
-         </Card>
-       ))}
-
-       <button style={{ width: "100%", background: DARK_NAVY, color: "#fff", border: "none", padding: 18, borderRadius: 16, fontWeight: 900, fontSize: 15 }}>
-          Ajouter un nouveau produit
-       </button>
-    </div>
-  );
-
-  const renderArchivePage = () => (
-    <div className="animate-fade-in" style={{ padding: 24, paddingBottom: 100 }}>
-       <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 24 }}>
-          <button onClick={() => setView("dashboard")} style={{ background: "none", border: "none" }}><ArrowLeft size={24} /></button>
-          <h2 style={{ fontSize: 22, fontWeight: 900 }}>Flux SÉCURISÉ LiviPro</h2>
-       </div>
-
-       <div style={{ background: "linear-gradient(135deg, #0f172a 0%, #1e293b 100%)", borderRadius: 24, padding: 24, border: "1px solid #f1f5f9", marginBottom: 24, color: "#fff" }}>
-         <div style={{ display: "flex", alignItems: "center", gap: 10, color: GOLD_COLOR, marginBottom: 12 }}>
-            <Lock size={20} /> <div style={{ fontSize: 13, fontWeight: 800 }}>Intégrité Certifiée (Ledger)</div>
-         </div>
-         <p style={{ fontSize: 12, opacity: 0.8, lineHeight: 1.5 }}>Tous vos documents bancaires et logistiques sont archivés dans notre Vault chiffré. Chaque pièce dispose d'un sceau d'intégrité infalsifiable.</p>
-       </div>
-
-       {SECURE_CHUNKS.map(doc => (
-         <Card key={doc.id} style={{ marginBottom: 16 }}>
-            <div style={{ display: "flex", gap: 14 }}>
-               <div style={{ background: "#f8fafc", width: 44, height: 44, borderRadius: 12, display: "flex", alignItems: "center", justifyContent: "center" }}>
-                  <Database size={20} color={DARK_NAVY} />
-               </div>
-               <div style={{ flex: 1 }}>
-                  <div style={{ fontSize: 15, fontWeight: 800 }}>{doc.name}</div>
-                  <div style={{ fontSize: 11, color: "#94a3b8", display: "flex", alignItems: "center", gap: 4 }}>
-                     <ShieldCheck size={12} color="#10b981" /> Hash: {doc.hash}
+               <h3 style={{ fontSize: 24, fontWeight: 900 }}>PRÊT APPROUVÉ !</h3>
+               <p style={{ fontSize: 16, color: "#64748b", marginTop: 12 }}>L'IA a validé votre demande. Le montant de <span style={{ fontWeight: 800, color: NAVY_DARK }}>500,000 FCFA</span> est prêt à être décaissé sur votre LiviWallet.</p>
+               
+               <div style={{ marginTop: 40, background: "#f8fafc", borderRadius: 24, padding: 24, textAlign: "left" }}>
+                  <div style={{ fontSize: 12, fontWeight: 800, color: "#94a3b8", marginBottom: 20, textTransform: "uppercase" }}>CONDITIONS ASSOCIÉES</div>
+                  <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}>
+                     <div style={{ padding: 16, background: "#fff", borderRadius: 16, border: "1px solid #e2e8f0" }}>
+                        <div style={{ fontSize: 11, color: "#94a3b8" }}>Taux mensuel</div>
+                        <div style={{ fontSize: 18, fontWeight: 900, color: EMERALD }}>0.8%</div>
+                     </div>
+                     <div style={{ padding: 16, background: "#fff", borderRadius: 16, border: "1px solid #e2e8f0" }}>
+                        <div style={{ fontSize: 11, color: "#94a3b8" }}>Durée</div>
+                        <div style={{ fontSize: 18, fontWeight: 900 }}>3 Mois</div>
+                     </div>
                   </div>
                </div>
-               <Badge color={doc.status === "Clôturé" ? "#10b981" : "#f59e0b"}>{doc.status}</Badge>
-            </div>
-            
-            <div style={{ marginTop: 20, borderTop: "1px dashed #f1f5f9", paddingTop: 16 }}>
-               <div style={{ fontSize: 11, fontWeight: 800, color: "#64748b", marginBottom: 10 }}>WORKFLOW DE VALIDATION</div>
-               <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
-                  <div style={{ background: "#10b981", height: 8, flex: 1, borderRadius: 4 }}></div>
-                  <div style={{ background: doc.status === "Clôturé" ? "#10b981" : "#e2e8f0", height: 8, flex: 1, borderRadius: 4 }}></div>
-                  <div style={{ background: doc.status === "Clôturé" ? "#10b981" : "#e2e8f0", height: 8, flex: 1, borderRadius: 4 }}></div>
+
+               <div style={{ marginTop: 32, display: "flex", gap: 16 }}>
+                  <button 
+                    onClick={() => handleAction("Signer Smart Contract")}
+                    style={{ flex: 1, background: NAVY_DARK, color: "#fff", border: "none", padding: 16, borderRadius: 14, fontWeight: 900, fontSize: 14, cursor: "pointer" }}
+                  >
+                    Signer & Recevoir
+                  </button>
+                  <button 
+                    onClick={closeLoanDossier}
+                    disabled={isProcessing}
+                    style={{ flex: 1, background: "#ef4444", color: "#fff", border: "none", padding: 16, borderRadius: 14, fontWeight: 900, fontSize: 14, cursor: isProcessing ? "wait" : "pointer" }}
+                  >
+                    Rembourser & Clôturer
+                  </button>
                </div>
+            </Card>
+         </div>
+       )}
+
+       {loanStep === "closed" && (
+         <div className="animate-fade-in" style={{ textAlign: "center", padding: 60 }}>
+            <div style={{ background: "#f0fdf4", width: 100, height: 100, borderRadius: "50%", margin: "0 auto 24px", display: "flex", alignItems: "center", justifyContent: "center" }}>
+               <ShieldCheck size={60} color={EMERALD} />
             </div>
-         </Card>
-       ))}
+            <h3 style={{ fontSize: 26, fontWeight: 900 }}>Dossier Dossier Clôturé avec Succès</h3>
+            <p style={{ fontSize: 16, color: "#64748b", marginTop: 12 }}>Votre intégrité financière est exemplaire. Votre score Karma a été réévalué.</p>
+            <button 
+               onClick={() => setLoanStep("apply")}
+               style={{ marginTop: 32, background: NAVY_DARK, color: "#fff", border: "none", padding: "14px 28px", borderRadius: 14, fontWeight: 800, cursor: "pointer" }}
+            >
+               Retour au Dashboard Bancaire
+            </button>
+         </div>
+       )}
+    </div>
+  );
+
+  const renderTontine = () => (
+    <div className="animate-fade-in">
+       <div style={{ marginBottom: 32 }}>
+          <h2 style={{ fontSize: 28, fontWeight: 900 }}>Cercle de Tontine Digitale</h2>
+          <p style={{ fontSize: 15, color: "#64748b" }}>Transparence absolue sur la LiviChain. Pas de frais de gestion.</p>
+       </div>
+
+       <div style={{ display: "grid", gridTemplateColumns: window.innerWidth > 1024 ? "2fr 1fr" : "1fr", gap: 32 }}>
+          <div>
+             <Card style={{ marginBottom: 24 }}>
+                <h3 style={{ fontSize: 18, fontWeight: 800, marginBottom: 20 }}>Votre Tontine Active : Casamance</h3>
+                <div style={{ display: "flex", gap: 24, marginBottom: 32 }}>
+                   <div style={{ flex: 1, background: "#f8fafc", padding: 20, borderRadius: 20 }}>
+                      <div style={{ fontSize: 11, color: "#94a3b8", fontWeight: 800, marginBottom: 6 }}>PROCHAIN TIRAGE</div>
+                      <div style={{ fontSize: 20, fontWeight: 950, color: EMERALD }}>VOUS (01 Avril)</div>
+                   </div>
+                   <div style={{ flex: 1, background: "#f8fafc", padding: 20, borderRadius: 20 }}>
+                      <div style={{ fontSize: 11, color: "#94a3b8", fontWeight: 800, marginBottom: 6 }}>MONTANT À RECEVOIR</div>
+                      <div style={{ fontSize: 20, fontWeight: 950 }}>1.200.000 F</div>
+                   </div>
+                </div>
+
+                <div style={{ fontSize: 14, fontWeight: 900, marginBottom: 16 }}>Ordre de Ramassage (Blockchain)</div>
+                {[
+                  { name: "Ousmane Diallo", status: "Reçu", date: "Janvier", color: "#94a3b8" },
+                  { name: "Grossiste DLH", status: "Reçu", date: "Février", color: "#94a3b8" },
+                  { name: "Boutique Serigne Saliou", status: "Reçu", date: "Mars", color: "#94a3b8" },
+                  { name: "VOUS (Al-Amine)", status: "À venir", date: "Avril", color: GOLD_COLOR, active: true },
+                  { name: "Cofisac SA", status: "À venir", date: "Mai", color: "#64748b" },
+                ].map((item, i) => (
+                  <div key={i} style={{ display: "flex", alignItems: "center", gap: 16, padding: "12px 16px", borderRadius: 14, background: item.active ? `${GOLD_COLOR}10` : "transparent", border: item.active ? `1px solid ${GOLD_COLOR}40` : "none", marginBottom: 4 }}>
+                     <div style={{ fontSize: 12, fontWeight: 900, color: item.color, width: 60 }}>{item.date}</div>
+                     <div style={{ flex: 1, fontSize: 13, fontWeight: 800, color: item.active ? NAVY_DARK : "#64748b" }}>{item.name}</div>
+                     <Badge color={item.status === "Reçu" ? EMERALD : item.color} bg={item.status === "Reçu" ? "#ecfdf5" : "#f1f5f9"}>{item.status}</Badge>
+                  </div>
+                ))}
+             </Card>
+          </div>
+          <div>
+            <Card style={{ background: EMERALD, color: "#fff", marginBottom: 24 }}>
+               <Sparkles size={32} style={{ marginBottom: 16 }} />
+               <h4 style={{ fontSize: 18, fontWeight: 900, marginBottom: 8 }}>Boostez votre Cycle</h4>
+               <p style={{ fontSize: 12, opacity: 0.9, lineHeight: 1.6, marginBottom: 20 }}>En réinvestissant 15% de votre ramassage dans le fonds de garantie, vous gagnez un accès VIP aux stocks de sécurité.</p>
+               <button onClick={() => handleAction("Activer Boost")} style={{ width: "100%", background: "#fff", color: EMERALD, border: "none", padding: 12, borderRadius: 12, fontWeight: 900, fontSize: 12, cursor: "pointer" }}>Inscrire au Programme</button>
+            </Card>
+          </div>
+       </div>
     </div>
   );
 
   return (
-    <div style={{ maxWidth: 480, margin: "0 auto", background: "#f8fafc", minHeight: "100vh", position: "relative", fontFamily: "'Inter', sans-serif" }}>
-       
-       <style>{`
-          @keyframes fade-in { from { opacity: 0; } to { opacity: 1; } }
-          @keyframes slide-up { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
-          .animate-fade-in { animation: fade-in 0.4s ease-out; }
-          .animate-slide-up { animation: slide-up 0.5s ease-out forwards; }
-          .animate-spin { animation: spin 1s linear infinite; }
-          @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
-       `}</style>
-       
+    <DashboardShell title={view === 'dashboard' ? 'Associates Bank Hub' : view === 'loans' ? 'Centre de Crédit IA' : 'Tontine & Solidarité'} role="admin">
+       <div style={{ display: "flex", gap: 10, marginBottom: 30, overflowX: "auto", paddingBottom: 10 }}>
+        {[
+          { id: "dashboard", label: "Dashboard Banque", icon: <LayoutDashboard size={16} /> },
+          { id: "loans", label: "Prêts & Crédits", icon: <HandCoins size={16} /> },
+          { id: "tontine", label: "Tontine Digitale", icon: <GroupIcon size={16} /> }, // Placeholder or use Users
+          { id: "assembly", label: "Gouvernance", icon: <Gavel size={16} /> }
+        ].map(tab => (
+          <button 
+            key={tab.id} 
+            onClick={() => handleNav(tab.id)} 
+            style={{ 
+              background: view === tab.id ? NAVY_DARK : "#fff", 
+              color: view === tab.id ? "#fff" : "#64748b",
+              border: "1px solid #e2e8f0",
+              padding: "10px 20px",
+              borderRadius: 12,
+              fontSize: 13,
+              fontWeight: 800,
+              display: "flex",
+              alignItems: "center",
+              gap: 8,
+              cursor: "pointer",
+              whiteSpace: "nowrap"
+            }}
+          >
+            {tab.id === 'assembly' ? <Gavel size={16}/> : tab.id === 'tontine' ? <Users size={16}/> : tab.icon} {tab.label}
+          </button>
+        ))}
+      </div>
+
        {view === "dashboard" && renderDashboard()}
-       {view === "loans" && renderLoansPage()}
-       {view === "assembly" && renderAssembly()}
-       {view === "fleet" && renderFleetPage()}
-       {view === "flux" && renderArchivePage()}
-       {view === "catalog" && renderCatalogPage()}
-       {view === "tontine" && (
-         <div className="animate-fade-in" style={{ padding: 24, paddingBottom: 100 }}>
-            <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 24 }}>
-               <button onClick={() => setView("dashboard")} style={{ background: "none", border: "none" }}><ArrowLeft size={24} /></button>
-               <h2 style={{ fontSize: 22, fontWeight: 900 }}>LiviTontine Numerique</h2>
-            </div>
-            <Card style={{ background: "linear-gradient(135deg, #6366f1 0%, #4338ca 100%)", color: "#fff", border: "none", marginBottom: 24 }}>
-               <div style={{ fontSize: 13, fontWeight: 700, opacity: 0.8 }}>POT COMMUN ACTUEL</div>
-               <div style={{ fontSize: 32, fontWeight: 900, marginTop: 8 }}>12.450.000 F</div>
-               <div style={{ fontSize: 12, marginTop: 12, background: "rgba(255,255,255,0.2)", padding: 8, borderRadius: 8 }}>Prochaine levée : 01 Avril (Boutique Al-Amine)</div>
-            </Card>
-            <h3 style={{ fontSize: 17, fontWeight: 900, marginBottom: 16 }}>Historique des Cotisations</h3>
-            {LOAN_HISTORY.map(l => (
-              <div key={l.id} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "16px", background: "#fff", borderRadius: 16, marginBottom: 12, border: "1px solid #f1f5f9" }}>
-                 <div style={{ display: "flex", gap: 12, alignItems: "center" }}>
-                    <div style={{ width: 40, height: 40, background: "#f0fdf4", borderRadius: 12, display: "flex", alignItems: "center", justifyContent: "center" }}><Coins size={20} color={EMERALD} /></div>
-                    <div>
-                       <div style={{ fontSize: 14, fontWeight: 800 }}>{l.applicant}</div>
-                       <div style={{ fontSize: 11, color: "#94a3b8" }}>Cotisation mensuelle OK</div>
-                    </div>
-                 </div>
-                 <div style={{ fontSize: 14, fontWeight: 900, color: EMERALD }}>+25.000 F</div>
-              </div>
-            ))}
-         </div>
-       )}
-
-       {/* NAV BAR MOCK */}
-       <div style={{ position: "fixed", bottom: 0, width: "100%", maxWidth: 480, height: 70, background: "#fff", borderTop: "1px solid #f1f5f9", display: "flex", justifyContent: "space-around", alignItems: "center", zIndex: 100 }}>
-          <div onClick={() => setView("dashboard")} style={{ display: "flex", flexDirection: "column", alignItems: "center", color: view === "dashboard" ? GOLD_COLOR : "#94a3b8", cursor: "pointer" }}>
-            <Building2 size={24} />
-            <span style={{ fontSize: 10, fontWeight: 800, marginTop: 4 }}>BANQUE</span>
-          </div>
-          <div style={{ display: "flex", flexDirection: "column", alignItems: "center", color: "#94a3b8" }}>
-            <Wallet size={24} />
-            <span style={{ fontSize: 10, fontWeight: 800, marginTop: 4 }}>PORTES</span>
-          </div>
-          <div style={{ background: NAVY_DARK, width: 50, height: 50, borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center", marginTop: -25, border: "5px solid #f8fafc" }}>
-            <HandCoins size={24} color={GOLD_COLOR} />
-          </div>
-          <div style={{ display: "flex", flexDirection: "column", alignItems: "center", color: "#94a3b8" }}>
-            <History size={24} />
-            <span style={{ fontSize: 10, fontWeight: 800, marginTop: 4 }}>FLUX</span>
-          </div>
-          <div style={{ display: "flex", flexDirection: "column", alignItems: "center", color: "#94a3b8" }}>
-            <AlertCircle size={24} />
-            <span style={{ fontSize: 10, fontWeight: 800, marginTop: 4 }}>AIDE</span>
-          </div>
-       </div>
-
-    </div>
+       {view === "loans" && renderLoans()}
+       {view === "tontine" && renderTontine()}
+       {view === "assembly" && renderDashboard() /* Governance is on dashboard too */}
+    </DashboardShell>
   );
+}
+
+function GroupIcon(props) {
+  return <Users {...props} />
 }
