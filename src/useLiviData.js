@@ -6,16 +6,23 @@ function useFetch(table, fallback = []) {
   const [data, setData] = useState(fallback)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
+  const [isFallback, setIsFallback] = useState(false)
 
   useEffect(() => {
     const fetchData = async () => {
       try {
         const { data: rows, error: err } = await supabase.from(table).select('*').order('created_at', { ascending: false })
         if (err) throw err
-        if (rows && rows.length > 0) setData(rows)
+        if (rows && rows.length > 0) {
+          setData(rows)
+          setIsFallback(false)
+        } else {
+          setIsFallback(true) // No data found, using fallback
+        }
       } catch (e) {
         console.warn(`[LiviData] Fallback local pour '${table}':`, e.message)
         setError(e)
+        setIsFallback(true)
       } finally {
         setLoading(false)
       }
@@ -23,7 +30,7 @@ function useFetch(table, fallback = []) {
     fetchData()
   }, [table])
 
-  return { data, loading, error }
+  return { data, loading, error, isFallback }
 }
 
 // --- HOOKS MÉTIER SPÉCIALISÉS ---
@@ -92,6 +99,7 @@ export function useDeliveryTour() {
   const [tour, setTour] = useState(LOCAL_FALLBACK)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
+  const [isFallback, setIsFallback] = useState(false)
 
   useEffect(() => {
     const fetchTour = async () => {
@@ -104,7 +112,10 @@ export function useDeliveryTour() {
           .limit(1)
 
         if (tourErr) throw tourErr
-        if (!tours || tours.length === 0) throw new Error('No active tour')
+        if (!tours || tours.length === 0) {
+          setIsFallback(true) // No active tours found
+          return
+        }
 
         const activeTour = tours[0]
 
@@ -121,9 +132,11 @@ export function useDeliveryTour() {
           ...activeTour,
           stops: stops || []
         })
+        setIsFallback(false)
       } catch (e) {
         console.warn('[LiviData] Fallback local pour delivery_tours:', e.message)
         setError(e)
+        setIsFallback(true)
       } finally {
         setLoading(false)
       }
@@ -132,5 +145,5 @@ export function useDeliveryTour() {
     fetchTour()
   }, [])
 
-  return { data: tour, loading, error }
+  return { data: tour, loading, error, isFallback }
 }

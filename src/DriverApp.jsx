@@ -24,7 +24,7 @@ function normalizeStop(stop) {
 }
 
 export default function DriverApp() {
-  const { data: tourData, loading: tourLoading } = useDeliveryTour()
+  const { data: tourData, loading: tourLoading, isFallback } = useDeliveryTour()
 
   const [completedStops, setCompletedStops] = useState(1)
   const [modalType, setModalType] = useState(null)
@@ -72,6 +72,10 @@ export default function DriverApp() {
   return (
     <div style={{ maxWidth: 480, margin: '0 auto', background: '#f8fafc', minHeight: '100vh', display: 'flex', flexDirection: 'column', position: 'relative' }}>
       
+      {/* STATUS BAR (CONNECTED / OFFLINE) */}
+      <div style={{ background: isFallback ? '#f59e0b' : '#10b981', color: '#fff', padding: '4px 12px', fontSize: 10, fontWeight: 800, textAlign: 'center', textTransform: 'uppercase', letterSpacing: '1px' }}>
+        {isFallback ? '⚠️ Mode Démo : Pas de connexion Supabase' : '● Connecté au Centre Logistique (Live)'}
+      </div>
       {/* HEADER LiviPro B2B */}
       <div style={{ background: DARK_NAVY, padding: '20px 20px 25px', color: '#fff', borderBottomLeftRadius: 24, borderBottomRightRadius: 24, boxShadow: '0 4px 20px rgba(0,0,0,0.1)', zIndex: 10 }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
