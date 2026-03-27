@@ -113,19 +113,19 @@ export default function AssociatesBank() {
        {/* STATS HEADER */}
        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: 24, marginBottom: 32 }}>
           <Card style={{ background: NAVY_DARK, color: "#fff" }}>
-             <div style={{ fontSize: 11, color: GOLD_COLOR, fontWeight: 800, textTransform: "uppercase", marginBottom: 8 }}>Trésorerie du Cercle Associé</div>
-             <div style={{ fontSize: 32, fontWeight: 900 }}>845.280.000 F</div>
-             <div style={{ fontSize: 11, color: EMERALD, marginTop: 10, fontWeight: 700 }}>↑ +4.2M F ce jour (Cotisations)</div>
+             <div style={{ fontSize: 11, color: GOLD_COLOR, fontWeight: 800, textTransform: "uppercase", marginBottom: 8 }}>Réserve de Garantie LiviShield™</div>
+             <div style={{ fontSize: 32, fontWeight: 900 }}>85.4M <span style={{ fontSize: 16 }}>F</span></div>
+             <div style={{ fontSize: 11, color: EMERALD, marginTop: 10, fontWeight: 700 }}>↑ +2.4M Provision Q4</div>
           </Card>
           <Card>
-             <div style={{ fontSize: 11, color: "#64748b", fontWeight: 800, textTransform: "uppercase", marginBottom: 8 }}>Taux Co-actionnaire Moyen</div>
-             <div style={{ fontSize: 32, fontWeight: 900, color: EMERALD }}>0.8% <span style={{ fontSize: 14, color: "#94a3b8", fontWeight: 500 }}>/ an</span></div>
-             <div style={{ fontSize: 11, color: GOLD_COLOR, marginTop: 10, fontWeight: 700 }}>Contre 12-15% en banque classique</div>
+             <div style={{ fontSize: 11, color: "#64748b", fontWeight: 800, textTransform: "uppercase", marginBottom: 8 }}>Exposition au Risque</div>
+             <div style={{ fontSize: 32, fontWeight: 900, color: "#ef4444" }}>12.8%</div>
+             <div style={{ fontSize: 11, color: GOLD_COLOR, marginTop: 10, fontWeight: 700 }}>Limite Audit IA : 20%</div>
           </Card>
           <Card>
-             <div style={{ fontSize: 11, color: "#64748b", fontWeight: 800, textTransform: "uppercase", marginBottom: 8 }}>Membres Actifs</div>
-             <div style={{ fontSize: 32, fontWeight: 900 }}>4,284</div>
-             <div style={{ fontSize: 11, color: "#6366f1", marginTop: 10, fontWeight: 700 }}>98% Taux de remboursement</div>
+             <div style={{ fontSize: 11, color: "#64748b", fontWeight: 800, textTransform: "uppercase", marginBottom: 8 }}>Score Karma Moyen</div>
+             <div style={{ fontSize: 32, fontWeight: 900, color: EMERALD }}>882</div>
+             <div style={{ fontSize: 11, color: "#6366f1", marginTop: 10, fontWeight: 700 }}>Fiabilité de remboursement</div>
           </Card>
        </div>
 
