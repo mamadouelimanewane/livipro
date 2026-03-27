@@ -23,11 +23,18 @@ import {
   Navigation,
   ShieldCheck,
   Zap,
-  Send
+  Send,
+  Thermometer,
+  Mic,
+  LayoutDashboard,
+  BrainCircuit,
+  PieChart
 } from "lucide-react";
 import LiviFleetManager from "./LiviFleetManager";
 import LiviBranchManager from "./LiviBranchManager";
 import LiviDirectory from "./LiviDirectory";
+import LiviVoice from "./LiviVoice";
+import LiviGreen from "./LiviGreen";
 import MapView from "./components/MapView";
 import { useProducts, useGroupageOffers } from "./useLiviData";
 import DashboardShell from "./components/DashboardShell";
@@ -43,11 +50,8 @@ const Card = ({ children, style = {} }) => (
 export default function SalesPortal() {
   const [searchParams, setSearchParams] = useSearchParams();
   const [view, setView] = useState(searchParams.get("view") || "catalog"); 
-  const [activeCategory, setActiveCategory] = useState("Tous");
-  const [searchTerm, setSearchTerm] = useState("");
-  const [isAdding, setIsAdding] = useState(false);
+  const [isVoiceActive, setIsVoiceActive] = useState(false);
   
-  // Shared simulation state
   const { data: productsData, loading: productsLoading } = useProducts();
   const [inventory, setInventory] = useState([]);
 
@@ -65,116 +69,83 @@ export default function SalesPortal() {
     if (v && v !== view) setView(v);
   }, [searchParams]);
 
-  const handleViewChange = (newView) => {
-    setView(newView);
-    setSearchParams({ view: newView });
+  const handleNav = (v) => {
+    setView(v);
+    setSearchParams({ view: v });
   };
 
-  const handleAction = (msg) => alert(`Action: ${msg}`);
-
-  const promoteToBoutiques = (product) => {
-    setIsAdding(true);
-    setTimeout(() => {
-      setIsAdding(false);
-      const updated = inventory.map(p => p.id === product.id ? { ...p, promoted: true } : p);
-      setInventory(updated);
-      localStorage.setItem('livi_shared_catalog', JSON.stringify(updated));
-      alert(`Le produit "${product.name}" a été promu ! Il apparaîtra instantanément dans les portails de toutes les boutiques partenaires.`);
-    }, 1000);
-  };
-
-  const addNewProduct = () => {
-    const name = prompt("Nom du produit ?");
-    if (!name) return;
-    const price = parseInt(prompt("Prix B2B (FCFA) ?") || "1000");
-    const newP = { id: `p-${Date.now()}`, name, price, stock: 500, category: "Nouveauté", promoted: true };
-    const updated = [newP, ...inventory];
-    setInventory(updated);
-    localStorage.setItem('livi_shared_catalog', JSON.stringify(updated));
-    alert("Produit ajouté et injecté dans le réseau !");
+  const handleCommand = (cmd) => {
+    if (cmd.action === 'LOGISTIQUE') handleNav('fleet');
+    else if (cmd.action === 'COMMANDE') handleNav('catalog');
   };
 
   const HeaderStats = () => (
-    <div style={{ marginBottom: 32 }}>
-       <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: 24 }}>
-         <Card style={{ background: DARK_NAVY, color: "#fff" }}>
-            <div style={{ fontSize: 11, color: GOLD, fontWeight: 800, textTransform: "uppercase" }}>Chiffre d'Affaire Distributeur</div>
-            <div style={{ fontSize: 32, fontWeight: 900, marginTop: 8 }}>452.8M FCFA</div>
-         </Card>
-         <Card>
-            <div style={{ fontSize: 11, color: "#64748b", fontWeight: 800, textTransform: "uppercase" }}>Taux de Livraison</div>
-            <div style={{ fontSize: 32, fontWeight: 900, color: VISION_GREEN }}>96.2%</div>
-         </Card>
-         <Card>
-            <div style={{ fontSize: 11, color: "#64748b", fontWeight: 800, textTransform: "uppercase" }}>Boutiques Actives</div>
-            <div style={{ fontSize: 32, fontWeight: 900 }}>114</div>
-         </Card>
-      </div>
+    <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))", gap: 24, marginBottom: 32 }}>
+       <Card style={{ background: DARK_NAVY, color: "#fff" }}>
+          <div style={{ fontSize: 11, color: GOLD, fontWeight: 800 }}>CAPEX DISTRIBUTEUR</div>
+          <div style={{ fontSize: 32, fontWeight: 900 }}>452.8M F</div>
+       </Card>
+       <Card>
+          <div style={{ fontSize: 11, color: "#64748b", fontWeight: 800 }}>PERF LOGISTIQUE</div>
+          <div style={{ fontSize: 32, fontWeight: 900, color: VISION_GREEN }}>96.2%</div>
+       </Card>
+       <Card>
+          <div style={{ fontSize: 11, color: "#64748b", fontWeight: 800 }}>INDICE CHAÎNE FROID</div>
+          <div style={{ fontSize: 32, fontWeight: 900, color: GOLD }}>2.4°C <span style={{ fontSize: 14, color: "#94a3b8" }}>Moyen</span></div>
+       </Card>
     </div>
   );
 
   return (
-    <DashboardShell title="Hub Logistique Grossiste" role="grossiste">
+    <DashboardShell title="Logistique & Ventes Grossiste" role="grossiste">
        <HeaderStats />
-       
+
        <div style={{ display: "flex", gap: 10, marginBottom: 30, overflowX: "auto", paddingBottom: 10 }}>
         {[
           { id: "catalog", label: "Stocks & Prix", icon: <Package size={16} /> },
+          { id: "branches", label: "Multi-Succursales", icon: <Building2 size={16} /> },
+          { id: "green", label: "LiviGreen ColdChain", icon: <Thermometer size={16} /> },
           { id: "fleet", label: "Suivi Flotte", icon: <Truck size={16} /> },
-          { id: "directory", label: "Portefeuille Clients", icon: <Users size={16} /> },
-          { id: "groupage", label: "LiviGroupage", icon: <Layers size={16} /> },
-          { id: "branches", label: "Relais & Points", icon: <Building2 size={16} /> }
+          { id: "directory", label: "Portefeuille Clients", icon: <Users size={16} /> }
         ].map(tab => (
-          <button key={tab.id} onClick={() => handleViewChange(tab.id)} style={{ background: view === tab.id ? DARK_NAVY : "#fff", color: view === tab.id ? "#fff" : "#64748b", border: "1px solid #e2e8f0", padding: "10px 20px", borderRadius: 12, fontSize: 13, fontWeight: 800, cursor: "pointer", whiteSpace: "nowrap" }}>{tab.icon} {tab.label}</button>
+          <button key={tab.id} onClick={() => handleNav(tab.id)} style={{ background: view === tab.id ? DARK_NAVY : "#fff", color: view === tab.id ? "#fff" : "#64748b", border: "1px solid #e2e8f0", padding: "10px 20px", borderRadius: 12, fontSize: 13, fontWeight: 800, cursor: "pointer", whiteSpace: "nowrap" }}>{tab.label}</button>
         ))}
+        <button onClick={() => setIsVoiceActive(!isVoiceActive)} style={{ background: isVoiceActive ? GOLD : "#fff", color: DARK_NAVY, border: isVoiceActive ? "none" : "1px solid #e2e8f0", padding: "10px 20px", borderRadius: 12, fontSize: 13, fontWeight: 800, cursor: "pointer", display: "flex", alignItems: "center", gap: 8 }}>
+           <Mic size={16} /> {isVoiceActive ? "Fermer Voix" : "LiviVoice"}
+        </button>
       </div>
 
-      <div style={{ background: "#fff", borderRadius: 28, padding: 32, border: "1px solid #e2e8f0" }}>
-        {view === "catalog" && (
-           <div className="animate-fade-in">
-              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 32 }}>
-                 <div>
-                    <h2 style={{ fontSize: 22, fontWeight: 900 }}>Inventaire & Offres B2B</h2>
-                    <p style={{ fontSize: 14, color: "#64748b" }}>Gérez vos prix et poussez vos promotions vers les boutiques.</p>
-                 </div>
-                 <button onClick={addNewProduct} style={{ background: GOLD, color: "#fff", border: "none", padding: "12px 24px", borderRadius: 14, fontWeight: 900, cursor: "pointer", display: "flex", alignItems: "center", gap: 8 }}>
-                   <Plus size={20} /> Nouveau Produit
-                 </button>
-              </div>
+       {isVoiceActive && <div style={{ marginBottom: 32 }}><LiviVoice onCommand={handleCommand} /></div>}
 
-              <table style={{ width: "100%", borderCollapse: "collapse" }}>
-                 <thead>
-                    <tr style={{ borderBottom: "2px solid #f8fafc", textAlign: "left" }}>
-                       <th style={{ padding: "16px", color: "#64748b", fontSize: 12, fontWeight: 800 }}>PRODUIT</th>
-                       <th style={{ padding: "16px", color: "#64748b", fontSize: 12, fontWeight: 800 }}>STOCK</th>
-                       <th style={{ padding: "16px", color: "#64748b", fontSize: 12, fontWeight: 800 }}>PRIX B2B</th>
-                       <th style={{ padding: "16px", color: "#64748b", fontSize: 12, fontWeight: 800, textAlign: "right" }}>ACTIONS</th>
-                    </tr>
-                 </thead>
-                 <tbody>
-                    {inventory.map(p => (
-                       <tr key={p.id} style={{ borderBottom: "1px solid #f8fafc" }}>
-                          <td style={{ padding: "16px", fontSize: 14, fontWeight: 800 }}>{p.name}</td>
-                          <td style={{ padding: "16px", fontSize: 14, color: p.stock < 50 ? "#ef4444" : "#1e293b", fontWeight: 700 }}>{p.stock}</td>
-                          <td style={{ padding: "16px", fontSize: 14, fontWeight: 900 }}>{p.price.toLocaleString()} F</td>
-                          <td style={{ padding: "16px", textAlign: "right" }}>
-                             <button 
-                                onClick={() => promoteToBoutiques(p)}
-                                style={{ background: p.promoted ? VISION_GREEN : "#f1f5f9", color: p.promoted ? "#fff" : "#64748b", border: "none", padding: "8px 16px", borderRadius: 10, fontSize: 11, fontWeight: 800, cursor: "pointer", display: "inline-flex", alignItems: "center", gap: 6 }}
-                             >
-                                <Send size={14} /> {p.promoted ? "Promu" : "Promouvoir"}
-                             </button>
-                          </td>
-                       </tr>
-                    ))}
-                 </tbody>
-              </table>
-           </div>
-        )}
-        {view === "fleet" && <LiviFleetManager />}
-        {view === "directory" && <LiviDirectory />}
-        {view === "branches" && <LiviBranchManager />}
-      </div>
+       <div style={{ background: "#fff", borderRadius: 28, padding: 32, border: "1px solid #e2e8f0", boxShadow: "0 20px 60px rgba(0,0,0,0.02)" }}>
+          {view === "catalog" && (
+            <div className="animate-fade-in">
+               <h2 style={{ fontSize: 24, fontWeight: 900, marginBottom: 24 }}>Inventaire Centralisé</h2>
+               <table style={{ width: "100%", borderCollapse: "collapse" }}>
+                  <thead style={{ background: "#f8fafc" }}>
+                     <tr style={{ textAlign: "left" }}>
+                        <th style={{ padding: "16px", fontSize: 12, color: "#64748b" }}>PRODUIT</th>
+                        <th style={{ padding: "16px", fontSize: 12, color: "#64748b" }}>STOCK RÉEL</th>
+                        <th style={{ padding: "16px", fontSize: 12, color: "#64748b" }}>PRIX B2B</th>
+                     </tr>
+                  </thead>
+                  <tbody>
+                     {inventory.map(p => (
+                        <tr key={p.id} style={{ borderBottom: "1px solid #f8fafc" }}>
+                           <td style={{ padding: "16px", fontSize: 14, fontWeight: 800 }}>{p.name}</td>
+                           <td style={{ padding: "16px", fontSize: 14, fontWeight: 700 }}>{p.stock}</td>
+                           <td style={{ padding: "16px", fontSize: 14, fontWeight: 950 }}>{p.price.toLocaleString()} F</td>
+                        </tr>
+                     ))}
+                  </tbody>
+               </table>
+            </div>
+          )}
+          {view === "branches" && <LiviBranchManager />}
+          {view === "green" && <LiviGreen />}
+          {view === "fleet" && <LiviFleetManager />}
+          {view === "directory" && <LiviDirectory />}
+       </div>
     </DashboardShell>
   );
 }
