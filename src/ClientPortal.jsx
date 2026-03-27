@@ -31,6 +31,7 @@ export default function ClientPortal() {
       </button>
       <LiviSearch />
     </div>
+  );
   if (view === "directory") return (
     <div className="animate-fade-in" style={{ maxWidth: 480, margin: "0 auto", position: "relative" }}>
       <button onClick={() => setView("dashboard")} style={{ position: "absolute", top: 20, left: 20, zIndex: 10, background: "#fff", border: "none", width: 40, height: 40, borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center", boxShadow: "0 4px 10px rgba(0,0,0,0.1)", cursor: "pointer" }}>

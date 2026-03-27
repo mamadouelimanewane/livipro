@@ -76,7 +76,6 @@ export default function DriverApp() {
               <div style={{ fontSize: 12, opacity: 0.7 }}>Manifeste {TOURNEE.id}</div>
             </div>
           </div>
-          </div>
           <div onClick={() => setModalType('docs')} style={{ cursor: 'pointer', width: 40, height: 40, background: '#334155', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 14, fontWeight: 700 }}>OD</div>
         </div>
 

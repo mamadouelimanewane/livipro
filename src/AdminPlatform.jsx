@@ -29,8 +29,7 @@ import {
   TrendingUp,
   FileText,
   ShieldAlert,
-  Database,
-  Lock
+  Database
 } from "lucide-react";
 
 // --- DATA SIMULATION ---
