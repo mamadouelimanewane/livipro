@@ -1,125 +1,119 @@
 import { useState } from "react";
 import { 
-  Users, 
-  Search, 
-  Phone, 
+  CreditCard, 
   MapPin, 
+  Search, 
   ShieldCheck, 
   Star, 
-  QrCode, 
+  Users, 
+  Phone, 
+  Globe, 
+  CheckCircle2, 
   MoreVertical,
-  MessageCircle,
-  Filter,
-  CheckCircle2,
-  Building2
+  Cpu,
+  Smartphone,
+  Zap,
+  LayoutDashboard,
+  ZapOff,
+  UserCircle
 } from "lucide-react";
 
 const DARK_NAVY = "#0f172a";
 const GOLD = "#f59e0b";
 const VISION_GREEN = "#10b981";
 
+const MEMBERS = [
+  { id: "M-9821-DAK", name: "Ousmane Drame", role: "Wholesaler", status: "Verified Owner", karma: 998, city: "Dakar", since: "2026", color: "linear-gradient(135deg, #0f172a 0%, #1e293b 100%)" },
+  { id: "M-4412-PIK", name: "Awa Ndiaye", role: "Boutique", status: "Verified Store", karma: 942, city: "Pikine", since: "2026", color: "linear-gradient(135deg, #111827 0%, #374151 100%)" },
+  { id: "M-7721-STL", name: "Modou Fall", role: "Wholesaler", status: "Elite Partner", karma: 885, city: "Saint-Louis", since: "2025", color: "linear-gradient(135deg, #064e3b 0%, #065f46 100%)" },
+  { id: "D-1102-CAM", name: "Cheikh Tidiane", role: "Driver", status: "Certified App", karma: 975, city: "Thiès", since: "2026", color: "linear-gradient(135deg, #7c2d12 0%, #9a3412 100%)" },
+  { id: "M-2231-MAT", name: "Binta Seck", role: "Boutique", status: "Verified Store", karma: 720, city: "Matam", since: "2026", color: "linear-gradient(135deg, #1e1b4b 0%, #312e81 100%)" },
+  { id: "M-5520-KOL", name: "Ibrahima Ka", role: "Admin", status: "Regulator", karma: 1000, city: "LiviHost", since: "2024", color: "linear-gradient(135deg, #1e40af 0%, #1d4ed8 100%)" },
+];
+
 export default function LiviDirectory() {
   const [searchTerm, setSearchTerm] = useState("");
-  const [filter, setFilter] = useState("all"); // all | wholesaler | boutique
 
-  const MEMBERS = [
-    { id: "M1", type: "wholesaler", name: "Grossiste Al-Amine", location: "Dakar Port, Zone B", phone: "+221 77 123 45 67", rating: 4.8, status: "Certifié Platinum" },
-    { id: "M2", type: "boutique", name: "Boutique Le Plateau", location: "Rue 12 x 15, Plateau", phone: "+221 78 987 65 43", rating: 4.9, status: "A+ Karma" },
-    { id: "M3", type: "wholesaler", name: "Diagne Distribution", location: "Kaolack Marche Central", phone: "+221 76 543 21 09", rating: 4.7, status: "Actif" },
-    { id: "M4", type: "boutique", name: "Alimentation Ndiaye", location: "Pikine Icotaf 2", phone: "+221 77 000 11 22", rating: 4.5, status: "Sociétaire Banque" }
-  ];
-
-  const filteredMembers = MEMBERS.filter(m => 
-    (filter === "all" || m.type === filter) &&
-    m.name.toLowerCase().includes(searchTerm.toLowerCase())
+  const filtered = MEMBERS.filter(m => 
+    m.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
+    m.city.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   return (
-    <div style={{ padding: 20, background: "#f8fafc", minHeight: "100vh", fontFamily: "'Inter', sans-serif" }}>
-       {/* DIRECTORY HEADER */}
-       <div style={{ marginBottom: 24 }}>
-          <h2 style={{ fontSize: 22, fontWeight: 900 }}>Annuaire LiviConnect</h2>
-          <div style={{ fontSize: 12, color: "#64748b", fontWeight: 700, marginTop: 4 }}>Réseau B2B de Confiance du Sénégal</div>
-       </div>
-
-       {/* SEARCH & FILTER */}
-       <div style={{ display: "flex", gap: 10, marginBottom: 24 }}>
-          <div style={{ flex: 1, position: "relative" }}>
-             <Search size={18} color="#94a3b8" style={{ position: "absolute", left: 14, top: "50%", transform: "translateY(-50%)" }} />
+    <div className="animate-fade-in">
+       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 32 }}>
+          <div>
+             <h2 style={{ fontSize: 24, fontWeight: 900 }}>Annuaire LiviPro ID™</h2>
+             <p style={{ fontSize: 13, color: "#64748b" }}>Identité numérique certifiée de tous les partenaires du réseau.</p>
+          </div>
+          <div style={{ background: "#fff", border: "1px solid #e2e8f0", borderRadius: 14, padding: "10px 16px", display: "flex", alignItems: "center", gap: 10, width: 300 }}>
+             <Search size={18} color="#94a3b8" />
              <input 
-               value={searchTerm}
+               type="text" 
+               placeholder="Rechercher membre ou ville..." 
+               style={{ border: "none", outline: "none", width: "100%", fontSize: 13 }}
                onChange={(e) => setSearchTerm(e.target.value)}
-               placeholder="Chercher un membre..." 
-               style={{ width: "100%", height: 50, padding: "0 44px", background: "#fff", border: "1px solid #e2e8f0", borderRadius: 14, fontSize: 13, fontWeight: 600, outline: "none" }} 
              />
           </div>
-          <button style={{ height: 50, width: 50, background: DARK_NAVY, border: "none", borderRadius: 14, display: "flex", alignItems: "center", justifyContent: "center" }}>
-             <Filter size={18} color={GOLD} />
-          </button>
        </div>
 
-       <div style={{ display: "flex", gap: 8, marginBottom: 24 }}>
-          {["all", "wholesaler", "boutique"].map(tab => (
-            <button 
-              key={tab} 
-              onClick={() => setFilter(tab)}
-              style={{ flex: 1, background: filter === tab ? DARK_NAVY : "#fff", color: filter === tab ? "#fff" : "#64748b", border: "1px solid #f1f5f9", padding: "8px", borderRadius: 10, fontSize: 11, fontWeight: 800 }}>
-               {tab === "all" ? "Tous" : tab === "wholesaler" ? "Grossistes" : "Boutiques"}
-            </button>
-          ))}
-       </div>
+       <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(360px, 1fr))", gap: 30 }}>
+          {filtered.map((member) => (
+            <div key={member.id} className="hover-scale" style={{ 
+               position: "relative",
+               background: member.color, 
+               borderRadius: 24, 
+               padding: 24, 
+               color: "#fff", 
+               boxShadow: "0 20px 40px rgba(0,0,0,0.15)",
+               overflow: "hidden",
+               minHeight: 220,
+               border: "1px solid rgba(255,255,255,0.1)",
+               cursor: "pointer"
+            }}>
+               {/* CHIP & NFC ICON */}
+               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 32 }}>
+                  <div style={{ width: 44, height: 32, background: "linear-gradient(135deg, #fbbf24 0%, #d97706 100%)", borderRadius: 6, position: "relative" }}>
+                     <div style={{ position: "absolute", top: 4, left: 4, right: 4, bottom: 4, border: "1px solid rgba(0,0,0,0.1)" }}></div>
+                  </div>
+                  <div style={{ opacity: 0.6 }}><Smartphone size={24} /></div>
+               </div>
 
-       {/* CARD LIST */}
-       <div style={{ display: "grid", gridTemplateColumns: "1fr", gap: 16 }}>
-          {filteredMembers.map(member => (
-            <div key={member.id} className="animate-fade-in" style={{ background: "#fff", borderRadius: 24, padding: "24px", border: "1px solid #f1f5f9", boxShadow: "0 4px 15px rgba(0,0,0,0.02)", position: "relative", overflow: "hidden" }}>
-               {/* Accent logic... */}
-               <div style={{ position: "absolute", top: 0, left: 0, bottom: 0, width: 6, background: member.type === 'wholesaler' ? GOLD : VISION_GREEN }}></div>
-               
-               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 16 }}>
-                  <div style={{ display: "flex", gap: 16, alignItems: "center" }}>
-                     <div style={{ width: 56, height: 56, borderRadius: 16, background: "#f8fafc", border: `1.5px solid ${member.type === 'wholesaler' ? GOLD : VISION_GREEN}`, display: "flex", alignItems: "center", justifyContent: "center" }}>
-                        {member.type === 'wholesaler' ? <Building2 size={24} color={GOLD} /> : <Users size={24} color={VISION_GREEN} />}
-                     </div>
+               {/* MEMBER LOGO / ICON */}
+               <div style={{ position: "absolute", right: 24, top: 70, opacity: 0.05 }}><ShieldCheck size={120} /></div>
+
+               <div style={{ position: "relative", zIndex: 1 }}>
+                  <div style={{ fontSize: 11, fontWeight: 800, color: GOLD, textTransform: "uppercase", letterSpacing: 1.5, marginBottom: 8 }}>{member.role === 'Admin' ? 'Régulateur National' : 'LiviPro Business Identity'}</div>
+                  <div style={{ fontSize: 20, fontWeight: 950, marginBottom: 4 }}>{member.name}</div>
+                  <div style={{ fontSize: 14, opacity: 0.8, letterSpacing: 2, fontFamily: "monospace", marginBottom: 24 }}>{member.id}</div>
+                  
+                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-end", marginTop: "auto" }}>
                      <div>
-                        <div style={{ fontSize: 16, fontWeight: 900 }}>{member.name}</div>
-                        <div style={{ fontSize: 10, color: member.type === 'wholesaler' ? GOLD : VISION_GREEN, fontWeight: 900, textTransform: "uppercase", letterSpacing: 1 }}>{member.type}</div>
+                        <div style={{ fontSize: 9, opacity: 0.6, fontWeight: 800 }}>KARMA SCORE</div>
+                        <div style={{ fontSize: 16, fontWeight: 950, color: VISION_GREEN }}>{member.karma} <span style={{ fontSize: 10 }}>PTS</span></div>
+                     </div>
+                     <div style={{ textAlign: "right" }}>
+                        <div style={{ fontSize: 9, opacity: 0.6, fontWeight: 800 }}>{member.city.toUpperCase()}</div>
+                        <div style={{ fontSize: 12, fontWeight: 700 }}>Membre depuis {member.since}</div>
                      </div>
                   </div>
-                  <MoreVertical size={18} color="#cbd5e1" />
                </div>
 
-               <div style={{ display: "flex", flexDirection: "column", gap: 8, marginBottom: 20 }}>
-                  <div style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 12, color: "#64748b" }}>
-                     <MapPin size={14} /> {member.location}
-                  </div>
-                  <div style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 12, color: "#64748b" }}>
-                     <Phone size={14} /> {member.phone}
-                  </div>
-               </div>
-
-               <div style={{ background: "#f8fafc", padding: "12px 16px", borderRadius: 16, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                  <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
-                     <CheckCircle2 size={16} color={VISION_GREEN} />
-                     <span style={{ fontSize: 11, fontWeight: 800, color: "#475569" }}>{member.status}</span>
-                  </div>
-                  <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
-                     <Star size={14} fill={GOLD} color={GOLD} />
-                     <span style={{ fontSize: 12, fontWeight: 900 }}>{member.rating}</span>
-                  </div>
-               </div>
-
-               <div style={{ display: "flex", gap: 10, marginTop: 16 }}>
-                  <button style={{ flex: 1, background: "#25d366", color: "#fff", border: "none", padding: "10px", borderRadius: 12, fontSize: 11, fontWeight: 800, display: "flex", alignItems: "center", justifyContent: "center", gap: 6 }}>
-                     <MessageCircle size={16} /> WhatsApp
-                  </button>
-                  <button style={{ background: "#f1f5f9", border: "none", padding: "10px", borderRadius: 12, color: "#64748b" }}>
-                     <QrCode size={18} />
-                  </button>
+               {/* VERIFIED SEAL */}
+               <div style={{ position: "absolute", top: 24, right: 24, display: "flex", alignItems: "center", gap: 6, background: "rgba(255,255,255,0.1)", padding: "4px 10px", borderRadius: 12, border: "1px solid rgba(255,255,255,0.2)" }}>
+                  <ShieldCheck size={14} color={VISION_GREEN} />
+                  <span style={{ fontSize: 10, fontWeight: 900 }}>{member.status.toUpperCase()}</span>
                </div>
             </div>
           ))}
        </div>
+
+       {filtered.length === 0 && (
+         <div style={{ textAlign: "center", padding: 80, color: "#94a3b8" }}>
+            <UserCircle size={60} style={{ margin: "0 auto 20px", opacity: 0.2 }} />
+            <p>Aucun membre trouvé dans le registre LiviPro.</p>
+         </div>
+       )}
     </div>
   );
 }
