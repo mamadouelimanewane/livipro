@@ -12,6 +12,8 @@ const BOUTIQUE = {
   tontineStatus: "Actif (Prélèvement 1.2%)",
 }
 
+const VISION_GREEN = "#10b981";
+
 export default function ClientPortal() {
   const [view, setView] = useState("dashboard"); // dashboard | search | directory
   const [isOrdering, setIsOrdering] = useState(false)
