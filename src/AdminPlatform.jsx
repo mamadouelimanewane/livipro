@@ -39,7 +39,7 @@ import {
   Zap,
   LayoutDashboard
 } from "lucide-react";
-import { useSocialFeed, useMembers } from "./useLiviData";
+import { useSocialFeed } from "./useLiviData";
 import DashboardShell from "./components/DashboardShell";
 import { useSearchParams } from "react-router-dom";
 
@@ -55,11 +55,28 @@ const Badge = ({ text, color, bg }) => (
   <span style={{ fontSize: 10, fontWeight: 900, padding: "4px 12px", borderRadius: 10, color, background: bg, textTransform: "uppercase", letterSpacing: 0.5 }}>{text}</span>
 );
 
+const StatsHeader = () => (
+  <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))", gap: 24, marginBottom: 32 }}>
+     <Card style={{ background: DARK_NAVY, color: "#fff" }}>
+        <div style={{ fontSize: 11, color: GOLD, fontWeight: 800, textTransform: "uppercase" }}>Indice de Santé Réseau</div>
+        <div style={{ fontSize: 32, fontWeight: 900, marginTop: 10 }}>98.2%</div>
+        <div style={{ fontSize: 11, color: VISION_GREEN, marginTop: 4 }}>+2.5% vs Q4</div>
+     </Card>
+     <Card>
+        <div style={{ fontSize: 11, color: "#64748b", fontWeight: 800 }}>MEMBRES CERTIFIÉS</div>
+        <div style={{ fontSize: 32, fontWeight: 900, marginTop: 10 }}>4,284</div>
+     </Card>
+     <Card>
+        <div style={{ fontSize: 11, color: "#64748b", fontWeight: 800 }}>TRANSACTIONS B2B / JOUR</div>
+        <div style={{ fontSize: 32, fontWeight: 900, marginTop: 10 }}>12.4M F</div>
+     </Card>
+  </div>
+);
+
 export default function AdminPlatform() {
   const [searchParams, setSearchParams] = useSearchParams();
   const [activeTab, setActiveTab] = useState(searchParams.get("view") || "social");
   const [isApproving, setIsApproving] = useState(null)
-  const [searchTerm, setSearchTerm] = useState("")
   const [networkUsers, setNetworkUsers] = useState([
     { id: "u1", name: "Dakar Logistics Hub", role: "Wholesaler", status: "Active", kyc: "Verified", date: "2026-01-10", city: "Dakar", karma: 998 },
     { id: "u2", name: "Supermarché Al-Amine", role: "Boutique", status: "Active", kyc: "Verified", date: "2026-02-14", city: "Dakar", karma: 942 },
@@ -72,14 +89,14 @@ export default function AdminPlatform() {
     if (view && view !== activeTab) {
       setActiveTab(view);
     }
-  }, [searchParams]);
+  }, [searchParams, activeTab]);
 
   const handleTabChange = (id) => {
     setActiveTab(id);
     setSearchParams({ view: id });
   };
 
-  const { data: socialPosts, loading: socialLoading } = useSocialFeed();
+  const { data: socialPosts } = useSocialFeed();
 
   const handleApprove = (id) => {
     setIsApproving(id)
@@ -93,24 +110,6 @@ export default function AdminPlatform() {
   const handleAction = (name) => {
     alert(`Régulation: Action "${name}" exécutée.`);
   }
-
-  const StatsHeader = () => (
-    <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))", gap: 24, marginBottom: 32 }}>
-       <Card style={{ background: DARK_NAVY, color: "#fff" }}>
-          <div style={{ fontSize: 11, color: GOLD, fontWeight: 800, textTransform: "uppercase" }}>Indice de Santé Réseau</div>
-          <div style={{ fontSize: 32, fontWeight: 900, marginTop: 10 }}>98.2%</div>
-          <div style={{ fontSize: 11, color: VISION_GREEN, marginTop: 4 }}>+2.5% vs Q4</div>
-       </Card>
-       <Card>
-          <div style={{ fontSize: 11, color: "#64748b", fontWeight: 800 }}>MEMBRES CERTIFIÉS</div>
-          <div style={{ fontSize: 32, fontWeight: 900, marginTop: 10 }}>4,284</div>
-       </Card>
-       <Card>
-          <div style={{ fontSize: 11, color: "#64748b", fontWeight: 800 }}>TRANSACTIONS B2B / JOUR</div>
-          <div style={{ fontSize: 32, fontWeight: 900, marginTop: 10 }}>12.4M F</div>
-       </Card>
-    </div>
-  );
 
   const renderUsers = () => {
     const pending = networkUsers.filter(u => u.status === "Pending");
