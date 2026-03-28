@@ -28,7 +28,8 @@ import {
   Mic,
   LayoutDashboard,
   BrainCircuit,
-  PieChart
+  PieChart,
+  MessageSquare
 } from "lucide-react";
 import LiviFleetManager from "./LiviFleetManager";
 import LiviBranchManager from "./LiviBranchManager";
