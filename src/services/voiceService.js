@@ -5,12 +5,17 @@
 
 // Specialized Wolof Whisper model
 const HF_MODEL = "dofbi/wolof-asr"; 
-const API_TOKEN = ""; 
+const API_TOKEN = import.meta.env.VITE_HF_API_TOKEN || ""; 
 
 // Internal "Phonetic Brain" - Loaded from storage to allow learning
 let learnedAliases = JSON.parse(localStorage.getItem('livipro_phonetic_brain') || '{}');
 
 export async function transcribeWolofAI(audioBlob) {
+  if (!API_TOKEN) {
+    console.warn("⚠️ LiviPro Warning: Missing VITE_HF_API_TOKEN. Using Local fallback.");
+    return null; // Triggers the 'Dites par exemple...' or text-input fallback
+  }
+
   try {
     const response = await fetch(`https://api-inference.huggingface.co/models/${HF_MODEL}`, {
       headers: { Authorization: `Bearer ${API_TOKEN}` },
