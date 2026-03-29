@@ -114,7 +114,7 @@ function AppRoutes() {
       <Route path="/boutique" element={<ProtectedRoute allowedRoles={['boutiquier','admin']}><ClientPortal /></ProtectedRoute>} />
       <Route path="/bank" element={<ProtectedRoute allowedRoles={['banque','admin']}><AssociatesBank /></ProtectedRoute>} />
       <Route path="/comm" element={<ProtectedRoute><CommModule /></ProtectedRoute>} />
-      <Route path="/admin" element={<ProtectedRoute allowedRoles={['admin']}><AdminPlatform /></ProtectedRoute>} />
+      <Route path="/admin" element={<ProtectedRoute><AdminPlatform /></ProtectedRoute>} />
       <Route path="/sales" element={<ProtectedRoute allowedRoles={['grossiste','admin']}><SalesPortal /></ProtectedRoute>} />
       <Route path="/wallet" element={<ProtectedRoute><LiviWallet /></ProtectedRoute>} />
       <Route path="/market" element={<LiviMarketPage />} />

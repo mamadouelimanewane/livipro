@@ -19,7 +19,9 @@ import {
   Wallet,
   MessageSquare,
   ShoppingBag,
-  HandCoins
+  HandCoins,
+  ShoppingCart,
+  Layout
 } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
 

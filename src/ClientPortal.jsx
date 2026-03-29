@@ -4,6 +4,9 @@ import LiviMarket from './LiviMarket'
 import LiviCommunity from './LiviCommunity'
 import LiviShield from './LiviShield'
 import LiviTontine from './LiviTontine'
+import LiviPredict from './LiviPredict'
+import LiviFintech from './LiviWallet'
+import LiviVoice from './LiviVoice'
 import { BellRing, PackageSearch, BatteryCharging, ShoppingCart, CheckCircle2, ChevronRight, Zap, Wallet, Search, ArrowLeft, Users, Mic, Heart, Star, Truck, MoreVertical, Box, Layers, History, ShieldCheck, Settings as SettingsIcon, Send, Receipt, Calculator, CreditCard, GraduationCap, LayoutDashboard, BrainCircuit, Globe, ShoppingBag, MessageSquare, ShieldAlert, Coins } from 'lucide-react'
 import { useGroupageOffers, useMembers, useProducts, placeOrder } from './useLiviData'
 import DashboardShell from "./components/DashboardShell";
@@ -33,10 +36,16 @@ export default function ClientPortal() {
   const [activeTab, setActiveTab] = useState(searchParams.get("view") || "market");
   const [isVoiceActive, setIsVoiceActive] = useState(false);
   const [salesRecord, setSalesRecord] = useState(parseInt(localStorage.getItem('livi_total_sales') || '1280000'));
+  const [loading, setLoading] = useState(false);
 
   const { user } = useAuth();
   const [realOrders, setRealOrders] = useState([]);
   const [fetchingOrders, setFetchingOrders] = useState(false);
+
+  const handleTabChange = (tabId) => {
+    setActiveTab(tabId);
+    setSearchParams({ view: tabId });
+  };
 
   const fetchOrders = async () => {
     if (!user) return;

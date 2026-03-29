@@ -163,18 +163,58 @@ export default function LiviVoiceAssistant() {
           </div>
 
           <div style={{ background: '#f8fafc', padding: 20, borderRadius: 20, marginBottom: 20, textAlign: 'center' }}>
-            <div style={{ fontSize: 13, color: '#94a3b8', fontWeight: 800, marginBottom: 8, textTransform: 'uppercase' }}>Vous avez dit :</div>
-            <div style={{ fontSize: 20, fontWeight: 950, color: '#0f172a' }}>"{transcript || "..."}"</div>
+            <div style={{ fontSize: 13, color: '#94a3b8', fontWeight: 800, marginBottom: 8, textTransform: 'uppercase' }}>Transcription / Saisie :</div>
+            
+            {/* Hybrid Input: Voice result or Manual text */}
+            <div style={{ position: 'relative' }}>
+              <input 
+                type="text"
+                value={transcript || ""}
+                onChange={(e) => setTranscript(e.target.value)}
+                onKeyDown={(e) => e.key === 'Enter' && processCommand(transcript)}
+                placeholder="Écrivez ou Parlez..."
+                style={{
+                  width: '100%', background: '#fff', border: '2px solid #f1f5f9',
+                  borderRadius: 12, padding: '12px 16px', fontSize: 16, fontWeight: 700,
+                  color: '#0f172a', textAlign: 'center', outline: 'none'
+                }}
+              />
+              {!isListening && transcript && (
+                <button 
+                  onClick={() => processCommand(transcript)}
+                  style={{ position: 'absolute', right: 8, top: 8, background: '#f97316', color: '#fff', border: 'none', padding: '6px 12px', borderRadius: 8, fontWeight: 900, fontSize: 11 }}
+                >
+                  OK
+                </button>
+              )}
+            </div>
           </div>
 
-          <div style={{ display: 'flex', alignItems: 'center', gap: 12, color: '#f97316', fontWeight: 800, fontSize: 14 }}>
-            <MessageCircle size={18} />
-            <span>{feedback}</span>
+          <div style={{ textAlign: 'center', marginBottom: 20 }}>
+            <div style={{ color: '#f97316', fontWeight: 800, fontSize: 14, marginBottom: 16 }}>{feedback}</div>
+            
+            {learningMode && (
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
+                <button onClick={() => handleLearn('/market?q=riz', 'Riz')} style={{ background: '#fff', border: '1px solid #e2e8f0', padding: 10, borderRadius: 10, fontWeight: 800, fontSize: 12 }}>🌾 C'est le Riz</button>
+                <button onClick={() => handleLearn('/market?q=huile', 'Huile')} style={{ background: '#fff', border: '1px solid #e2e8f0', padding: 10, borderRadius: 10, fontWeight: 800, fontSize: 12 }}>🛢 C'est l'Huile</button>
+                <button onClick={() => handleLearn('/market', 'Offres')} style={{ background: '#fff', border: '1px solid #e2e8f0', padding: 10, borderRadius: 10, fontWeight: 800, fontSize: 12 }}>🏷️ Voir Offres</button>
+                <button onClick={() => handleLearn('/boutique?view=wallet', 'Argent')} style={{ background: '#fff', border: '1px solid #e2e8f0', padding: 10, borderRadius: 10, fontWeight: 800, fontSize: 12 }}>💰 Argent/Banque</button>
+              </div>
+            )}
           </div>
 
-          <div style={{ marginTop: 24, display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
-             <button onClick={startListening} style={{ background: '#f97316', color: '#fff', border: 'none', padding: 14, borderRadius: 12, fontWeight: 900 }}>Réessayer</button>
-             <button onClick={() => setShowPanel(false)} style={{ background: '#f1f5f9', color: '#64748b', border: 'none', padding: 14, borderRadius: 12, fontWeight: 900 }}>Fermer</button>
+          <div style={{ display: 'flex', gap: 12 }}>
+             <button 
+               onClick={startListening} 
+               style={{ 
+                 flex: 1, 
+                 background: isListening ? '#ef4444' : '#f97316', 
+                 color: '#fff', border: 'none', padding: 14, borderRadius: 12, fontWeight: 900 
+               }}
+             >
+               {isListening ? '🛑 Stop' : '🎙 Réessayer'}
+             </button>
+             <button onClick={() => setShowPanel(false)} style={{ flex: 1, background: '#f1f5f9', color: '#64748b', border: 'none', padding: 14, borderRadius: 12, fontWeight: 900 }}>Fermer</button>
           </div>
         </div>
       )}
