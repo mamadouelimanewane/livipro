@@ -15,6 +15,8 @@ export default function DriverApp() {
   const [orders, setOrders] = useState([]);
   const [completedStops, setCompletedStops] = useState(0);
   const [modalType, setModalType] = useState(null);
+  const [otpCode, setOtpCode] = useState("");
+  const [hasSigned, setHasSigned] = useState(false);
   const sigPad = useRef(null);
 
   const { user } = useAuth();
@@ -305,8 +307,20 @@ export default function DriverApp() {
               textAlign: "center",
               marginBottom: 'clamp(16px, 4vw, 30px)'
             }}>
-              Veuillez faire signer le client pour valider le transfert de responsabilité.
+              Veuillez saisir le **code OTP du client** et faire signer pour certifier le transfert sur la **LiviChain™**.
             </p>
+
+            {/* OTP Input Field */}
+            <div style={{ marginBottom: 24 }}>
+               <label style={{ fontSize: 11, fontWeight: 900, color: BRAND_ORANGE, display: 'block', textAlign: 'center', marginBottom: 8 }}>CODE OTP RÉCEPTION (4 CHIFFRES)</label>
+               <input 
+                  type="text" 
+                  maxLength="4"
+                  placeholder="0 0 0 0"
+                  style={{ width: '100%', padding: 16, borderRadius: 16, border: '2px solid #e2e8f0', textAlign: 'center', fontSize: 24, fontWeight: 900, letterSpacing: 10, outline: 'none' }}
+                  onChange={e => setOtpCode(e.target.value)}
+               />
+            </div>
 
             {/* Signature canvas — responsive width */}
             <div style={{
@@ -320,6 +334,7 @@ export default function DriverApp() {
               <SignatureCanvas
                 ref={sigPad}
                 penColor={DARK_NAVY}
+                onEnd={() => setHasSigned(true)}
                 canvasProps={{
                   style: { width: "100%", height: "100%" },
                   className: 'sigCanvas'
@@ -327,9 +342,14 @@ export default function DriverApp() {
               />
             </div>
 
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8, background: '#ecfdf5', padding: 12, borderRadius: 14, marginBottom: 24 }}>
+               <ShieldCheck size={18} color="#10b981" />
+               <div style={{ fontSize: 11, color: '#065f46', fontWeight: 800 }}>CERTIFICATION BLOCKCHAIN : LIVICHAIN™ READY</div>
+            </div>
+
             <div style={{ display: "flex", gap: 12, flexWrap: "wrap" }}>
               <button
-                onClick={() => setModalType(null)}
+                onClick={() => { setModalType(null); setHasSigned(false); }}
                 style={{
                   flex: 1,
                   minWidth: 100,
@@ -346,22 +366,23 @@ export default function DriverApp() {
                 Annuler
               </button>
               <button
+                disabled={!hasSigned || otpCode.length < 4 || fetching}
                 onClick={() => finalizeDelivery(modalType)}
                 style={{
                   flex: 2,
                   minWidth: 160,
-                  background: BRAND_ORANGE,
+                  background: (!hasSigned || otpCode.length < 4) ? '#94a3b8' : BRAND_ORANGE,
                   color: "#fff",
                   border: "none",
                   padding: 'clamp(12px, 3vw, 16px)',
                   borderRadius: 16,
                   fontWeight: 900,
-                  cursor: "pointer",
+                  cursor: (!hasSigned || otpCode.length < 4) ? 'not-allowed' : 'pointer',
                   minHeight: 48,
                   fontSize: 14
                 }}
               >
-                Valider Livraison
+                {!hasSigned ? "SIGNATURE REQUISE" : otpCode.length < 4 ? "ENTRER OTP" : "SCELLER LA LIVRAISON"}
               </button>
             </div>
           </div>

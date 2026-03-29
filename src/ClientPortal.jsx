@@ -246,14 +246,19 @@ export default function ClientPortal() {
                           <span style={{
                             fontSize: 11,
                             fontWeight: 900,
-                            background: o.status === "delivered" ? "#ecfdf5" : "#fffbeb",
-                            color: o.status === "delivered" ? VISION_GREEN : GOLD,
+                            background: o.status === "delivered" ? "#ecfdf5" : o.status === "delivering" ? "#eff6ff" : "#fffbeb",
+                            color: o.status === "delivered" ? VISION_GREEN : o.status === "delivering" ? "#3b82f6" : GOLD,
                             padding: "4px 10px",
                             borderRadius: 8,
                             whiteSpace: "nowrap"
                           }}>
-                            {o.status.toUpperCase()}
+                            {o.status === 'delivering' ? "🚚 EN ROUTE" : o.status.toUpperCase()}
                           </span>
+                          {o.status === "delivered" && (
+                            <div style={{ marginTop: 6, fontSize: 10, color: "#6366f1", fontWeight: 800, cursor: "pointer", display: "flex", alignItems: "center", gap: 4 }}>
+                               <ShieldCheck size={12} /> POD CERTIFIÉ
+                            </div>
+                          )}
                         </td>
                       </tr>
                     ))}
