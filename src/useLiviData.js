@@ -66,16 +66,16 @@ export function useGroupageOffers() {
 
 export function useProducts() {
   const LOCAL_FALLBACK = [
-    { id: "p1", name: "Riz Parfumé Thai (Sac 50kg)", price: 21500, stock: 450, promo: false, category: "Céréales", wholesaler: "Grossiste Al-Amine", origin: "Importation - Port de Dakar" },
-    { id: "p2", name: "Riz Brisé Local Casamance (Sac 50kg)", price: 18500, stock: 1200, promo: true, category: "Céréales", wholesaler: "Coopérative Rizicole Sédhiou", origin: "Production Locale 🇸🇳" },
-    { id: "p3", name: "Sucre Subventionné (Gouv SN)", price: 18000, stock: 5000, promo: true, category: "Soutien Étatique", wholesaler: "Ministère du Commerce", origin: "CSS" },
-    { id: "p4", name: "Huile Dinor 20L", price: 28500, stock: 80, promo: true, category: "Alimentaire", wholesaler: "Dakar Port Hub", origin: "Importation" },
-    { id: "p5", name: "Lait Nido (Carton 12)", price: 45000, stock: 210, promo: false, category: "Laitier", wholesaler: "Mboro Distribution", origin: "Nestlé Abidjan" },
-    { id: "p6", name: "Café Touba Artisanal (Lot 10kg)", price: 7500, stock: 140, promo: false, category: "Boissons", wholesaler: "Diagne Distribution", origin: "Touba 🇸🇳" },
-    { id: "p7", name: "Pâtes Madar (Carton)", price: 12500, stock: 95, promo: false, category: "Alimentaire", wholesaler: "Ets Saliou", origin: "Turquie" },
-    { id: "p8", name: "Savon Diama (Lot 24)", price: 6200, stock: 300, promo: false, category: "Entretien", wholesaler: "Dakar Port Hub", origin: "Sénégal 🇸🇳" },
-    { id: "p9", name: "Ciment SOCOCIM (Tonne)", price: 73000, stock: 200, promo: false, category: "BTP", wholesaler: "Ets Saliou", origin: "Rufisque 🇸🇳" },
-    { id: "p10", name: "Engrais NPK (Sac 50kg)", price: 32000, stock: 800, promo: true, category: "Agricole", wholesaler: "Ministère du Commerce", origin: "Programme National 🇸🇳" },
+    { id: "p1", name: "Riz Parfumé Thai (Sac 50kg)", price: 21500, stock: 450, promo: false, category: "Céréales", wholesaler: "Grossiste Al-Amine", origin: "Importation - Port de Dakar", image_url: "https://images.unsplash.com/photo-1586201375761-83865001e31c?w=800" },
+    { id: "p2", name: "Riz Brisé Local Casamance (Sac 50kg)", price: 18500, stock: 1200, promo: true, category: "Céréales", wholesaler: "Coopérative Rizicole Sédhiou", origin: "Production Locale 🇸🇳", image_url: "https://images.unsplash.com/photo-1613728913123-97d8331bec37?w=800" },
+    { id: "p3", name: "Sucre Subventionné (Gouv SN)", price: 18000, stock: 5000, promo: true, category: "Soutien Étatique", wholesaler: "Ministère du Commerce", origin: "CSS", image_url: "https://images.unsplash.com/photo-1593710382375-48866177fc64?w=800" },
+    { id: "p4", name: "Huile Dinor 20L", price: 28500, stock: 80, promo: true, category: "Alimentaire", wholesaler: "Dakar Port Hub", origin: "Importation", image_url: "https://images.unsplash.com/photo-1474979266404-7eaacbcd87c5?w=800" },
+    { id: "p5", name: "Lait Nido (Carton 12)", price: 45000, stock: 210, promo: false, category: "Laitier", wholesaler: "Mboro Distribution", origin: "Nestlé Abidjan", image_url: "https://images.unsplash.com/photo-1550583724-125581cc2546?w=800" },
+    { id: "p6", name: "Café Touba Artisanal (Lot 10kg)", price: 7500, stock: 140, promo: false, category: "Boissons", wholesaler: "Diagne Distribution", origin: "Touba 🇸🇳", image_url: "https://images.unsplash.com/photo-1559056199-641a0ac8b55e?w=800" },
+    { id: "p7", name: "Pâtes Madar (Carton)", price: 12500, stock: 95, promo: false, category: "Alimentaire", wholesaler: "Ets Saliou", origin: "Turquie", image_url: "https://images.unsplash.com/photo-1612929633738-8fe44f7ec841?w=800" },
+    { id: "p8", name: "Savon Diama (Lot 24)", price: 6200, stock: 300, promo: false, category: "Entretien", wholesaler: "Dakar Port Hub", origin: "Sénégal 🇸🇳", image_url: "https://images.unsplash.com/photo-1584622781564-1d9876a13d1e?w=800" },
+    { id: "p9", name: "Ciment SOCOCIM (Tonne)", price: 73000, stock: 200, promo: false, category: "BTP", wholesaler: "Ets Saliou", origin: "Rufisque 🇸🇳", image_url: "https://images.unsplash.com/photo-1518171052208-8db94050fc25?w=800" },
+    { id: "p10", name: "Engrais NPK (Sac 50kg)", price: 32000, stock: 800, promo: true, category: "Agricole", wholesaler: "Ministère du Commerce", origin: "Programme National 🇸🇳", image_url: "https://images.unsplash.com/photo-1592982537447-7440770cbfc9?w=800" },
   ]
   return useFetch('products', LOCAL_FALLBACK)
 }
@@ -146,4 +146,126 @@ export function useDeliveryTour() {
   }, [])
 
   return { data: tour, loading, error, isFallback }
+}
+
+// --- FONCTIONS DE MUTATION (ÉCRITURE) ---
+
+export async function placeOrder(orderData, items) {
+  try {
+    const { data: order, error: orderErr } = await supabase
+      .from('orders')
+      .insert([{
+        order_number: `ORD-${Date.now().toString().slice(-6)}`,
+        buyer_id: orderData.buyer_id,
+        seller_id: orderData.seller_id,
+        total_amount: orderData.total_amount,
+        status: 'pending',
+        payment_method: orderData.payment_method || 'wave',
+        payment_status: orderData.payment_status || 'pending',
+        delivery_address: orderData.delivery_address
+      }])
+      .select()
+      .single()
+
+    if (orderErr) throw orderErr
+
+    const orderItems = items.map(item => ({
+      order_id: order.id,
+      product_id: item.id,
+      product_name: item.name,
+      quantity: item.quantity,
+      unit_price: item.price,
+      total_price: item.price * item.quantity
+    }))
+
+    const { error: itemsErr } = await supabase
+      .from('order_items')
+      .insert(orderItems)
+
+    if (itemsErr) throw itemsErr
+
+    return { success: true, order }
+  } catch (e) {
+    console.error('[LiviData] Erreur placeOrder:', e.message)
+    return { success: false, error: e.message }
+  }
+}
+
+export async function updateWalletBalance(memberId, amount, type = 'debit', description = '') {
+  try {
+    // 1. Get current balance
+    const { data: member, error: fetchErr } = await supabase
+      .from('members')
+      .select('wallet_balance')
+      .eq('id', memberId)
+      .single()
+
+    if (fetchErr) throw fetchErr
+
+    const newBalance = type === 'debit' 
+      ? Number(member.wallet_balance) - Number(amount)
+      : Number(member.wallet_balance) + Number(amount)
+
+    // 2. Update balance
+    const { error: updateErr } = await supabase
+      .from('members')
+      .update({ wallet_balance: newBalance })
+      .eq('id', memberId)
+
+    if (updateErr) throw updateErr
+
+    // 3. Record transaction
+    await supabase.from('wallet_transactions').insert([{
+      member_id: memberId,
+      type,
+      amount,
+      balance_after: newBalance,
+      description,
+      status: 'completed'
+    }])
+
+    return { success: true, newBalance }
+  } catch (e) {
+    console.error('[LiviData] Erreur updateWallet:', e.message)
+    return { success: false, error: e.message }
+  }
+}
+
+// Hook pour écouter les nouvelles commandes (pour les Grossistes)
+export function useRealtimeOrders(sellerId) {
+  const [orders, setOrders] = useState([])
+
+  useEffect(() => {
+    if (!sellerId) return
+
+    // Initial fetch
+    const fetchOrders = async () => {
+      const { data } = await supabase
+        .from('orders')
+        .select('*, buyer:members(name)')
+        .eq('seller_id', sellerId)
+        .order('created_at', { ascending: false })
+      if (data) setOrders(data)
+    }
+    fetchOrders()
+
+    // Realtime subscription
+    const channel = supabase
+      .channel('public:orders')
+      .on('postgres_changes', { 
+        event: 'INSERT', 
+        schema: 'public', 
+        table: 'orders',
+        filter: `seller_id=eq.${sellerId}` 
+      }, (payload) => {
+        setOrders(prev => [payload.new, ...prev])
+      })
+      .subscribe()
+
+    return () => {
+      supabase.removeChannel(channel)
+    }
+  }, [sellerId])
+
+  return orders
 }

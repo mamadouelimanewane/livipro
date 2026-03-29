@@ -1,15 +1,15 @@
 import React, { useState, useEffect } from "react";
-import { 
-  Users, 
-  Package, 
-  Truck, 
-  BarChart3, 
-  Settings, 
-  LogOut, 
-  LayoutDashboard, 
-  Menu, 
-  X, 
-  Bell, 
+import {
+  Users,
+  Package,
+  Truck,
+  BarChart3,
+  Settings,
+  LogOut,
+  LayoutDashboard,
+  Menu,
+  X,
+  Bell,
   Search,
   ChevronRight,
   UserCircle,
@@ -28,184 +28,157 @@ const GOLD = "#f59e0b";
 const VISION_GREEN = "#10b981";
 
 export default function DashboardShell({ children, title, role = "admin" }) {
-  const [isSidebarOpen, setIsSidebarOpen] = useState(window.innerWidth > 1024);
-  const [isMobile, setIsMobile] = useState(window.innerWidth <= 1024);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
   const location = useLocation();
 
   useEffect(() => {
-    const handleResize = () => {
-      const mobile = window.innerWidth <= 1024;
-      setIsMobile(mobile);
-      if (!mobile) setIsSidebarOpen(true);
-      else setIsSidebarOpen(false);
-    };
-
+    const handleResize = () => setIsMobile(window.innerWidth < 768);
     window.addEventListener("resize", handleResize);
     return () => window.removeEventListener("resize", handleResize);
   }, []);
 
   const menuItems = {
     admin: [
-      { id: "community", label: "LiviCommunity™", icon: <MessageSquare size={20} />, path: "/admin?view=community" },
-      { id: "users", label: "Gestion Partenaires", icon: <Users size={20} />, path: "/admin?view=users" },
-      { id: "compliance", label: "Documents & KYC", icon: <ShieldCheck size={20} />, path: "/admin?view=compliance" },
-      { id: "bank", label: "Banque des Associés", icon: <Building2 size={20} />, path: "/bank" },
-      { id: "security", label: "Cyber-Sécurité", icon: <BarChart3 size={20} />, path: "/admin?view=security" },
-      { id: "track", label: "Atlas Tracking", icon: <Settings size={20} />, path: "/admin?view=track" },
+      { id: "community", label: "Social", icon: <MessageSquare size={22} />, path: "/admin?view=community" },
+      { id: "users", label: "Partners", icon: <Users size={22} />, path: "/admin?view=users" },
+      { id: "bank", label: "Bank", icon: <Building2 size={22} />, path: "/bank" },
+      { id: "track", label: "Admin", icon: <ShieldCheck size={22} />, path: "/admin?view=track" },
     ],
     grossiste: [
-      { id: "community", label: "LiviCommunity™", icon: <MessageSquare size={20} />, path: "/sales?view=community" },
-      { id: "catalog", label: "Stocks & Prix", icon: <Building2 size={20} />, path: "/sales?view=catalog" },
-      { id: "fleet", label: "Gestion Flotte", icon: <Truck size={20} />, path: "/sales?view=fleet" },
-      { id: "clients", label: "Portefeuille Clients", icon: <Users size={20} />, path: "/sales?view=directory" },
-      { id: "bank", label: "Banque des Associés", icon: <Building2 size={20} />, path: "/bank" },
-      { id: "branches", label: "Relais & Points", icon: <Settings size={20} />, path: "/sales?view=branches" },
+      { id: "community", label: "Social", icon: <MessageSquare size={22} />, path: "/sales?view=community" },
+      { id: "orders", label: "Flux", icon: <ShoppingCart size={22} />, path: "/sales?view=orders" },
+      { id: "fleet", label: "Logistique", icon: <Truck size={22} />, path: "/sales?view=fleet" },
+      { id: "catalog", label: "Stock", icon: <Package size={22} />, path: "/sales?view=catalog" },
     ],
     boutique: [
-      { id: "community", label: "LiviCommunity™", icon: <MessageSquare size={20} />, path: "/boutique?view=community" },
-      { id: "market", label: "Marketplace B2B", icon: <ShoppingBag size={20} />, path: "/boutique?view=market" },
-      { id: "dashboard", label: "Tableau de Bord", icon: <Store size={20} />, path: "/boutique?view=dashboard" },
-      { id: "wallet", label: "LiviWallet B2B", icon: <Wallet size={20} />, path: "/boutique?view=wallet" },
-      { id: "bank", label: "Banque & Tontine", icon: <Building2 size={20} />, path: "/bank" },
-      { id: "settings", label: "Paramètres Shop", icon: <Settings size={20} />, path: "/boutique?view=settings" },
+      { id: "community", label: "Social", icon: <MessageSquare size={22} />, path: "/boutique?view=community" },
+      { id: "market", label: "Marché", icon: <ShoppingBag size={22} />, path: "/boutique?view=market" },
+      { id: "dashboard", label: "Ma Boutique", icon: <Store size={22} />, path: "/boutique?view=dashboard" },
+      { id: "wallet", label: "Wallet", icon: <Wallet size={22} />, path: "/boutique?view=wallet" },
     ]
   };
 
   const handleLogout = () => {
-    alert("Déconnexion réussie. À bientôt sur LiviPro !");
+    alert("Déconnexion réussie.");
     window.location.href = "/";
   };
 
   const currentMenu = menuItems[role] || menuItems.admin;
 
   return (
-    <div style={{ display: "flex", minHeight: "100vh", background: "#f8fafc", color: DARK_NAVY, fontFamily: "'Inter', sans-serif" }}>
-      
-      {/* SIDEBAR */}
-      <div style={{ 
-        width: isSidebarOpen ? 280 : 0, 
-        background: DARK_NAVY, 
-        color: "#fff", 
-        transition: "width 0.3s ease", 
-        overflow: "hidden", 
-        display: "flex", 
-        flexDirection: "column",
-        position: isMobile ? "fixed" : "relative",
-        height: "100vh",
-        zIndex: 1000,
-        boxShadow: isMobile ? "10px 0 30px rgba(0,0,0,0.2)" : "none"
-      }}>
-        <div style={{ padding: "30px 24px", display: "flex", alignItems: "center", gap: 12 }}>
-          <div style={{ background: GOLD, padding: 8, borderRadius: 10 }}>
-            <Building2 size={24} color="#fff" />
-          </div>
-          <div style={{ display: isSidebarOpen ? "block" : "none" }}>
-            <div style={{ fontSize: 20, fontWeight: 900, letterSpacing: "-0.5px" }}>LIVIPRO <span style={{ fontWeight: 400, opacity: 0.7 }}>B2B</span></div>
-            <div style={{ fontSize: 10, color: GOLD, fontWeight: 800, textTransform: "uppercase" }}>Master Hub System</div>
-          </div>
-        </div>
-
-        <div style={{ flex: 1, padding: "20px 16px" }}>
-          {currentMenu.map((item, idx) => (
-            <Link key={idx} to={item.path} style={{ textDecoration: 'none' }}>
-              <div style={{ 
-                display: "flex", 
-                alignItems: "center", 
-                gap: 12, 
-                padding: "14px 16px", 
-                borderRadius: 14, 
-                marginBottom: 4, 
-                cursor: "pointer",
-                background: location.pathname === item.path ? "rgba(255,255,255,0.1)" : "transparent",
-                color: location.pathname === item.path ? GOLD : "#94a3b8",
-                fontWeight: 700,
-                fontSize: 14,
-                border: location.pathname === item.path ? `1px solid rgba(245,158,11,0.2)` : '1px solid transparent'
-              }}>
-                {item.icon}
-                <span style={{ display: isSidebarOpen ? "block" : "none" }}>{item.label}</span>
-              </div>
-            </Link>
-          ))}
-        </div>
-
-        <div style={{ padding: 24, borderTop: "1px solid rgba(255,255,255,0.05)" }}>
-          <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 20 }}>
-            <div style={{ width: 40, height: 40, borderRadius: "50%", background: "#1e293b", display: "flex", alignItems: "center", justifyContent: "center" }}>
-              <UserCircle size={28} color="#94a3b8" />
+    <div style={{
+      display: "flex",
+      minHeight: "100vh",
+      background: "#f1f5f9",
+      color: DARK_NAVY,
+      fontFamily: "'Outfit', sans-serif",
+      flexDirection: "column"
+    }}>
+      <div style={{ display: "flex", flex: 1, minHeight: 0 }}>
+        {/* SIDEBAR (Desktop Only) */}
+        {!isMobile && (
+          <aside style={{
+            width: 280,
+            background: DARK_NAVY,
+            color: "#fff",
+            display: "flex",
+            flexDirection: "column",
+            position: "sticky",
+            top: 0,
+            height: "100vh",
+            zIndex: 1000
+          }}>
+            <div style={{ padding: 30, display: "flex", alignItems: "center", gap: 12, borderBottom: "1px solid rgba(255,255,255,0.05)" }}>
+              <Building2 size={28} color={GOLD} />
+              <div style={{ fontSize: 20, fontWeight: 950 }}>LIVIPRO <span style={{ fontWeight: 400, opacity: 0.6 }}>B2B</span></div>
             </div>
-            <div style={{ display: isSidebarOpen ? "block" : "none" }}>
-              <div style={{ fontSize: 13, fontWeight: 800 }}>Mamadou Diallo</div>
-              <div style={{ fontSize: 10, color: VISION_GREEN, fontWeight: 700 }}>VERIFIED OWNER</div>
-            </div>
-          </div>
-          <button 
-            onClick={handleLogout}
-            style={{ width: "100%", background: "rgba(239, 68, 68, 0.1)", color: "#ef4444", border: "none", padding: "12px", borderRadius: 12, fontSize: 13, fontWeight: 800, display: "flex", alignItems: "center", justifyContent: "center", gap: 8, cursor: "pointer" }}
-          >
-            <LogOut size={18} /> {isSidebarOpen && "Déconnexion"}
-          </button>
-        </div>
-      </div>
-
-      {/* MAIN CONTENT */}
-      <div style={{ flex: 1, display: "flex", flexDirection: "column", maxWidth: isMobile ? "100%" : "calc(100vw - 280px)" }}>
-        
-        {/* TOPNAV */}
-        <header style={{ 
-          height: 70, 
-          background: "#fff", 
-          borderBottom: "1px solid #e2e8f0", 
-          display: "flex", 
-          alignItems: "center", 
-          justifyContent: "space-between", 
-          padding: "0 24px",
-          position: "sticky",
-          top: 0,
-          zIndex: 900
-        }}>
-          <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
-            {isMobile && (
-              <button onClick={() => setIsSidebarOpen(!isSidebarOpen)} style={{ background: "none", border: "none", color: DARK_NAVY }}>
-                <Menu size={24} />
+            <nav style={{ flex: 1, padding: "20px 15px" }}>
+              {currentMenu.map((item, idx) => (
+                <Link key={idx} to={item.path} style={{ textDecoration: "none" }}>
+                  <div style={{
+                    display: "flex", alignItems: "center", gap: 12, padding: "14px 18px", borderRadius: 14, marginBottom: 6,
+                    background: location.search.includes(item.id) || location.pathname.includes(item.id) ? "rgba(255,255,255,0.08)" : "transparent",
+                    color: location.search.includes(item.id) || location.pathname.includes(item.id) ? GOLD : "#94a3b8",
+                    fontWeight: 800, fontSize: 14, transition: 'all 0.2s'
+                  }}>
+                    {item.icon} {item.label}
+                  </div>
+                </Link>
+              ))}
+            </nav>
+            <div style={{ padding: 24, borderTop: "1px solid rgba(255,255,255,0.05)" }}>
+              <button onClick={handleLogout} style={{ width: '100%', background: 'rgba(239, 68, 68, 0.1)', color: '#ef4444', border: 'none', padding: 14, borderRadius: 12, fontWeight: 900, cursor: 'pointer' }}>
+                <LogOut size={18} /> Déconnexion
               </button>
-            )}
-            <h1 style={{ fontSize: 18, fontWeight: 900, color: DARK_NAVY }}>{title}</h1>
-          </div>
-
-          <div style={{ display: isMobile ? "none" : "flex", alignItems: "center", gap: 24 }}>
-            <div style={{ background: "#f1f5f9", borderRadius: 12, padding: "8px 16px", display: "flex", alignItems: "center", gap: 10, width: 300 }}>
-              <Search size={18} color="#94a3b8" />
-              <input placeholder="Recherche globale LiviPro..." style={{ background: "none", border: "none", outline: "none", fontSize: 13, width: "100%" }} />
             </div>
-            <div style={{ position: "relative", cursor: "pointer" }}>
-              <Bell size={20} color="#64748b" />
-              <div style={{ position: "absolute", top: -2, right: -2, width: 8, height: 8, background: "#ef4444", borderRadius: "50%", border: "2px solid #fff" }} />
-            </div>
-            <button style={{ background: DARK_NAVY, color: "#fff", border: "none", padding: "10px 20px", borderRadius: 12, fontSize: 13, fontWeight: 800, display: "flex", alignItems: "center", gap: 8 }}>
-              Mode Production <ChevronRight size={16} />
-            </button>
-          </div>
-        </header>
+          </aside>
+        )}
 
-        {/* CONTENT AREA */}
-        <main style={{ 
-          flex: 1, 
-          padding: isMobile ? "20px" : "32px", 
-          maxWidth: isMobile ? "100%" : 1400, 
-          margin: isMobile ? "0" : "0 auto",
-          width: "100%"
+        {/* MAIN AREA */}
+        <main style={{
+          flex: 1,
+          display: "flex",
+          flexDirection: "column",
+          minWidth: 0,
+          paddingBottom: isMobile ? 80 : 0 // Leave room for bottom nav
         }}>
-          {children}
+          {/* HEADER (Sticky) */}
+          <header style={{
+            height: isMobile ? 64 : 72,
+            background: "#fff",
+            borderBottom: "1px solid #e2e8f0",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+            padding: "0 20px",
+            position: "sticky",
+            top: 0,
+            zIndex: 900,
+            boxShadow: '0 2px 10px rgba(0,0,0,0.02)'
+          }}>
+            <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+              {isMobile && <div style={{ background: DARK_NAVY, padding: 6, borderRadius: 8 }}><Building2 size={20} color={GOLD} /></div>}
+              <h1 style={{ fontSize: isMobile ? 18 : 22, fontWeight: 950, margin: 0 }}>{title}</h1>
+            </div>
+            <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+              <div style={{ width: 36, height: 36, borderRadius: 10, background: '#f1f5f9', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <Bell size={18} color="#64748b" />
+              </div>
+              {!isMobile && (
+                <div style={{ display: 'flex', alignItems: 'center', gap: 10, background: '#f8fafc', padding: '6px 12px', borderRadius: 12, border: '1px solid #e2e8f0' }}>
+                  <UserCircle size={20} color="#94a3b8" />
+                  <span style={{ fontSize: 13, fontWeight: 800 }}>Admin LiviPro</span>
+                </div>
+              )}
+            </div>
+          </header>
+
+          {/* PAGE CONTENT */}
+          <div style={{ padding: 'clamp(12px, 4vw, 32px)', flex: 1 }}>
+            {children}
+          </div>
         </main>
       </div>
 
-      {/* MOBILE OVERLAY */}
-      {isMobile && isSidebarOpen && (
-        <div 
-          onClick={() => setIsSidebarOpen(false)}
-          style={{ position: "fixed", top: 0, left: 0, right: 0, bottom: 0, background: "rgba(0,0,0,0.5)", zIndex: 999 }} 
-        />
+      {/* BOTTOM NAV (Mobile Only) */}
+      {isMobile && (
+        <nav className="mobile-nav-bar">
+          {currentMenu.map((item, idx) => (
+            <Link 
+              key={idx} 
+              to={item.path} 
+              className={`mobile-nav-item ${location.search.includes(item.id) || location.pathname.includes(item.id) ? 'active' : ''}`}
+            >
+              {item.icon}
+              <span>{item.label}</span>
+            </Link>
+          ))}
+          <button onClick={handleLogout} style={{ background: 'none', border: 'none', padding: 0 }} className="mobile-nav-item">
+            <LogOut size={22} />
+            <span>Sortie</span>
+          </button>
+        </nav>
       )}
     </div>
   );

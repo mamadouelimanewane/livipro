@@ -29,13 +29,7 @@ const RICE_IMG = "sac_de_riz_sac_50kg_premium_senegal_1774652642574.png";
 const OIL_IMG = "huile_vegetale_dinor_premium_5l_1774652655927.png";
 const MILK_IMG = "lait_nido_carton_senegal_b2b_1774652670053.png";
 
-const MARKET_PRODUCTS = [
-  { id: "p1", name: "Riz Parfumé Thai (Sac 50kg)", category: "Céréales", price: 21500, stock: 450, host: "Dakar Logistics Hub", rating: 4.8, image: RICE_IMG, trending: true },
-  { id: "p2", name: "Huile Dinor Premium (5L x 4)", category: "Liquides", price: 18400, stock: 120, host: "Al-Amine Grossiste", rating: 4.9, image: OIL_IMG, trending: true },
-  { id: "p3", name: "Lait Nido (Carton 12)", category: "Épicerie", price: 45000, stock: 85, host: "Coopérative Thiès Hub", rating: 4.7, image: MILK_IMG, trending: false },
-  { id: "p4", name: "Sucre St Louis (Fardeau)", category: "Épicerie", price: 22100, stock: 0, host: "Dakar Logistics Hub", rating: 4.5, image: null, trending: false },
-  { id: "p5", name: "Savon BF (Carton)", category: "Hygiène", price: 12500, stock: 210, host: "Al-Amine Grossiste", rating: 4.6, image: null, trending: false },
-];
+import { useProducts, useGroupageOffers } from "./useLiviData";
 
 const Card = ({ children, style = {} }) => (
   <div style={{ background: "#fff", borderRadius: 28, padding: 0, border: "1px solid #f1f5f9", boxShadow: "0 10px 40px rgba(0,0,0,0.03)", overflow: "hidden", position: "relative", ...style }}>{children}</div>
@@ -49,8 +43,11 @@ export default function LiviMarket({ onOrder }) {
   const [activeCat, setActiveCat] = useState("Tous");
   const [searchTerm, setSearchTerm] = useState("");
   const [isAdding, setIsAdding] = useState(null);
+  
+  const { data: products, loading: productsLoading } = useProducts();
+  const { data: groupageOffers, loading: groupageLoading } = useGroupageOffers();
 
-  const filtered = MARKET_PRODUCTS.filter(p => 
+  const filtered = products.filter(p => 
     (activeCat === "Tous" || p.category === activeCat) &&
     p.name.toLowerCase().includes(searchTerm.toLowerCase())
   );
@@ -89,6 +86,57 @@ export default function LiviMarket({ onOrder }) {
              ))}
           </div>
        </div>
+
+        {/* GROUPAGE OFFERS SECTION - B2B Bulk Advantage */}
+        <div style={{ marginBottom: 48 }}>
+           <h2 style={{ fontSize: 20, fontWeight: 950, marginBottom: 20, display: "flex", alignItems: "center", gap: 10 }}>
+              <Layers size={22} color={GOLD} /> Offres de Groupage Actives <Badge bg="#fffbeb" color={GOLD}>Exclusif LiviPro</Badge>
+           </h2>
+           <div style={{ display: "flex", gap: 20, overflowX: "auto", paddingBottom: 20, WebkitOverflowScrolling: "touch" }}>
+              {groupageLoading ? (
+                 <div style={{ padding: 20, color: "#94a3b8" }}>Recherche d'opportunités de gros...</div>
+              ) : groupageOffers?.map(offer => (
+                <div key={offer.id} style={{ 
+                  minWidth: 320, background: DARK_NAVY, color: "#fff", 
+                  padding: 24, borderRadius: 24, boxShadow: "0 15px 35px rgba(15,23,42,0.3)",
+                  position: "relative", overflow: "hidden"
+                }}>
+                   <div style={{ fontSize: 11, color: GOLD, fontWeight: 800, textTransform: "uppercase", marginBottom: 6 }}>OFFRE À SAISIR</div>
+                   <h4 style={{ fontSize: 17, fontWeight: 900, marginBottom: 12 }}>{offer.name}</h4>
+                   <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 16 }}>
+                      <div>
+                         <div style={{ fontSize: 10, color: "#94a3b8" }}>RÉDUCTION</div>
+                         <div style={{ fontSize: 18, fontWeight: 950, color: GOLD }}>-{offer.discount}</div>
+                      </div>
+                      <div style={{ textAlign: "right" }}>
+                         <div style={{ fontSize: 10, color: "#94a3b8" }}>EXPIRATION</div>
+                         <div style={{ fontSize: 14, fontWeight: 800 }}>{offer.deadline}</div>
+                      </div>
+                   </div>
+                   
+                   {/* Local progress bar */}
+                   <div style={{ marginBottom: 20 }}>
+                      <div style={{ display: "flex", justifyContent: "space-between", fontSize: 10, marginBottom: 6 }}>
+                         <span>Progression: {offer.current_orders}/{offer.min_orders} Boutiquiers</span>
+                         <span>{Math.round((offer.current_orders/offer.min_orders)*100)}%</span>
+                      </div>
+                      <div style={{ height: 6, background: "rgba(255,255,255,0.1)", borderRadius: 3, overflow: "hidden" }}>
+                         <div style={{ height: "100%", width: `${(offer.current_orders/offer.min_orders)*100}%`, background: GOLD }} />
+                      </div>
+                   </div>
+
+                   <button style={{ 
+                     width: "100%", background: "rgba(255,255,255,0.1)", color: "#fff", 
+                     border: "1px solid rgba(255,255,255,0.2)", padding: "10px", 
+                     borderRadius: 12, fontSize: 12, fontWeight: 800, cursor: "pointer",
+                     display: "flex", alignItems: "center", justifyContent: "center", gap: 8
+                   }}>
+                      <Users size={14} /> Rejoindre le groupage
+                   </button>
+                </div>
+              ))}
+           </div>
+        </div>
 
        {/* PRODUCT GRID */}
        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(300px, 1fr))", gap: 32 }}>

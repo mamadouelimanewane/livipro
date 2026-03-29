@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Sparkles, TrendingUp, AlertTriangle, Zap, Calendar, Package, RefreshCw, BarChart3, Clock, LayoutDashboard } from 'lucide-react';
+import { useProducts } from './useLiviData';
 
 const VISION_GREEN = "#10b981";
 const GOLD = "#f59e0b";
@@ -10,22 +11,28 @@ const Card = ({ children, style = {} }) => (
 );
 
 export default function LiviPredict() {
+  const { data: products, loading: productsLoading } = useProducts();
   const [activeSeason, setActiveSeason] = useState("ramadan");
   const [isRefreshing, setIsRefreshing] = useState(false);
 
-  const PREDICTIONS = {
-    ramadan: [
-      { id: "p1", name: "Sucre St Louis (Fardeau)", current: 12, predicted: 45, confidence: 98, status: "Rupture Imminente" },
-      { id: "p2", name: "Lait Nido (Carton 12)", current: 5, predicted: 24, confidence: 95, status: "Alerte Critique" },
-      { id: "p3", name: "Dattes Medjool (Caisse)", current: 0, predicted: 15, confidence: 92, status: "Pré-Commande AI" },
-    ],
-    tabaski: [
-      { id: "u1", name: "Huile Dinor 5L (Carton)", current: 20, predicted: 85, confidence: 96, status: "Restocker" },
-      { id: "u2", name: "Oignons / Pommes de Terre", current: 8, predicted: 150, confidence: 99, status: "Volume Hub Groupé" },
-    ]
+  // Simulation de calcul prédictif basé sur le stock réel
+  const getDyanmicPredictions = () => {
+    if (!products || products.length === 0) return [];
+    
+    return products.slice(0, 3).map(p => {
+      const isCritical = p.stock < 100;
+      return {
+        id: p.id,
+        name: p.name,
+        current: p.stock,
+        predicted: p.stock + (activeSeason === 'ramadan' ? 150 : 80),
+        confidence: isCritical ? 99 : 88,
+        status: isCritical ? "Rupture Imminente" : "Flux Stable"
+      };
+    });
   };
 
-  const currentPredictions = PREDICTIONS[activeSeason] || [];
+  const currentPredictions = getDyanmicPredictions();
 
   return (
     <div className="animate-fade-in">
@@ -40,7 +47,9 @@ export default function LiviPredict() {
                 <RefreshCw size={18} className={isRefreshing ? "animate-spin" : ""} /> {isRefreshing ? "Analyse Flux..." : "Rafraîchir"}
              </button>
           </div>
-          <p style={{ fontSize: 15, opacity: 0.8, lineHeight: 1.6, maxWidth: 500 }}>Prédiction des stocks basée sur la consommation historique (Ramadan 2024/2025) et les flux LiviPOS de votre zone.</p>
+          <p style={{ fontSize: 15, opacity: 0.8, lineHeight: 1.6, maxWidth: 500 }}>
+            {productsLoading ? "Analyse du catalogue en cours..." : "Analyse IA terminée. Votre stock de Riz et Huile nécessite une attention immédiate pour le Ramadan."}
+          </p>
        </div>
 
        <div style={{ display: "flex", gap: 12, marginBottom: 32 }}>
