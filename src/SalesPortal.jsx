@@ -255,20 +255,36 @@ export default function SalesPortal() {
                       </button>
                     )}
                     {order.status === 'processing' && (
-                      <div style={{ display: 'flex', gap: 10 }}>
-                         <button 
-                          onClick={() => alert(`📦 Dispatch : Commande #${order.order_number} envoyée vers LiviFleet. Un livreur va être assigné automatiquement.`)}
-                          style={{ background: DARK_NAVY, color: '#fff', border: 'none', padding: '8px 16px', borderRadius: 10, fontWeight: 800, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 6 }}
-                         >
-                            <Truck size={14} /> Assigner Livreur
-                         </button>
-                         <button 
-                          disabled={updating}
-                          onClick={() => updateOrderStatus(order.id, 'delivering')}
-                          style={{ background: '#6366f1', color: '#fff', border: 'none', padding: '8px 16px', borderRadius: 10, fontWeight: 800, cursor: 'pointer' }}
-                         >
-                            Expédier en direct
-                         </button>
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: 10, width: '100%', marginTop: 10 }}>
+                         <div style={{ display: 'flex', gap: 10 }}>
+                            <button 
+                              onClick={() => alert(`📦 Dispatch : Commande #${order.order_number} envoyée vers LiviFleet. Un livreur va être assigné automatiquement.`)}
+                              style={{ background: DARK_NAVY, color: '#fff', border: 'none', padding: '8px 16px', borderRadius: 10, fontWeight: 800, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 6 }}
+                            >
+                                <Truck size={14} /> Ré-assigner
+                            </button>
+                            <button 
+                              disabled={updating}
+                              onClick={() => updateOrderStatus(order.id, 'delivering')}
+                              style={{ background: '#6366f1', color: '#fff', border: 'none', padding: '8px 16px', borderRadius: 10, fontWeight: 800, cursor: 'pointer' }}
+                            >
+                                Forcer Collecte
+                            </button>
+                         </div>
+                         <div style={{ padding: 12, background: '#f0f9ff', borderRadius: 14, border: '1px solid #bae6fd' }}>
+                            <div style={{ fontSize: 10, fontWeight: 900, color: '#0369a1', marginBottom: 6, display: 'flex', alignItems: 'center', gap: 4 }}>
+                               <Building2 size={12} /> LIVREUR EN ROUTE VERS DÉPÔT
+                            </div>
+                            <button 
+                              onClick={() => window.open(`tel:${order.driver_phone || '+221770000000'}`, '_self')}
+                              style={{ width: '100%', background: '#0369a1', color: '#fff', border: 'none', padding: '8px', borderRadius: 10, fontSize: 11, fontWeight: 800, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6, marginBottom: 8 }}
+                            >
+                               <PhoneCall size={14} /> CONTACTER CHAUFFEUR
+                            </button>
+                            <div style={{ height: 80, borderRadius: 10, overflow: 'hidden' }}>
+                               <MapView />
+                            </div>
+                         </div>
                       </div>
                     )}
                     {order.status === 'delivering' && (
