@@ -28,7 +28,7 @@ export default function DriverApp() {
     const { data } = await supabase
       .from('orders')
       .select('*, buyer:members(name, location)')
-      .eq('status', 'delivering')
+      .in('status', ['processing', 'delivering'])
       .order('created_at', { ascending: true });
     if (data) setOrders(data);
     setFetching(false);
@@ -40,7 +40,7 @@ export default function DriverApp() {
     // Abonnement aux nouvelles livraisons
     const channel = supabase.channel('driver-orders')
       .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'orders' }, (payload) => {
-        if (payload.new.status === 'delivering' || payload.old.status === 'delivering') {
+        if (['processing', 'delivering'].includes(payload.new.status) || ['processing', 'delivering'].includes(payload.old.status)) {
           fetchDeliveringOrders();
         }
       })
@@ -51,12 +51,15 @@ export default function DriverApp() {
 
   const finalizeDelivery = async (orderId) => {
     setFetching(true);
+    const currentOrder = orders.find(o => o.id === orderId);
+    const nextStatus = currentOrder.status === 'processing' ? 'delivering' : 'delivered';
+
     // 1. Update order status
     const { error } = await supabase
       .from('orders')
       .update({ 
-        status: 'delivered', 
-        delivered_at: new Date().toISOString() 
+        status: nextStatus,
+        [nextStatus === 'delivered' ? 'delivered_at' : 'picked_up_at']: new Date().toISOString() 
       })
       .eq('id', orderId);
 
@@ -196,14 +199,22 @@ export default function DriverApp() {
                   </div>
                 </div>
                 <div style={{
-                  background: "#fff7ed",
+                  background: order.status === 'processing' ? '#f0f9ff' : "#fff7ed",
                   padding: "8px",
                   borderRadius: 12,
-                  color: BRAND_ORANGE,
+                  color: order.status === 'processing' ? '#0369a1' : BRAND_ORANGE,
                   flexShrink: 0
                 }}>
-                  <Package size={20} />
+                  {order.status === 'processing' ? <Building2 size={20} /> : <Package size={20} />}
                 </div>
+              </div>
+
+              {/* Status Indicator: Pickup vs Delivery */}
+              <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 4 }}>
+                 <div style={{ width: 8, height: 8, borderRadius: '50%', background: order.status === 'processing' ? '#3b82f6' : VISION_GREEN }}></div>
+                 <span style={{ fontSize: 11, fontWeight: 900, color: order.status === 'processing' ? '#3b82f6' : VISION_GREEN }}>
+                    {order.status === 'processing' ? "ÉCHÉANCE : RÉCUPÉRATION AU DÉPÔT" : "ÉCHÉANCE : LIVRAISON CLIENT"}
+                 </span>
               </div>
 
               {/* Location */}
@@ -218,7 +229,7 @@ export default function DriverApp() {
                 gap: 6
               }}>
                 <MapPin size={14} style={{ flexShrink: 0 }} />
-                {order.buyer?.location || 'Dakar Plateau (Secteur 2)'}
+                {order.status === 'processing' ? "ENTREPÔT GROSSISTE : AL-AMINE" : (order.buyer?.location || 'Dakar Plateau (Secteur 2)')}
               </div>
 
                 {/* Map & Navigation */}
@@ -226,7 +237,7 @@ export default function DriverApp() {
                    <MapView />
                    <div style={{ position: 'absolute', bottom: 8, right: 8 }}>
                       <button 
-                        onClick={() => window.open(`https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(order.buyer?.location || 'Dakar')}`, '_blank')}
+                        onClick={() => window.open(`https://www.google.com/maps/dir/?api=1&destination=${order.status === 'processing' ? 'Entrepôt+Al-Amine+Dakar' : encodeURIComponent(order.buyer?.location || 'Dakar')}`, '_blank')}
                         style={{ background: DARK_NAVY, color: '#fff', border: 'none', padding: '6px 12px', borderRadius: 10, fontSize: 10, fontWeight: 900, display: 'flex', alignItems: 'center', gap: 6, cursor: 'pointer' }}
                       >
                          <Navigation size={12} color={BRAND_ORANGE} /> NAVIGATION GPS
@@ -240,7 +251,7 @@ export default function DriverApp() {
                     onClick={() => setModalType(order.id)}
                     style={{
                       flex: 1,
-                      background: BRAND_ORANGE,
+                      background: order.status === 'processing' ? '#3b82f6' : BRAND_ORANGE,
                       color: "#fff",
                       border: "none",
                       padding: "clamp(12px, 3vw, 14px)",
@@ -256,7 +267,8 @@ export default function DriverApp() {
                       touchAction: "manipulation"
                     }}
                   >
-                    <QrCode size={18} /> Scanner & Livrer
+                    {order.status === 'processing' ? <Box size={18} /> : <QrCode size={18} />}
+                    {order.status === 'processing' ? "VALIDER RÉCUPÉRATION" : "SCANNER & LIVRER"}
                   </button>
                   <button
                     onClick={() => window.open(`tel:${order.buyer?.phone || '+221770000000'}`, '_self')}
