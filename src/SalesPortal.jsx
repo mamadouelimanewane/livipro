@@ -29,7 +29,8 @@ import {
   LayoutDashboard,
   BrainCircuit,
   PieChart,
-  MessageSquare
+  MessageSquare,
+  PhoneCall
 } from "lucide-react";
 import LiviFleetManager from "./LiviFleetManager";
 import LiviBranchManager from "./LiviBranchManager";
@@ -269,6 +270,19 @@ export default function SalesPortal() {
                             Expédier en direct
                          </button>
                       </div>
+                    )}
+                    {order.status === 'delivering' && (
+                       <div style={{ width: '100%', marginTop: 12 }}>
+                          <button 
+                            onClick={() => window.open(`tel:${order.driver_phone || '+221770000000'}`, '_self')}
+                            style={{ width: '100%', background: VISION_GREEN, color: '#fff', border: 'none', padding: '10px', borderRadius: 12, fontWeight: 900, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10, cursor: 'pointer' }}
+                          >
+                             <PhoneCall size={18} /> CONTACTER CAMION EN MISSION
+                          </button>
+                          <div style={{ marginTop: 8, height: 80, borderRadius: 10, overflow: 'hidden' }}>
+                             <MapView />
+                          </div>
+                       </div>
                     )}
                   </div>
                 </Card>

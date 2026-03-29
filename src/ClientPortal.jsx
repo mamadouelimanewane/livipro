@@ -7,7 +7,7 @@ import LiviTontine from './LiviTontine'
 import LiviPredict from './LiviPredict'
 import LiviFintech from './LiviWallet'
 import LiviVoice from './LiviVoice'
-import { BellRing, PackageSearch, BatteryCharging, ShoppingCart, CheckCircle2, ChevronRight, Zap, Wallet, Search, ArrowLeft, Users, Mic, Heart, Star, Truck, MoreVertical, Box, Layers, History, ShieldCheck, Settings as SettingsIcon, Send, Receipt, Calculator, CreditCard, GraduationCap, LayoutDashboard, BrainCircuit, Globe, ShoppingBag, MessageSquare, ShieldAlert, Coins } from 'lucide-react'
+import { BellRing, PackageSearch, BatteryCharging, ShoppingCart, CheckCircle2, ChevronRight, Zap, Wallet, Search, ArrowLeft, Users, Mic, Heart, Star, Truck, MoreVertical, Box, Layers, History, ShieldCheck, Settings as SettingsIcon, Send, Receipt, Calculator, CreditCard, GraduationCap, LayoutDashboard, BrainCircuit, Globe, ShoppingBag, MessageSquare, ShieldAlert, Coins, PhoneCall } from 'lucide-react'
 import { useGroupageOffers, useMembers, useProducts, placeOrder } from './useLiviData'
 import DashboardShell from "./components/DashboardShell";
 import { useSearchParams } from "react-router-dom";
@@ -254,6 +254,20 @@ export default function ClientPortal() {
                           }}>
                             {o.status === 'delivering' ? "🚚 EN ROUTE" : o.status.toUpperCase()}
                           </span>
+                          {o.status === "delivering" && (
+                            <div style={{ marginTop: 10, padding: 12, background: '#eff6ff', borderRadius: 12, border: '1px solid #bfdbfe' }}>
+                               <div style={{ fontSize: 10, fontWeight: 900, color: '#1d4ed8', marginBottom: 6 }}>SUIVI TEMPS RÉEL</div>
+                               <div style={{ height: 100, borderRadius: 10, overflow: 'hidden', marginBottom: 10 }}>
+                                  <MapView />
+                               </div>
+                               <button 
+                                onClick={() => window.open(`tel:${o.driver_phone || '+221770000000'}`, '_self')}
+                                style={{ width: '100%', background: '#3b82f6', color: '#fff', border: 'none', padding: '8px', borderRadius: 10, fontSize: 11, fontWeight: 800, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6 }}
+                               >
+                                  <PhoneCall size={14} /> APPELER LIVREUR
+                               </button>
+                            </div>
+                          )}
                           {o.status === "delivered" && (
                             <div style={{ marginTop: 6, fontSize: 10, color: "#6366f1", fontWeight: 800, cursor: "pointer", display: "flex", alignItems: "center", gap: 4 }}>
                                <ShieldCheck size={12} /> POD CERTIFIÉ

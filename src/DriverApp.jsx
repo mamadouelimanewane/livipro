@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from 'react'
-import { CheckCircle, Truck, Package, Banknote, PhoneCall, CheckSquare, ScanBarcode, PenTool, X, MapPin, QrCode, Sparkles, Receipt, AlertTriangle, FileText, Send, ShieldCheck, UserCircle } from 'lucide-react'
+import { CheckCircle, Truck, Package, Banknote, PhoneCall, CheckSquare, ScanBarcode, PenTool, X, MapPin, QrCode, Sparkles, Receipt, AlertTriangle, FileText, Send, ShieldCheck, UserCircle, Navigation, Building2 } from 'lucide-react'
 import SignatureCanvas from 'react-signature-canvas'
 import MapView from './components/MapView'
 import LiviVision from './LiviVision'
@@ -242,7 +242,7 @@ export default function DriverApp() {
                   <button
                     onClick={() => window.open(`tel:${order.buyer?.phone || '+221770000000'}`, '_self')}
                     style={{
-                      width: 48,
+                      width: 44,
                       background: '#fff',
                       color: BRAND_ORANGE,
                       border: `2px solid ${BRAND_ORANGE}`,
@@ -250,10 +250,28 @@ export default function DriverApp() {
                       display: "flex",
                       alignItems: "center",
                       justifyContent: "center",
-                      cursor: "pointer"
+                      cursor: "pointer",
+                      title: "Appeler Boutique"
                     }}
                   >
-                    <PhoneCall size={20} />
+                    <PhoneCall size={18} />
+                  </button>
+                  <button
+                    onClick={() => window.open(`tel:+221771112233`, '_self')} // Fixed Depot Number
+                    style={{
+                      width: 44,
+                      background: DARK_NAVY,
+                      color: '#fff',
+                      border: "none",
+                      borderRadius: 14,
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      cursor: "pointer",
+                      title: "Appeler Dépôt"
+                    }}
+                  >
+                    <Building2 size={18} />
                   </button>
                 </div>
             </div>
