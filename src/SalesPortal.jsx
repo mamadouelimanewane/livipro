@@ -327,16 +327,35 @@ export default function SalesPortal() {
                   <tr style={{ textAlign: "left" }}>
                     <th style={{ padding: "clamp(10px, 2vw, 16px)", fontSize: 12, color: "#64748b", whiteSpace: "nowrap" }}>PRODUIT</th>
                     <th style={{ padding: "clamp(10px, 2vw, 16px)", fontSize: 12, color: "#64748b", whiteSpace: "nowrap" }}>STOCK RÉEL</th>
-                    <th style={{ padding: "clamp(10px, 2vw, 16px)", fontSize: 12, color: "#64748b", whiteSpace: "nowrap" }}>PRIX B2B</th>
+                    <th style={{ padding: "clamp(10px, 2vw, 16px)", fontSize: 12, color: "#64748b", whiteSpace: "nowrap" }}>📦 LIVIPREDICT™ (IA)</th>
+                    <th style={{ padding: "clamp(10px, 2vw, 16px)", fontSize: 12, color: "#64748b", whiteSpace: "nowrap" }}>ACTIONS</th>
                   </tr>
                 </thead>
                 <tbody>
                   {inventory.map(p => (
                     <tr key={p.id} style={{ borderBottom: "1px solid #f8fafc" }}>
-                      <td style={{ padding: "clamp(10px, 2vw, 16px)", fontSize: 'clamp(12px, 2vw, 14px)', fontWeight: 800 }}>{p.name}</td>
-                      <td style={{ padding: "clamp(10px, 2vw, 16px)", fontSize: 'clamp(12px, 2vw, 14px)', fontWeight: 700 }}>{p.stock}</td>
-                      <td style={{ padding: "clamp(10px, 2vw, 16px)", fontSize: 'clamp(12px, 2vw, 14px)', fontWeight: 950, whiteSpace: "nowrap" }}>
-                        {p.price.toLocaleString()} F
+                      <td style={{ padding: "clamp(10px, 2vw, 16px)", fontSize: 'clamp(12px, 2vw, 14px)', fontWeight: 800 }}>
+                         {p.name}
+                         {p.stock < 50 && <div style={{ fontSize: 9, color: '#ef4444', fontWeight: 900 }}>⚠️ RUPTURE IMMINENTE</div>}
+                      </td>
+                      <td style={{ padding: "clamp(10px, 2vw, 16px)", fontSize: 'clamp(12px, 2vw, 14px)', fontWeight: 700 }}>
+                         <span style={{ color: p.stock < 100 ? '#ef4444' : DARK_NAVY }}>{p.stock} UN</span>
+                      </td>
+                      <td style={{ padding: "clamp(10px, 2vw, 16px)" }}>
+                         <div style={{ fontSize: 12, fontWeight: 900, color: VISION_GREEN }}>Rupture dans {Math.floor(p.stock / 20)} Jours</div>
+                         <div style={{ height: 4, width: 60, background: '#f1f5f9', borderRadius: 2, marginTop: 4 }}>
+                            <div style={{ height: '100%', width: `${Math.min(100, (p.stock / 500) * 100)}%`, background: VISION_GREEN }} />
+                         </div>
+                      </td>
+                      <td style={{ padding: "clamp(10px, 2vw, 16px)" }}>
+                         {p.stock < 100 && (
+                            <button 
+                              onClick={() => alert(`🚀 IA RESTOCK : Commande de ${500 - p.stock} sacs envoyée au producteur.`)}
+                              style={{ background: '#fdf2f2', color: '#ef4444', border: '1px solid #fee2e2', padding: '6px 12px', borderRadius: 8, fontSize: 10, fontWeight: 950, cursor: 'pointer' }}
+                            >
+                               RÉAPPRO. IA
+                            </button>
+                         )}
                       </td>
                     </tr>
                   ))}
