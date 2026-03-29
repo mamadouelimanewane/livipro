@@ -22,3 +22,5 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+LiviPro_Documentation_Complete.pdf
+generate_pdf.py
