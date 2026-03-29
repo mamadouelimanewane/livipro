@@ -245,6 +245,16 @@ export default function DriverApp() {
                    </div>
                 </div>
 
+                {/* Exception Handling */}
+                <div style={{ display: 'flex', gap: 8 }}>
+                   <button 
+                     onClick={() => alert(`🚨 ALERTE INCIDENT : Commande #${order.id}. Veuillez prendre une photo du produit endommagé ou notifier le motif du refus.`)}
+                     style={{ flex: 1, background: '#fee2e2', color: '#ef4444', border: 'none', padding: '8px', borderRadius: 10, fontSize: 10, fontWeight: 800, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 4 }}
+                   >
+                      <AlertTriangle size={12} /> SIGNALER INCIDENT
+                   </button>
+                </div>
+
                 {/* CTA buttons — touch-friendly */}
                 <div style={{ display: 'flex', gap: 10 }}>
                   <button

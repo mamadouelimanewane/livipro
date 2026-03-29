@@ -318,16 +318,19 @@ export default function ClientPortal() {
                             </div>
                           )}
                           {o.status === "delivered" && (
-                            <div style={{ marginTop: 10 }}>
+                            <div style={{ marginTop: 10, display: 'flex', flexDirection: 'column', gap: 6 }}>
                                <button 
                                 onClick={() => setRatingOrder(o.id)}
                                 style={{ width: '100%', background: VISION_GREEN, color: '#fff', border: 'none', padding: '8px', borderRadius: 10, fontSize: 10, fontWeight: 900, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 4 }}
                                >
                                   <Star size={12} fill="#fff" /> ÉVALUER LE LIVREUR
                                </button>
-                               <div style={{ marginTop: 6, fontSize: 10, color: "#6366f1", fontWeight: 800, cursor: "pointer", display: "flex", alignItems: "center", gap: 4 }}>
-                                  <ShieldCheck size={12} /> POD CERTIFIÉ
-                               </div>
+                               <button 
+                                onClick={() => alert(`↩️ RETOUR MARCHANDISE : Commande #${o.id}. Une équipe logistique va passer pour récupérer le colis.`)}
+                                style={{ width: '100%', background: '#fff', color: '#ef4444', border: '1px solid #fee2e2', padding: '8px', borderRadius: 10, fontSize: 10, fontWeight: 900, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 4 }}
+                               >
+                                  <ArrowLeft size={12} /> RETOURNER ARTICLE
+                               </button>
                             </div>
                           )}
                         </td>
