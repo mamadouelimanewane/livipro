@@ -35,6 +35,55 @@ export default function ClientPortal() {
   const [searchParams, setSearchParams] = useSearchParams();
   const [activeTab, setActiveTab] = useState(searchParams.get("view") || "market");
   const [isVoiceActive, setIsVoiceActive] = useState(false);
+  const [selectedProduct, setSelectedProduct] = useState(null)
+  const [ratingOrder, setRatingOrder] = useState(null)
+  const [stars, setStars] = useState(5)
+  const [comment, setComment] = useState("")
+
+  const renderRatingModal = () => (
+    <div style={{
+      position: 'fixed', inset: 0, background: 'rgba(15,23,42,0.8)', zIndex: 10000,
+      display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 20
+    }}>
+       <div style={{ background: '#fff', padding: 24, borderRadius: 28, width: '100%', maxWidth: 400, boxShadow: '0 25px 50px -12px rgba(0,0,0,0.5)' }}>
+          <div style={{ textAlign: 'center', marginBottom: 20 }}>
+             <Star size={48} color={GOLD} fill={GOLD} style={{ margin: '0 auto 12px' }} />
+             <h3 style={{ fontSize: 20, fontWeight: 900 }}>Finaliser la Livraison</h3>
+             <p style={{ fontSize: 13, color: '#64748b' }}>Évaluer le sérieux du livreur pour son **Dossier de Leasing**.</p>
+          </div>
+
+          <div style={{ display: 'flex', justifyContent: 'center', gap: 10, marginBottom: 24 }}>
+             {[1,2,3,4,5].map(s => (
+                <Star 
+                  key={s} 
+                  size={32} 
+                  fill={s <= stars ? GOLD : 'none'} 
+                  color={GOLD} 
+                  style={{ cursor: 'pointer' }}
+                  onClick={() => setStars(s)} 
+                />
+             ))}
+          </div>
+
+          <textarea 
+            placeholder="Livreur courtois et ponctuel ? Notez-le ici..."
+            style={{ width: '100%', padding: 14, borderRadius: 16, border: '1px solid #e2e8f0', minHeight: 100, marginBottom: 20, outline: 'none', fontSize: 13 }}
+            onChange={e => setComment(e.target.value)}
+          />
+
+          <button 
+            onClick={() => {
+              alert(`🌟 LiviKarma™ : +${stars*10} points attribués au Livreur ! Merci pour votre confiance.`);
+              setRatingOrder(null);
+            }}
+            style={{ width: '100%', background: DARK_NAVY, color: '#fff', border: 'none', padding: 16, borderRadius: 18, fontWeight: 900, cursor: 'pointer' }}
+          >
+             VALIDER & FERMER
+          </button>
+       </div>
+    </div>
+  )
+
   const [salesRecord, setSalesRecord] = useState(parseInt(localStorage.getItem('livi_total_sales') || '1280000'));
   const [loading, setLoading] = useState(false);
 
@@ -269,8 +318,16 @@ export default function ClientPortal() {
                             </div>
                           )}
                           {o.status === "delivered" && (
-                            <div style={{ marginTop: 6, fontSize: 10, color: "#6366f1", fontWeight: 800, cursor: "pointer", display: "flex", alignItems: "center", gap: 4 }}>
-                               <ShieldCheck size={12} /> POD CERTIFIÉ
+                            <div style={{ marginTop: 10 }}>
+                               <button 
+                                onClick={() => setRatingOrder(o.id)}
+                                style={{ width: '100%', background: VISION_GREEN, color: '#fff', border: 'none', padding: '8px', borderRadius: 10, fontSize: 10, fontWeight: 900, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 4 }}
+                               >
+                                  <Star size={12} fill="#fff" /> ÉVALUER LE LIVREUR
+                               </button>
+                               <div style={{ marginTop: 6, fontSize: 10, color: "#6366f1", fontWeight: 800, cursor: "pointer", display: "flex", alignItems: "center", gap: 4 }}>
+                                  <ShieldCheck size={12} /> POD CERTIFIÉ
+                               </div>
                             </div>
                           )}
                         </td>

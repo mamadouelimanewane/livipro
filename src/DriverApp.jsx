@@ -10,6 +10,7 @@ import './index.css'
 
 const BRAND_ORANGE = '#f97316'
 const DARK_NAVY = '#0f172a'
+const VISION_GREEN = '#10b981'
 
 export default function DriverApp() {
   const [orders, setOrders] = useState([]);
@@ -115,8 +116,8 @@ export default function DriverApp() {
           <UserCircle size={32} color="#94a3b8" style={{ flexShrink: 0 }} />
         </div>
 
-        {/* Progress bar */}
-        <div style={{ background: '#1e293b', padding: 'clamp(12px, 3vw, 16px)', borderRadius: 18 }}>
+        {/* Progress bar: Tournée */}
+        <div style={{ background: '#1e293b', padding: 'clamp(12px, 3vw, 16px)', borderRadius: 18, marginBottom: 12 }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 10, flexWrap: 'wrap', gap: 4 }}>
             <span style={{ fontSize: 13, color: '#94a3b8' }}>Tournée en cours</span>
             <span style={{ fontSize: 13, fontWeight: 900 }}>
@@ -133,6 +134,24 @@ export default function DriverApp() {
               transition: 'width 0.5s ease'
             }} />
           </div>
+        </div>
+
+        {/* LiviKarma & Leasing Progress */}
+        <div style={{ background: 'linear-gradient(90deg, #1e293b 0%, #0f172a 100%)', padding: 'clamp(12px, 3vw, 16px)', borderRadius: 18, border: '1px solid rgba(249, 115, 22, 0.2)' }}>
+           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                 <Sparkles size={16} color={BRAND_ORANGE} />
+                 <span style={{ fontSize: 11, fontWeight: 900, color: BRAND_ORANGE }}>SCORE LIVIKARMA™ LEASING</span>
+              </div>
+              <div style={{ fontSize: 14, fontWeight: 950 }}>850 <span style={{ fontSize: 10, opacity: 0.6 }}>pts</span></div>
+           </div>
+           <div style={{ height: 10, background: '#334155', borderRadius: 5, overflow: 'hidden', position: 'relative' }}>
+              <div style={{ height: '100%', width: '85%', background: VISION_GREEN, transition: 'width 1s ease' }} />
+           </div>
+           <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 8 }}>
+              <span style={{ fontSize: 10, color: '#94a3b8', fontWeight: 700 }}>OBJECTIF : RENOUVELLEMENT VÉHICULE (1000 pts)</span>
+              <span style={{ fontSize: 10, color: VISION_GREEN, fontWeight: 800 }}>85% ÉLIGIBLE</span>
+           </div>
         </div>
       </div>
 
