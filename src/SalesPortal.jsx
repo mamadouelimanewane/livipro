@@ -254,13 +254,21 @@ export default function SalesPortal() {
                       </button>
                     )}
                     {order.status === 'processing' && (
-                      <button 
-                        disabled={updating}
-                        onClick={() => updateOrderStatus(order.id, 'delivering')}
-                        style={{ background: '#6366f1', color: '#fff', border: 'none', padding: '8px 16px', borderRadius: 10, fontWeight: 800, cursor: 'pointer' }}
-                      >
-                        Expédier
-                      </button>
+                      <div style={{ display: 'flex', gap: 10 }}>
+                         <button 
+                          onClick={() => alert(`📦 Dispatch : Commande #${order.order_number} envoyée vers LiviFleet. Un livreur va être assigné automatiquement.`)}
+                          style={{ background: DARK_NAVY, color: '#fff', border: 'none', padding: '8px 16px', borderRadius: 10, fontWeight: 800, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 6 }}
+                         >
+                            <Truck size={14} /> Assigner Livreur
+                         </button>
+                         <button 
+                          disabled={updating}
+                          onClick={() => updateOrderStatus(order.id, 'delivering')}
+                          style={{ background: '#6366f1', color: '#fff', border: 'none', padding: '8px 16px', borderRadius: 10, fontWeight: 800, cursor: 'pointer' }}
+                         >
+                            Expédier en direct
+                         </button>
+                      </div>
                     )}
                   </div>
                 </Card>
@@ -315,52 +323,98 @@ export default function SalesPortal() {
              </div>
 
              {promoForm ? (
-               <Card style={{ background: '#f8fafc', border: `2px dashed ${GOLD}` }}>
+                <Card style={{ background: '#f8fafc', border: `2px dashed ${GOLD}`, position: 'relative' }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 20 }}>
-                     <h3 style={{ fontSize: 18, fontWeight: 900 }}>🚀 Publier une Offre B2B</h3>
-                     <button onClick={() => setPromoForm(null)} style={{ background: 'none', border: 'none', color: '#64748b', fontWeight: 800, cursor: 'pointer' }}>Annuler</button>
+                    <h3 style={{ fontSize: 18, fontWeight: 900 }}>🚀 Publier une Offre B2B</h3>
+                    <button onClick={() => setPromoForm(null)} style={{ background: 'none', border: 'none', color: '#64748b', fontWeight: 800, cursor: 'pointer' }}>Annuler</button>
                   </div>
-                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 20 }}>
-                     <div>
-                        <label style={{ fontSize: 12, fontWeight: 800, color: '#64748b', display: 'block', marginBottom: 8 }}>PRIX PROMOTIONNEL (FCFA)</label>
-                        <input 
-                          type="number" 
-                          placeholder="Ex: 14500" 
-                          style={{ width: '100%', padding: 12, borderRadius: 12, border: '1px solid #e2e8f0', outline: 'none' }}
-                          onChange={e => setPromoForm({...promoForm, price: e.target.value})}
-                        />
-                     </div>
-                     <div>
-                        <label style={{ fontSize: 12, fontWeight: 800, color: '#64748b', display: 'block', marginBottom: 8 }}>URL DE L'IMAGE PRODUIT</label>
-                        <input 
-                          type="text" 
-                          placeholder="https://..." 
-                          style={{ width: '100%', padding: 12, borderRadius: 12, border: '1px solid #e2e8f0', outline: 'none' }}
-                          onChange={e => setPromoForm({...promoForm, imageUrl: e.target.value})}
-                        />
-                     </div>
-                     <div>
-                        <label style={{ fontSize: 12, fontWeight: 800, color: '#64748b', display: 'block', marginBottom: 8 }}>TAG D'EXPOSITION</label>
-                        <select 
-                          style={{ width: '100%', padding: 12, borderRadius: 12, border: '1px solid #e2e8f0', outline: 'none' }}
-                          onChange={e => setPromoForm({...promoForm, tag: e.target.value})}
-                        >
-                           <option value="FLASH">Vente Flash</option>
-                           <option value="NEW">Nouveauté</option>
-                           <option value="BEST">Top Débit</option>
-                        </select>
-                     </div>
+
+                  <div style={{ display: 'grid', gridTemplateColumns: window.innerWidth > 768 ? '1fr 1fr' : '1fr', gap: 24 }}>
+                    {/* Visual part: Upload & Preview */}
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+                       <label style={{ fontSize: 13, fontWeight: 900, color: DARK_NAVY }}>MULTIMÉDIA PRODUIT</label>
+                       <div style={{ 
+                        width: '100%', 
+                        height: 200, 
+                        background: '#fff', 
+                        borderRadius: 20, 
+                        border: '2px dashed #cbd5e1',
+                        display: 'flex',
+                        flexDirection: 'column',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        overflow: 'hidden',
+                        position: 'relative'
+                       }}>
+                          {promoForm.imageUrl ? (
+                            <img src={promoForm.imageUrl} alt="Preview" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                          ) : (
+                            <div style={{ textAlign: 'center', padding: 20 }}>
+                               <Plus size={32} color="#94a3b8" />
+                               <div style={{ fontSize: 11, color: '#94a3b8', marginTop: 8, fontWeight: 700 }}>PRENDRE OU SÉLECTIONNER PHOTO</div>
+                            </div>
+                          )}
+                          <input 
+                            type="file" 
+                            accept="image/*"
+                            capture="environment"
+                            style={{ position: 'absolute', inset: 0, opacity: 0, cursor: 'pointer' }}
+                            onChange={e => {
+                              const file = e.target.files[0];
+                              if (file) {
+                                const reader = new FileReader();
+                                reader.onloadend = () => setPromoForm({...promoForm, imageUrl: reader.result});
+                                reader.readAsDataURL(file);
+                              }
+                            }}
+                          />
+                       </div>
+                    </div>
+
+                    {/* Data part: Price, Tags, Comments */}
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+                       <div>
+                          <label style={{ fontSize: 12, fontWeight: 800, color: '#64748b', display: 'block', marginBottom: 8 }}>PRIX PROMOTIONNEL (FCFA)</label>
+                          <input 
+                            type="number" 
+                            placeholder="Ex: 14500" 
+                            style={{ width: '100%', padding: 14, borderRadius: 12, border: '1px solid #e2e8f0', outline: 'none', fontSize: 16, fontWeight: 800 }}
+                            onChange={e => setPromoForm({...promoForm, price: e.target.value})}
+                          />
+                       </div>
+                       <div>
+                          <label style={{ fontSize: 12, fontWeight: 800, color: '#64748b', display: 'block', marginBottom: 8 }}>TAG D'EXPOSITION</label>
+                          <select 
+                            style={{ width: '100%', padding: 14, borderRadius: 12, border: '1px solid #e2e8f0', outline: 'none', fontSize: 14, fontWeight: 700 }}
+                            onChange={e => setPromoForm({...promoForm, tag: e.target.value})}
+                          >
+                             <option value="FLASH">⚡ Vente Flash</option>
+                             <option value="NEW">✨ Nouveauté</option>
+                             <option value="BEST">🔥 Top Débit</option>
+                          </select>
+                       </div>
+                    </div>
                   </div>
+
+                  <div style={{ marginTop: 24 }}>
+                     <label style={{ fontSize: 12, fontWeight: 800, color: '#64748b', display: 'block', marginBottom: 8 }}>COMMENTAIRES OU TEXTE PROMO (POUR LES BOUTIQUES)</label>
+                     <textarea 
+                        placeholder="Ex: Arrivage exceptionnel qualité Premium. Livraison sous 24h garantie." 
+                        style={{ width: '100%', padding: 16, borderRadius: 16, border: '1px solid #e2e8f0', outline: 'none', fontSize: 14, minHeight: 100, resize: 'none' }}
+                        onChange={e => setPromoForm({...promoForm, comments: e.target.value})}
+                     />
+                  </div>
+
                   <button 
                     onClick={() => {
-                       alert("Offre publiée sur LiviMarket™ !");
+                       alert("🚀 Notification Réseau : Offre publiée avec photo sur LiviMarket™ !");
                        setPromoForm(null);
                     }}
-                    style={{ width: '100%', marginTop: 24, background: DARK_NAVY, color: '#fff', padding: 16, borderRadius: 14, fontWeight: 900, border: 'none', cursor: 'pointer' }}
+                    style={{ width: '100%', marginTop: 24, background: DARK_NAVY, color: '#fff', padding: 18, borderRadius: 18, fontSize: 16, fontWeight: 900, border: 'none', cursor: 'pointer', boxShadow: '0 10px 20px rgba(15,23,42,0.2)' }}
                   >
-                     Déployer sur le Réseau
+                     Propulser l'Offre sur LiviPro
                   </button>
-               </Card>
+                </Card>
              ) : (
                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: 20 }}>
                   {inventory.map(p => (

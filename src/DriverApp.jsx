@@ -198,31 +198,62 @@ export default function DriverApp() {
               }}>
                 <MapPin size={14} style={{ flexShrink: 0 }} />
                 {order.buyer?.location || 'Dakar Plateau (Secteur 2)'}
-</div>
+              </div>
 
-              {/* CTA button — touch-friendly */}
-              <button
-                onClick={() => setModalType(order.id)}
-                style={{
-                  width: "100%",
-                  background: BRAND_ORANGE,
-                  color: "#fff",
-                  border: "none",
-                  padding: "clamp(12px, 3vw, 14px)",
-                  borderRadius: 14,
-                  fontSize: 'clamp(12px, 2.5vw, 13px)',
-                  fontWeight: 900,
-                  cursor: "pointer",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  gap: 8,
-                  minHeight: 48,
-                  touchAction: "manipulation"
-                }}
-              >
-                Démarrer Livraison
-              </button>
+                {/* Map & Navigation */}
+                <div style={{ position: 'relative', height: 120, borderRadius: 16, overflow: 'hidden', border: '1px solid #e2e8f0' }}>
+                   <MapView />
+                   <div style={{ position: 'absolute', bottom: 8, right: 8 }}>
+                      <button 
+                        onClick={() => window.open(`https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(order.buyer?.location || 'Dakar')}`, '_blank')}
+                        style={{ background: DARK_NAVY, color: '#fff', border: 'none', padding: '6px 12px', borderRadius: 10, fontSize: 10, fontWeight: 900, display: 'flex', alignItems: 'center', gap: 6, cursor: 'pointer' }}
+                      >
+                         <Navigation size={12} color={BRAND_ORANGE} /> NAVIGATION GPS
+                      </button>
+                   </div>
+                </div>
+
+                {/* CTA buttons — touch-friendly */}
+                <div style={{ display: 'flex', gap: 10 }}>
+                  <button
+                    onClick={() => setModalType(order.id)}
+                    style={{
+                      flex: 1,
+                      background: BRAND_ORANGE,
+                      color: "#fff",
+                      border: "none",
+                      padding: "clamp(12px, 3vw, 14px)",
+                      borderRadius: 14,
+                      fontSize: 'clamp(12px, 2.5vw, 13px)',
+                      fontWeight: 900,
+                      cursor: "pointer",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      gap: 8,
+                      minHeight: 48,
+                      touchAction: "manipulation"
+                    }}
+                  >
+                    <QrCode size={18} /> Scanner & Livrer
+                  </button>
+                  <button
+                    onClick={() => window.open(`tel:${order.buyer?.phone || '+221770000000'}`, '_self')}
+                    style={{
+                      width: 48,
+                      background: '#fff',
+                      color: BRAND_ORANGE,
+                      border: `2px solid ${BRAND_ORANGE}`,
+                      borderRadius: 14,
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      cursor: "pointer"
+                    }}
+                  >
+                    <PhoneCall size={20} />
+                  </button>
+                </div>
             </div>
           )) : (
             <div style={{
