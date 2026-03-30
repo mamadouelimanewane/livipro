@@ -1,6 +1,7 @@
 import { BrowserRouter, Routes, Route, Navigate, Link } from 'react-router-dom'
 import { useEffect } from 'react'
 import { AuthProvider, useAuth } from './AuthContext'
+import { ToastProvider } from './components/Toast'
 import { initIdleDiscovery } from './services/DiscoveryService'
 import LiviVoiceAssistant from './components/LiviVoiceAssistant'
 import LoginPage from './LoginPage'
@@ -125,15 +126,18 @@ function AppRoutes() {
 
 export default function App() {
   useEffect(() => {
-    initIdleDiscovery();
+    const cleanup = initIdleDiscovery();
+    return cleanup;
   }, []);
 
   return (
     <BrowserRouter>
       <AuthProvider>
-        <LiviVoiceAssistant />
-        <AppRoutes />
-        <LiviAI />
+        <ToastProvider>
+          <LiviVoiceAssistant />
+          <AppRoutes />
+          <LiviAI />
+        </ToastProvider>
       </AuthProvider>
     </BrowserRouter>
   )

@@ -1,4 +1,6 @@
 import React, { useState, useEffect } from "react";
+import { useAuth } from '../AuthContext';
+import { useToast } from './Toast';
 import {
   Users,
   Package,
@@ -31,13 +33,17 @@ const VISION_GREEN = "#10b981";
 
 export default function DashboardShell({ children, title, role = "admin" }) {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-  const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
+  const [isMobile, setIsMobile] = useState(() => window.innerWidth < 768);
+  const { logout } = useAuth();
+  const { toast } = useToast();
   const location = useLocation();
 
   useEffect(() => {
-    const handleResize = () => setIsMobile(window.innerWidth < 768);
-    window.addEventListener("resize", handleResize);
-    return () => window.removeEventListener("resize", handleResize);
+    const mq = window.matchMedia('(max-width: 767px)');
+    const handler = (e) => setIsMobile(e.matches);
+    setIsMobile(mq.matches);
+    mq.addEventListener('change', handler);
+    return () => mq.removeEventListener('change', handler);
   }, []);
 
   const menuItems = {
@@ -62,8 +68,8 @@ export default function DashboardShell({ children, title, role = "admin" }) {
   };
 
   const handleLogout = () => {
-    alert("Déconnexion réussie.");
-    window.location.href = "/";
+    toast.success('Déconnexion réussie. À bientôt !');
+    setTimeout(() => logout(), 800);
   };
 
   const currentMenu = menuItems[role] || menuItems.admin;

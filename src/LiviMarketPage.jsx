@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { ShoppingBag, TrendingUp, Zap, ArrowLeft, Package, Search, LayoutDashboard } from 'lucide-react';
 import { Link, useSearchParams } from 'react-router-dom';
 import { useProducts } from './useLiviData';
+import { useIsMobile } from './hooks/useMediaQuery';
 
 const Card = ({ children, style = {} }) => (
   <div style={{ background: "#fff", borderRadius: 24, padding: 24, border: "1px solid #f1f5f9", boxShadow: "0 10px 40px rgba(0,0,0,0.03)", ...style }}>{children}</div>
@@ -76,7 +77,7 @@ export default function LiviMarketPage() {
   const { data: products, loading } = useProducts();
   const [searchParams, setSearchParams] = useSearchParams();
   const [searchTerm, setSearchTerm] = useState(searchParams.get("q") || "");
-  const isMobile = window.innerWidth < 768;
+  const isMobile = useIsMobile();
 
   const filteredProducts = products.filter(p => 
     p.name.toLowerCase().includes(searchTerm.toLowerCase()) ||

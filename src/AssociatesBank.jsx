@@ -1,4 +1,6 @@
 import { useState, useEffect } from "react";
+import { useIsDesktop } from './hooks/useMediaQuery';
+import { useToast } from './components/Toast';
 import LoanManager from "./LoanManager";
 import BankPerformance from "./BankPerformance";
 import { 
@@ -63,6 +65,8 @@ const Badge = ({ children, color = "#64748b", bg = "#f1f5f9" }) => (
 );
 
 export default function AssociatesBank() {
+  const isDesktop = useIsDesktop();
+  const { toast } = useToast();
   const [searchParams, setSearchParams] = useSearchParams();
   const [view, setView] = useState(searchParams.get("view") || "dashboard"); 
   const [loanStep, setLoanStep] = useState(searchParams.get("loanStep") || "apply"); // apply | analyzing | result | closed
@@ -82,7 +86,7 @@ export default function AssociatesBank() {
   };
 
   const handleAction = (msg) => {
-    alert(`Action: ${msg} enregistrée.`);
+    toast.info(`Action : ${msg} enregistrée.`);
   }
 
   const triggerAiAudit = () => {
@@ -100,12 +104,12 @@ export default function AssociatesBank() {
       setIsProcessing(false);
       setLoanStep("closed");
       setSearchParams({ view: "loans", loanStep: "closed" });
-      alert("Félicitations ! Votre dossier de prêt est désormais CLÔTURÉ. Votre Karma Logistique a augmenté de +45 pts.");
+      toast.success("Félicitations ! Dossier de prêt CLÔTURÉ. Karma Logistique +45 pts !");
     }, 1500);
   };
 
   const handleVote = (res) => {
-    alert(`Votre vote pour "${res}" a été enregistré sur la LiviChain.`);
+    toast.success(`Vote pour "${res}" enregistré sur la LiviChain.`);
   }
 
   const renderDashboard = () => (
@@ -129,7 +133,7 @@ export default function AssociatesBank() {
           </Card>
        </div>
 
-       <div style={{ display: "grid", gridTemplateColumns: window.innerWidth > 1024 ? "2fr 1fr" : "1fr", gap: 32 }}>
+       <div style={{ display: "grid", gridTemplateColumns: isDesktop ? "2fr 1fr" : "1fr", gap: 32 }}>
           <div style={{ display: "flex", flexDirection: "column", gap: 32 }}>
              {/* TONTINE HUB */}
              <Card>
@@ -332,7 +336,7 @@ export default function AssociatesBank() {
           <p style={{ fontSize: 15, color: "#64748b" }}>Transparence absolue sur la LiviChain. Pas de frais de gestion.</p>
        </div>
 
-       <div style={{ display: "grid", gridTemplateColumns: window.innerWidth > 1024 ? "2fr 1fr" : "1fr", gap: 32 }}>
+       <div style={{ display: "grid", gridTemplateColumns: isDesktop ? "2fr 1fr" : "1fr", gap: 32 }}>
           <div>
              <Card style={{ marginBottom: 24 }}>
                 <h3 style={{ fontSize: 18, fontWeight: 800, marginBottom: 20 }}>Votre Tontine Active : Casamance</h3>

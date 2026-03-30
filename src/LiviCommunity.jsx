@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useIsDesktop } from './hooks/useMediaQuery';
 import { 
   MessageSquare, 
   Send, 
@@ -44,6 +45,7 @@ const Card = ({ children, style = {} }) => (
 );
 
 export default function LiviCommunity() {
+  const isDesktop = useIsDesktop();
   const [activeTab, setActiveTab] = useState("feed");
   const [newMessage, setNewMessage] = useState("");
   const [messages, setMessages] = useState([
@@ -58,7 +60,7 @@ export default function LiviCommunity() {
   };
 
   return (
-    <div className="animate-fade-in" style={{ display: "grid", gridTemplateColumns: window.innerWidth > 1024 ? "1fr 400px" : "1fr", gap: 32 }}>
+    <div className="animate-fade-in" style={{ display: "grid", gridTemplateColumns: isDesktop ? "1fr 400px" : "1fr", gap: 32 }}>
        
        {/* MAIN FEED */}
        <div>

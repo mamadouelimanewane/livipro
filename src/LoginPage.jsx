@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
 import { useAuth, DEMO_ACCOUNTS } from './AuthContext'
+import { useIsMobile } from './hooks/useMediaQuery'
 
 const COLORS = {
   admin: '#0f172a',
@@ -27,7 +28,7 @@ export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false)
   const { login } = useAuth()
   const navigate = useNavigate()
-  const isMobile = window.innerWidth < 480;
+  const isMobile = useIsMobile();
 
   const handleSubmit = async (e) => {
     e.preventDefault()

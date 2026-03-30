@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useToast } from './Toast';
 import { Mic, X, Volume2, Search, ArrowRight, MessageCircle } from 'lucide-react';
 import { transcribeWolofAI, learnPhonetic } from '../services/voiceService';
 
@@ -27,6 +28,7 @@ const COMMANDS = {
 };
 
 export default function LiviVoiceAssistant() {
+  const { toast } = useToast();
   const [isListening, setIsListening] = useState(false);
   const [transcript, setTranscript] = useState("");
   const [showPanel, setShowPanel] = useState(false);
@@ -73,7 +75,7 @@ export default function LiviVoiceAssistant() {
 
     } catch (err) {
       console.error("Mic access failed", err);
-      alert("Microphone bloqué ? Autorisez le micro.");
+      toast.warning("Microphone bloqué ? Autorisez le micro dans les paramètres du navigateur.");
     }
   };
 

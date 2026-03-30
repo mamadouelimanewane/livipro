@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import { useToast } from './components/Toast'
 import LiviAcademy from './LiviAcademy'
 import LiviMarket from './LiviMarket'
 import LiviCommunity from './LiviCommunity'
@@ -32,6 +33,7 @@ const Card = ({ children, style = {} }) => (
 );
 
 export default function ClientPortal() {
+  const { toast } = useToast();
   const [searchParams, setSearchParams] = useSearchParams();
   const [activeTab, setActiveTab] = useState(searchParams.get("view") || "market");
   const [isVoiceActive, setIsVoiceActive] = useState(false);
@@ -73,7 +75,7 @@ export default function ClientPortal() {
 
           <button 
             onClick={() => {
-              alert(`🌟 LiviKarma™ : +${stars*10} points attribués au Livreur ! Merci pour votre confiance.`);
+              toast.success(`LiviKarma™ : +${stars*10} points attribués au Livreur ! Merci pour votre confiance.`);
               setRatingOrder(null);
             }}
             style={{ width: '100%', background: DARK_NAVY, color: '#fff', border: 'none', padding: 16, borderRadius: 18, fontWeight: 900, cursor: 'pointer' }}
@@ -113,7 +115,7 @@ export default function ClientPortal() {
   }, [user, activeTab]);
 
   const handleOrder = async (product) => {
-    if (!user) return alert("Veuillez vous connecter");
+    if (!user) { toast.warning("Veuillez vous connecter"); return; }
     
     setLoading(true);
     const result = await placeOrder({
@@ -127,16 +129,16 @@ export default function ClientPortal() {
     setLoading(false);
 
     if (result.success) {
-      alert(`LiviMarket Certifié : Commande ${result.order.order_number} créée pour ${product.name}.`);
+      toast.success(`LiviMarket Certifié : Commande ${result.order.order_number} créée pour ${product.name}.`);
       fetchOrders();
       handleTabChange('dashboard');
     } else {
-      alert("Erreur lors de la commande: " + result.error);
+      toast.error("Erreur lors de la commande: " + result.error);
     }
   };
 
   const finalizeSale = () => {
-    alert(`Vente de proximité enregistrée !`);
+    toast.success(`Vente de proximité enregistrée !`);
   };
 
   const tabs = [
@@ -326,7 +328,7 @@ export default function ClientPortal() {
                                   <Star size={12} fill="#fff" /> ÉVALUER LE LIVREUR
                                </button>
                                <button 
-                                onClick={() => alert(`↩️ RETOUR MARCHANDISE : Commande #${o.id}. Une équipe logistique va passer pour récupérer le colis.`)}
+                                onClick={() => toast.info(`RETOUR MARCHANDISE : Commande #${o.id}. Une équipe logistique va passer pour récupérer le colis.`)}
                                 style={{ width: '100%', background: '#fff', color: '#ef4444', border: '1px solid #fee2e2', padding: '8px', borderRadius: 10, fontSize: 10, fontWeight: 900, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 4 }}
                                >
                                   <ArrowLeft size={12} /> RETOURNER ARTICLE

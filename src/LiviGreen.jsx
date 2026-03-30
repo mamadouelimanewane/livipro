@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useIsDesktop } from './hooks/useMediaQuery';
 import { Thermometer, Zap, ShieldCheck, Truck, Droplets, MapPin, Sparkles, BatteryCharging, History, MoreVertical, Globe, RefreshCw } from "lucide-react";
 
 const VISION_GREEN = "#10b981";
@@ -10,6 +11,7 @@ const Card = ({ children, style = {} }) => (
 );
 
 export default function LiviGreen() {
+  const isDesktop = useIsDesktop();
   const [activeFriz, setActiveFriz] = useState({
     id: "FRIZ-9821",
     vehicle: "Canter Solaire DK-921",
@@ -50,7 +52,7 @@ export default function LiviGreen() {
           </Card>
        </div>
 
-       <div style={{ display: "grid", gridTemplateColumns: window.innerWidth > 1024 ? "2fr 1fr" : "1fr", gap: 32 }}>
+       <div style={{ display: "grid", gridTemplateColumns: isDesktop ? "2fr 1fr" : "1fr", gap: 32 }}>
           <Card>
              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 24 }}>
                 <h3 style={{ fontSize: 18, fontWeight: 900 }}>Supervision IoT Camion : {activeFriz.id}</h3>

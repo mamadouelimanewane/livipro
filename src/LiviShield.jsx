@@ -1,4 +1,6 @@
 import { useState, useEffect } from 'react';
+import { useToast } from './components/Toast';
+import { useIsDesktop } from './hooks/useMediaQuery';
 import { ShieldCheck, Zap, HandCoins, AlertTriangle, CheckCircle2, TrendingUp, Lock, ArrowRight, ShieldAlert, Sparkles, Building2, LayoutDashboard, MoreVertical, Layers } from 'lucide-react';
 
 const VISION_GREEN = "#10b981";
@@ -10,6 +12,8 @@ const Card = ({ children, style = {} }) => (
 );
 
 export default function LiviShield() {
+  const { toast } = useToast();
+  const isDesktop = useIsDesktop();
   const [activeTab, setActiveTab] = useState("apply");
   const [isApproving, setIsApproving] = useState(false);
   const [currentOrder, setCurrentOrder] = useState({ name: "Stock Ramadan (Complet)", total: 1250000, wholesaler: "Dakar Logistics Hub" });
@@ -22,7 +26,7 @@ export default function LiviShield() {
     setIsApproving(true);
     setTimeout(() => {
       setIsApproving(false);
-      alert(`LiviShield™ ACTIVÉ : L'IA a validé votre garantie de ${currentOrder.total.toLocaleString()} F. Le grossiste a été payé par le fonds de réserve LiviPro.`);
+      toast.success(`LiviShield™ ACTIVÉ : L'IA a validé votre garantie de ${currentOrder.total.toLocaleString()} F. Le grossiste a été payé.`);
       setActiveTab('stats');
     }, 2500);
   };
@@ -38,7 +42,7 @@ export default function LiviShield() {
           <p style={{ fontSize: 15, opacity: 0.8, lineHeight: 1.6, maxWidth: 600 }}>Approvisionnez-vous sans avance de trésorerie. LiviPro garantit vos paiements auprès des grossistes en se basant sur la puissance de votre Karma.</p>
        </div>
 
-       <div style={{ display: "grid", gridTemplateColumns: window.innerWidth > 1024 ? "2fr 1fr" : "1fr", gap: 32 }}>
+       <div style={{ display: "grid", gridTemplateColumns: isDesktop ? "2fr 1fr" : "1fr", gap: 32 }}>
           <div>
              {activeTab === "apply" ? (
                <Card style={{ borderTop: `8px solid ${GOLD}` }}>

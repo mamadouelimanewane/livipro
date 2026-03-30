@@ -1,5 +1,7 @@
 import { useState, useEffect } from "react";
 import { useSearchParams } from "react-router-dom";
+import { useToast } from './components/Toast';
+import { useIsTablet } from './hooks/useMediaQuery';
 import {
   Package,
   Search,
@@ -62,6 +64,8 @@ const Card = ({ children, style = {} }) => (
 );
 
 export default function SalesPortal() {
+  const { toast } = useToast();
+  const isTablet = useIsTablet();
   const [searchParams, setSearchParams] = useSearchParams();
   const [view, setView] = useState(searchParams.get("view") || "catalog");
   const { user } = useAuth();
@@ -116,7 +120,7 @@ export default function SalesPortal() {
       .update({ status: newStatus })
       .eq('id', orderId);
     
-    if (error) alert("Erreur: " + error.message);
+    if (error) toast.error("Erreur: " + error.message);
     setUpdating(false);
   };
 
@@ -258,7 +262,7 @@ export default function SalesPortal() {
                       <div style={{ display: 'flex', flexDirection: 'column', gap: 10, width: '100%', marginTop: 10 }}>
                          <div style={{ display: 'flex', gap: 10 }}>
                             <button 
-                              onClick={() => alert(`📦 Dispatch : Commande #${order.order_number} envoyée vers LiviFleet. Un livreur va être assigné automatiquement.`)}
+                              onClick={() => toast.success(`Dispatch : Commande #${order.order_number} envoyée vers LiviFleet. Un livreur va être assigné automatiquement.`)}
                               style={{ background: DARK_NAVY, color: '#fff', border: 'none', padding: '8px 16px', borderRadius: 10, fontWeight: 800, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 6 }}
                             >
                                 <Truck size={14} /> Ré-assigner
@@ -350,7 +354,7 @@ export default function SalesPortal() {
                       <td style={{ padding: "clamp(10px, 2vw, 16px)" }}>
                          {p.stock < 100 && (
                             <button 
-                              onClick={() => alert(`🚀 IA RESTOCK : Commande de ${500 - p.stock} sacs envoyée au producteur.`)}
+                              onClick={() => toast.info(`IA RESTOCK : Commande de ${500 - p.stock} sacs envoyée au producteur.`)}
                               style={{ background: '#fdf2f2', color: '#ef4444', border: '1px solid #fee2e2', padding: '6px 12px', borderRadius: 8, fontSize: 10, fontWeight: 950, cursor: 'pointer' }}
                             >
                                RÉAPPRO. IA
@@ -378,7 +382,7 @@ export default function SalesPortal() {
                     <button onClick={() => setPromoForm(null)} style={{ background: 'none', border: 'none', color: '#64748b', fontWeight: 800, cursor: 'pointer' }}>Annuler</button>
                   </div>
 
-                  <div style={{ display: 'grid', gridTemplateColumns: window.innerWidth > 768 ? '1fr 1fr' : '1fr', gap: 24 }}>
+                  <div style={{ display: 'grid', gridTemplateColumns: isTablet ? '1fr' : '1fr 1fr', gap: 24 }}>
                     {/* Visual part: Upload & Preview */}
                     <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
                        <label style={{ fontSize: 13, fontWeight: 900, color: DARK_NAVY }}>MULTIMÉDIA PRODUIT</label>
@@ -456,7 +460,7 @@ export default function SalesPortal() {
 
                   <button 
                     onClick={() => {
-                       alert("🚀 Notification Réseau : Offre publiée avec photo sur LiviMarket™ !");
+                       toast.success("Notification Réseau : Offre publiée avec photo sur LiviMarket™ !");
                        setPromoForm(null);
                     }}
                     style={{ width: '100%', marginTop: 24, background: DARK_NAVY, color: '#fff', padding: 18, borderRadius: 18, fontSize: 16, fontWeight: 900, border: 'none', cursor: 'pointer', boxShadow: '0 10px 20px rgba(15,23,42,0.2)' }}

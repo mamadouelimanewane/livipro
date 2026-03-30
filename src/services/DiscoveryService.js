@@ -55,7 +55,7 @@ export async function backgroundDiscovery() {
  */
 export function initIdleDiscovery() {
   let idleTimer;
-  
+
   const resetTimer = () => {
     clearTimeout(idleTimer);
     idleTimer = setTimeout(backgroundDiscovery, 300000); // 5 minutes
@@ -66,4 +66,12 @@ export function initIdleDiscovery() {
   window.addEventListener('touchstart', resetTimer);
 
   resetTimer();
+
+  // Retourne une fonction de nettoyage pour éviter les memory leaks
+  return () => {
+    clearTimeout(idleTimer);
+    window.removeEventListener('mousemove', resetTimer);
+    window.removeEventListener('keypress', resetTimer);
+    window.removeEventListener('touchstart', resetTimer);
+  };
 }

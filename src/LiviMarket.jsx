@@ -1,4 +1,6 @@
 import { useState, useEffect } from "react";
+import { useToast } from './components/Toast';
+import { useIsTablet } from './hooks/useMediaQuery';
 import { 
   ShoppingCart, 
   Search, 
@@ -40,6 +42,8 @@ const Badge = ({ children, color, bg }) => (
 );
 
 export default function LiviMarket({ onOrder }) {
+  const { toast } = useToast();
+  const isTablet = useIsTablet();
   const [activeCat, setActiveCat] = useState("Tous");
   const [searchTerm, setSearchTerm] = useState("");
   const [isAdding, setIsAdding] = useState(null);
@@ -57,14 +61,14 @@ export default function LiviMarket({ onOrder }) {
     setTimeout(() => {
       setIsAdding(null);
       if (onOrder) onOrder(product);
-      else alert(`Commande de ${product.name} envoyée à ${product.host} !`);
+      else toast.success(`Commande de ${product.name} envoyée à ${product.host} !`);
     }, 1200);
   };
 
   return (
     <div className="animate-fade-in" style={{ fontFamily: "'Outfit', sans-serif" }}>
        {/* SEARCH & FILTERS */}
-       <div style={{ display: "flex", flexDirection: window.innerWidth > 768 ? "row" : "column", justifyContent: "space-between", alignItems: window.innerWidth > 768 ? "center" : "flex-start", gap: 20, marginBottom: 40 }}>
+       <div style={{ display: "flex", flexDirection: isTablet ? "column" : "row", justifyContent: "space-between", alignItems: isTablet ? "flex-start" : "center", gap: 20, marginBottom: 40 }}>
           <div style={{ background: "#fff", border: "1px solid #e2e8f0", borderRadius: 16, padding: "12px 20px", display: "flex", alignItems: "center", gap: 12, flex: 1, boxShadow: "0 4px 15px rgba(0,0,0,0.02)" }}>
              <Search size={20} color="#94a3b8" />
              <input 

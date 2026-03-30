@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect } from 'react'
+import { useToast } from './components/Toast'
 import { CheckCircle, Truck, Package, Banknote, PhoneCall, CheckSquare, ScanBarcode, PenTool, X, MapPin, QrCode, Sparkles, Receipt, AlertTriangle, FileText, Send, ShieldCheck, UserCircle, Navigation, Building2 } from 'lucide-react'
 import SignatureCanvas from 'react-signature-canvas'
 import MapView from './components/MapView'
@@ -13,6 +14,7 @@ const DARK_NAVY = '#0f172a'
 const VISION_GREEN = '#10b981'
 
 export default function DriverApp() {
+  const { toast } = useToast();
   const [orders, setOrders] = useState([]);
   const [completedStops, setCompletedStops] = useState(0);
   const [modalType, setModalType] = useState(null);
@@ -64,13 +66,13 @@ export default function DriverApp() {
       .eq('id', orderId);
 
     if (error) {
-      alert("Erreur: " + error.message);
+      toast.error("Erreur: " + error.message);
     } else {
       // 2. Refresh list
       await fetchDeliveringOrders();
       setCompletedStops(prev => prev + 1);
       setModalType(null);
-      alert("LiviPro : Livraison confirmée et archivée. Karma +10.");
+      toast.success("LiviPro : Livraison confirmée et archivée. Karma +10.");
     }
     setFetching(false);
   };
@@ -248,7 +250,7 @@ export default function DriverApp() {
                 {/* Exception Handling */}
                 <div style={{ display: 'flex', gap: 8 }}>
                    <button 
-                     onClick={() => alert(`🚨 ALERTE INCIDENT : Commande #${order.id}. Veuillez prendre une photo du produit endommagé ou notifier le motif du refus.`)}
+                     onClick={() => toast.warning(`ALERTE INCIDENT : Commande #${order.id}. Prenez une photo du produit endommagé.`)}
                      style={{ flex: 1, background: '#fee2e2', color: '#ef4444', border: 'none', padding: '8px', borderRadius: 10, fontSize: 10, fontWeight: 800, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 4 }}
                    >
                       <AlertTriangle size={12} /> SIGNALER INCIDENT

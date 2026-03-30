@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useToast } from "./components/Toast";
 import DocumentVault from "./DocumentVault";
 import LiviTrack from "./LiviTrack";
 import LiviChain from "./LiviChain";
@@ -74,6 +75,7 @@ const StatsHeader = () => (
 );
 
 export default function AdminPlatform() {
+  const { toast } = useToast();
   const [searchParams, setSearchParams] = useSearchParams();
   const [activeTab, setActiveTab] = useState(searchParams.get("view") || "social");
   const [isApproving, setIsApproving] = useState(null)
@@ -103,12 +105,12 @@ export default function AdminPlatform() {
     setTimeout(() => {
       setIsApproving(null)
       setNetworkUsers(prev => prev.map(u => u.id === id ? { ...u, status: "Active", kyc: "Verified" } : u));
-      alert(`Partenaire approuvé ! Le contrat intelligent (Smart Contract) d'adhésion a été scellé sur la LiviChain.`);
+      toast.success(`Partenaire approuvé ! Smart Contract scellé sur la LiviChain.`);
     }, 1500);
   };
 
   const handleAction = (name) => {
-    alert(`Régulation: Action "${name}" exécutée.`);
+    toast.info(`Régulation : Action "${name}" exécutée.`);
   }
 
   const renderUsers = () => {

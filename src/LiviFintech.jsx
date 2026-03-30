@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useIsDesktop } from './hooks/useMediaQuery';
 import { Wallet, Smartphone, ShieldCheck, Zap, Lock, CreditCard, ChevronRight, History, MoreVertical, Building2, Globe, TrendingUp } from 'lucide-react';
 
 const VISION_GREEN = "#10b981";
@@ -10,6 +11,7 @@ const Card = ({ children, style = {} }) => (
 );
 
 export default function LiviFintech() {
+  const isDesktop = useIsDesktop();
   const [activeTab, setActiveTab] = useState("wallet");
 
   const WALLET_BALANCE = 542000;
@@ -23,7 +25,7 @@ export default function LiviFintech() {
 
   return (
     <div className="animate-fade-in">
-       <div style={{ display: "grid", gridTemplateColumns: window.innerWidth > 1024 ? "2fr 1fr" : "1fr", gap: 32 }}>
+       <div style={{ display: "grid", gridTemplateColumns: isDesktop ? "2fr 1fr" : "1fr", gap: 32 }}>
           <div>
              <Card style={{ background: `linear-gradient(135deg, ${DARK_NAVY} 0%, #1e293b 100%)`, color: "#fff", marginBottom: 32 }}>
                 <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 32 }}>
