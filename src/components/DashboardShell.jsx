@@ -1,15 +1,15 @@
 import React, { useState, useEffect } from "react";
-import { 
-  Users, 
-  Package, 
-  Truck, 
-  BarChart3, 
-  Settings, 
-  LogOut, 
-  LayoutDashboard, 
-  Menu, 
-  X, 
-  Bell, 
+import {
+  Users,
+  Package,
+  Truck,
+  BarChart3,
+  Settings,
+  LogOut,
+  LayoutDashboard,
+  Menu,
+  X,
+  Bell,
   Search,
   ChevronRight,
   UserCircle,
@@ -21,7 +21,8 @@ import {
   ShoppingBag,
   HandCoins
 } from "lucide-react";
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
+import { useToast } from "./Toast";
 
 const DARK_NAVY = "#0f172a";
 const GOLD = "#f59e0b";
@@ -31,6 +32,8 @@ export default function DashboardShell({ children, title, role = "admin" }) {
   const [isSidebarOpen, setIsSidebarOpen] = useState(window.innerWidth > 1024);
   const [isMobile, setIsMobile] = useState(window.innerWidth <= 1024);
   const location = useLocation();
+  const navigate = useNavigate();
+  const { toast } = useToast();
 
   useEffect(() => {
     const handleResize = () => {
@@ -72,8 +75,8 @@ export default function DashboardShell({ children, title, role = "admin" }) {
   };
 
   const handleLogout = () => {
-    alert("Déconnexion réussie. À bientôt sur LiviPro !");
-    window.location.href = "/";
+    toast.success("Déconnexion réussie. À bientôt sur LiviPro !");
+    setTimeout(() => navigate("/"), 800);
   };
 
   const currentMenu = menuItems[role] || menuItems.admin;

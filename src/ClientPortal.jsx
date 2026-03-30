@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import { useToast } from './components/Toast'
 import LiviAcademy from './LiviAcademy'
 import LiviMarket from './LiviMarket'
 import LiviCommunity from './LiviCommunity'
@@ -17,6 +18,7 @@ const Card = ({ children, style = {} }) => (
 );
 
 export default function ClientPortal() {
+  const { toast } = useToast();
   const [searchParams, setSearchParams] = useSearchParams();
   const [activeTab, setActiveTab] = useState(searchParams.get("view") || "market"); // Set market as default for wow factor
   const [isVoiceActive, setIsVoiceActive] = useState(false);
@@ -36,12 +38,12 @@ export default function ClientPortal() {
      const orders = JSON.parse(localStorage.getItem('livi_pending_orders') || '[]');
      const newOrder = { id: `ORD-${Date.now()}`, product: product.name, price: product.price, status: 'En attente', date: new Date().toLocaleDateString() };
      localStorage.setItem('livi_pending_orders', JSON.stringify([newOrder, ...orders]));
-     alert(`LiviMarket Certifié : Votre commande de ${product.name} a été envoyée au hub ${product.host}.`);
+     toast.success(`LiviMarket Certifié : Commande de ${product.name} envoyée au hub ${product.host}.`);
      handleTabChange('dashboard');
   };
 
   const finalizeSale = () => {
-    alert(`Vente de proximité enregistrée !`);
+    toast.success(`Vente de proximité enregistrée !`);
   };
 
   return (

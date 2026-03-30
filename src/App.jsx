@@ -7,6 +7,8 @@ import AdminPlatform from './AdminPlatform'
 import SalesPortal from './SalesPortal'
 import LiviWallet from './LiviWallet'
 import LiviAI from './LiviAI'
+import { ToastProvider } from './components/Toast'
+import { useIsMobile } from './hooks/useMediaQuery'
 import './index.css'
 
 const DARK_NAVY = "#0f172a";
@@ -15,13 +17,14 @@ const GOLD = "#f59e0b";
 function DemoHome() {
   const hour = new Date().getHours()
   const greeting = hour < 18 ? "Bonjour" : "Bonsoir"
+  const isMobile = useIsMobile()
 
   return (
     <div style={{ maxWidth: 1000, margin: '0 auto', background: '#f8fafc', minHeight: '100vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: "40px 20px", textAlign: 'center' }}>
-      <h1 style={{ fontSize: window.innerWidth > 768 ? 48 : 32, fontWeight: 900, color: '#0f172a', marginBottom: 12, letterSpacing: "-1px" }}>{greeting}, LiviPro B2B</h1>
+      <h1 style={{ fontSize: isMobile ? 32 : 48, fontWeight: 900, color: '#0f172a', marginBottom: 12, letterSpacing: "-1px" }}>{greeting}, LiviPro B2B</h1>
       <p style={{ fontSize: 18, color: '#64748b', marginBottom: 60, fontWeight: 500 }}>Écosystème Fintech & Logistique Alpha v3.0</p>
-      
-      <div style={{ display: 'grid', gridTemplateColumns: window.innerWidth > 768 ? 'repeat(3, 1fr)' : '1fr', gap: 24, width: '100%', maxWidth: 900 }}>
+
+      <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : 'repeat(3, 1fr)', gap: 24, width: '100%', maxWidth: 900 }}>
         <Link to="/sales" style={{ textDecoration: 'none' }}>
           <div style={{ background: '#6366f1', color: '#fff', padding: 32, borderRadius: 24, boxShadow: '0 20px 40px rgba(99, 102, 241, 0.2)', fontWeight: 800, fontSize: 18, height: "100%", display: "flex", flexDirection: "column", justifyContent: "center" }}>
             <div style={{ fontSize: 32, marginBottom: 12 }}>🏭</div>
@@ -45,7 +48,7 @@ function DemoHome() {
         </Link>
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: window.innerWidth > 768 ? 'repeat(4, 1fr)' : '1fr 1fr', gap: 16, width: '100%', maxWidth: 900, marginTop: 24 }}>
+      <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr 1fr' : 'repeat(4, 1fr)', gap: 16, width: '100%', maxWidth: 900, marginTop: 24 }}>
           <Link to="/wallet" style={{ textDecoration: 'none' }}>
             <div style={{ background: '#fff', color: DARK_NAVY, padding: 20, borderRadius: 20, fontWeight: 900, fontSize: 14, border: '2px solid #e2e8f0', textAlign: 'center' }}>
               💳 LiviWallet
@@ -80,17 +83,19 @@ function DemoHome() {
 export default function App() {
   return (
     <BrowserRouter>
-      <Routes>
-        <Route path="/" element={<DemoHome />} />
-        <Route path="/driver" element={<DriverApp />} />
-        <Route path="/boutique" element={<ClientPortal />} />
-        <Route path="/bank" element={<AssociatesBank />} />
-        <Route path="/comm" element={<CommModule />} />
-        <Route path="/admin" element={<AdminPlatform />} />
-        <Route path="/sales" element={<SalesPortal />} />
-        <Route path="/wallet" element={<LiviWallet />} />
-      </Routes>
-      <LiviAI />
+      <ToastProvider>
+        <Routes>
+          <Route path="/" element={<DemoHome />} />
+          <Route path="/driver" element={<DriverApp />} />
+          <Route path="/boutique" element={<ClientPortal />} />
+          <Route path="/bank" element={<AssociatesBank />} />
+          <Route path="/comm" element={<CommModule />} />
+          <Route path="/admin" element={<AdminPlatform />} />
+          <Route path="/sales" element={<SalesPortal />} />
+          <Route path="/wallet" element={<LiviWallet />} />
+        </Routes>
+        <LiviAI />
+      </ToastProvider>
     </BrowserRouter>
   )
 }

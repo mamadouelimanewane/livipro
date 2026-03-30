@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useToast } from './components/Toast';
 import { ShieldCheck, Zap, HandCoins, AlertTriangle, CheckCircle2, TrendingUp, Lock, ArrowRight, ShieldAlert, Sparkles, Building2, LayoutDashboard, MoreVertical, Layers } from 'lucide-react';
 
 const VISION_GREEN = "#10b981";
@@ -10,6 +11,7 @@ const Card = ({ children, style = {} }) => (
 );
 
 export default function LiviShield() {
+  const { toast } = useToast();
   const [activeTab, setActiveTab] = useState("apply");
   const [isApproving, setIsApproving] = useState(false);
   const [currentOrder, setCurrentOrder] = useState({ name: "Stock Ramadan (Complet)", total: 1250000, wholesaler: "Dakar Logistics Hub" });
@@ -22,7 +24,7 @@ export default function LiviShield() {
     setIsApproving(true);
     setTimeout(() => {
       setIsApproving(false);
-      alert(`LiviShield™ ACTIVÉ : L'IA a validé votre garantie de ${currentOrder.total.toLocaleString()} F. Le grossiste a été payé par le fonds de réserve LiviPro.`);
+      toast.success(`LiviShield™ ACTIVÉ : L'IA a validé votre garantie de ${currentOrder.total.toLocaleString()} F. Le grossiste a été payé.`);
       setActiveTab('stats');
     }, 2500);
   };

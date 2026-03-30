@@ -41,6 +41,7 @@ import {
 } from "lucide-react";
 import { useSocialFeed, useMembers } from "./useLiviData";
 import DashboardShell from "./components/DashboardShell";
+import { useToast } from "./components/Toast";
 import { useSearchParams } from "react-router-dom";
 
 const DARK_NAVY = "#0f172a";
@@ -56,6 +57,7 @@ const Badge = ({ text, color, bg }) => (
 );
 
 export default function AdminPlatform() {
+  const { toast } = useToast();
   const [searchParams, setSearchParams] = useSearchParams();
   const [activeTab, setActiveTab] = useState(searchParams.get("view") || "social");
   const [isApproving, setIsApproving] = useState(null)
@@ -86,12 +88,12 @@ export default function AdminPlatform() {
     setTimeout(() => {
       setIsApproving(null)
       setNetworkUsers(prev => prev.map(u => u.id === id ? { ...u, status: "Active", kyc: "Verified" } : u));
-      alert(`Partenaire approuvé ! Le contrat intelligent (Smart Contract) d'adhésion a été scellé sur la LiviChain.`);
+      toast.success(`Partenaire approuvé ! Le Smart Contract d'adhésion a été scellé sur la LiviChain.`);
     }, 1500);
   };
 
   const handleAction = (name) => {
-    alert(`Régulation: Action "${name}" exécutée.`);
+    toast.info(`Régulation : Action "${name}" exécutée.`);
   }
 
   const StatsHeader = () => (

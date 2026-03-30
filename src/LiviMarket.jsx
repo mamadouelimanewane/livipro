@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useToast } from "./components/Toast";
 import { 
   ShoppingCart, 
   Search, 
@@ -46,6 +47,7 @@ const Badge = ({ children, color, bg }) => (
 );
 
 export default function LiviMarket({ onOrder }) {
+  const { toast } = useToast();
   const [activeCat, setActiveCat] = useState("Tous");
   const [searchTerm, setSearchTerm] = useState("");
   const [isAdding, setIsAdding] = useState(null);
@@ -60,7 +62,7 @@ export default function LiviMarket({ onOrder }) {
     setTimeout(() => {
       setIsAdding(null);
       if (onOrder) onOrder(product);
-      else alert(`Commande de ${product.name} envoyée à ${product.host} !`);
+      else toast.success(`Commande de ${product.name} envoyée à ${product.host} !`);
     }, 1200);
   };
 

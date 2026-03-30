@@ -31,6 +31,7 @@ import {
   LayoutDashboard
 } from "lucide-react";
 import DashboardShell from "./components/DashboardShell";
+import { useToast } from "./components/Toast";
 import { useSearchParams } from "react-router-dom";
 
 // --- SIMULATION DATA ---
@@ -63,6 +64,7 @@ const Badge = ({ children, color = "#64748b", bg = "#f1f5f9" }) => (
 );
 
 export default function AssociatesBank() {
+  const { toast } = useToast();
   const [searchParams, setSearchParams] = useSearchParams();
   const [view, setView] = useState(searchParams.get("view") || "dashboard"); 
   const [loanStep, setLoanStep] = useState(searchParams.get("loanStep") || "apply"); // apply | analyzing | result | closed
@@ -82,7 +84,7 @@ export default function AssociatesBank() {
   };
 
   const handleAction = (msg) => {
-    alert(`Action: ${msg} enregistrée.`);
+    toast.info(`Action: ${msg} enregistrée.`);
   }
 
   const triggerAiAudit = () => {
@@ -100,12 +102,12 @@ export default function AssociatesBank() {
       setIsProcessing(false);
       setLoanStep("closed");
       setSearchParams({ view: "loans", loanStep: "closed" });
-      alert("Félicitations ! Votre dossier de prêt est désormais CLÔTURÉ. Votre Karma Logistique a augmenté de +45 pts.");
+      toast.success("Félicitations ! Votre dossier de prêt est désormais CLÔTURÉ. Votre Karma Logistique a augmenté de +45 pts.");
     }, 1500);
   };
 
   const handleVote = (res) => {
-    alert(`Votre vote pour "${res}" a été enregistré sur la LiviChain.`);
+    toast.success(`Votre vote pour "${res}" a été enregistré sur la LiviChain.`);
   }
 
   const renderDashboard = () => (

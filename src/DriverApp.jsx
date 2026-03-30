@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect } from 'react'
+import { useToast } from './components/Toast'
 import { CheckCircle, Truck, Package, Banknote, PhoneCall, CheckSquare, ScanBarcode, PenTool, X, MapPin, QrCode, Sparkles, Receipt, AlertTriangle, FileText, Send, ShieldCheck, UserCircle } from 'lucide-react'
 import SignatureCanvas from 'react-signature-canvas'
 import MapView from './components/MapView'
@@ -10,6 +11,7 @@ const BRAND_ORANGE = '#f97316'
 const DARK_NAVY = '#0f172a'
 
 export default function DriverApp() {
+  const { toast } = useToast();
   const [orders, setOrders] = useState([]);
   const [completedStops, setCompletedStops] = useState(0);
   const [modalType, setModalType] = useState(null);
@@ -29,7 +31,7 @@ export default function DriverApp() {
     setOrders(updated.filter(o => o.status !== 'Livré'));
     setCompletedStops(prev => prev + 1);
     setModalType(null);
-    alert("Livraison confirmée et synchronisée avec le portail boutique !");
+    toast.success("Livraison confirmée et synchronisée avec le portail boutique !");
   };
 
   return (
