@@ -1,43 +1,39 @@
-import * as React from "react"
-import { cva, type VariantProps } from "class-variance-authority"
+import { cn } from "@/lib/utils";
+import { ReactNode } from "react";
 
-import { cn } from "@/lib/utils"
+type BadgeProps = {
+  children: ReactNode;
+  variant?: "actif" | "inactif" | "suspendu" | "en_cours" | "terminee" | "planifiee" | "annulee" | "especes" | "mobile_money" | "credit" | "default";
+  className?: string;
+};
 
-const badgeVariants = cva(
-  // @replit
-  // Whitespace-nowrap: Badges should never wrap.
-  "whitespace-nowrap inline-flex items-center rounded-md border px-2.5 py-0.5 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2" +
-  " hover-elevate ",
-  {
-    variants: {
-      variant: {
-        default:
-          // @replit shadow-xs instead of shadow, no hover because we use hover-elevate
-          "border-transparent bg-primary text-primary-foreground shadow-xs",
-        secondary:
-          // @replit no hover because we use hover-elevate
-          "border-transparent bg-secondary text-secondary-foreground",
-        destructive:
-          // @replit shadow-xs instead of shadow, no hover because we use hover-elevate
-          "border-transparent bg-destructive text-destructive-foreground shadow-xs",
-          // @replit shadow-xs" - use badge outline variable
-        outline: "text-foreground border [border-color:var(--badge-outline)]",
-      },
-    },
-    defaultVariants: {
-      variant: "default",
-    },
-  }
-)
+export function Badge({ children, variant = "default", className }: BadgeProps) {
+  const variantClasses = {
+    actif: "bg-emerald-100 text-emerald-800 border-emerald-200",
+    inactif: "bg-slate-100 text-slate-800 border-slate-200",
+    suspendu: "bg-rose-100 text-rose-800 border-rose-200",
+    
+    en_cours: "bg-amber-100 text-amber-800 border-amber-200",
+    terminee: "bg-emerald-100 text-emerald-800 border-emerald-200",
+    planifiee: "bg-sky-100 text-sky-800 border-sky-200",
+    annulee: "bg-rose-100 text-rose-800 border-rose-200",
+    
+    especes: "bg-emerald-50 text-emerald-700 border-emerald-100",
+    mobile_money: "bg-indigo-50 text-indigo-700 border-indigo-100",
+    credit: "bg-orange-50 text-orange-700 border-orange-100",
+    
+    default: "bg-slate-100 text-slate-800 border-slate-200",
+  };
 
-export interface BadgeProps
-  extends React.HTMLAttributes<HTMLDivElement>,
-    VariantProps<typeof badgeVariants> {}
+  const formattedText = typeof children === 'string' ? children.replace('_', ' ') : children;
 
-function Badge({ className, variant, ...props }: BadgeProps) {
   return (
-    <div className={cn(badgeVariants({ variant }), className)} {...props} />
-  )
+    <span className={cn(
+      "inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold uppercase tracking-wide border",
+      variantClasses[variant as keyof typeof variantClasses] || variantClasses.default,
+      className
+    )}>
+      {formattedText}
+    </span>
+  );
 }
-
-export { Badge, badgeVariants }
